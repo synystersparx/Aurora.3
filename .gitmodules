@@ -1,0 +1,3 @@
+[submodule "maps/space_ruins"]
+	path = maps/space_ruins
+	url = https://gitlab.com/aurorastation/space_ruins.git
