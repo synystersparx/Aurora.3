@@ -1,5 +1,110 @@
 var/list/sacrificed = list()
 
+/datum/cultist_rune
+	var/name = "Cultist Rune"
+	var/description = "Cultist rune description."
+	var/image
+	var/list/key_words
+	var/call_proc
+	var/proc_arguments
+
+	teleport
+		name = "Teleport Self"
+		description = "Teleport rune is a special rune, as it only needs two words, with the third word being destination. Basically, when you have two runes with the same destination, invoking one will teleport you to the other one. If there are more than 2 runes, you will be teleported to a random one. Runes with different third words will create separate networks. You can imbue this rune into a talisman, giving you a great escape mechanism."
+		key_words = list("travel","self")
+	teleport_other
+		name = "Teleport Other"
+		description = "Teleport other allows for teleportation for any movable object to another rune with the same third word. You need 3 cultists chanting the invocation for this rune to work."
+		key_words = list("travel", "other")
+	summon_tome
+		name = "Summon New Tome"
+		description = "Invoking this rune summons a new arcane tome."
+		key_words = list("see","blood","hell")
+	convert_person
+		name = "Convert Person"
+		description = "This rune opens target\'s mind to the realm of Nar-Sie, which usually results in this person joining the cult. However, some people (mostly the ones who possess high authority) have strong enough will to stay true to their old ideals."
+		key_words = list("join","blood","self")
+	summon_narsie
+		name = "Summon Nar-Sie"
+		description = "The ultimate rune. It summons the Avatar of Nar-Sie himself, tearing a huge hole in reality and consuming everything around it. Summoning it is the final goal of any cult."
+		key_words = list("hell","join","self")
+	disable_technology
+		name = "Disable Technology"
+		description = "Invoking this rune creates a strong electromagnetic pulse in a small radius, making it basically analogous to an EMP grenade. You can imbue this rune into a talisman, making it a decent defensive item."
+		key_words = list("destroy","see","technology")
+	blood_drain
+		name = "Blood Drain"
+		description = "This rune instantly heals you of some brute damage at the expense of a person placed on top of the rune. Whenever you invoke a drain rune, ALL drain runes on the station are activated, draining blood from anyone located on top of those runes. This includes yourself, though the blood you drain from yourself just comes back to you. This might help you identify this rune when studying words. One drain gives up to 25HP per each victim, but you can repeat it if you need more. Draining only works on living people, so you might need to recharge your \"Battery\" once its empty. Drinking too much blood at once might cause blood hunger."
+		key_words =  list("travel","blood","self")
+	raise_dead
+		name = "Raise Dead"
+		description = "This rune allows for the resurrection of any dead person. You will need a dead human body and a living human sacrifice. Make 2 raise dead runes. Put a living, awake human on top of one, and a dead body on the other one. When you invoke the rune, the life force of the living human will be transferred into the dead body, allowing a ghost standing on top of the dead body to enter it, instantly and fully healing it. Use other runes to ensure there is a ghost ready to be resurrected."
+		key_words = list("blood","join","hell")
+	hide_runes
+		name = "Hide Runes"
+		description = "This rune makes all nearby runes completely invisible. They are still there and will work if activated somehow, but you cannot invoke them directly if you do not see them."
+		key_words = list("hide","see","blood")
+	reveal_runes
+		name = "Reveal Runes"
+		description = "This rune is made to reverse the process of hiding a rune. It reveals all hidden runes in a rather large area around it."
+		key_words = list("blood","see","hide")
+	astral_journey
+		name = "Astral Journey"
+		description = "This rune gently rips your soul out of your body, leaving it intact. You can observe the surroundings as a ghost as well as communicate with other ghosts. Your body takes damage while you are there, so ensure your journey is not too long, or you might never come back."
+		key_words = list("hell","travel","self")
+	manifest_ghost
+		name = "Manifest Ghost"
+		description = "Unlike the Raise Dead rune, this rune does not require any special preparations or vessels. Instead of using full lifeforce of a sacrifice, it will drain YOUR lifeforce. Stand on the rune and invoke it. If there\'s a ghost standing over the rune, it will materialise, and will live as long as you don\'t move off the rune or die. You can put a paper with a name on the rune to make the new body look like that person."
+		key_words = list("blood","see","travel")
+	imbue
+		name = "Imbue" //could rework this to imbue a piece of paper held in offhand?
+		description = "This rune allows you to imbue the magic of some runes into paper talismans. Create an imbue rune, then an appropriate rune beside it. Put an empty piece of paper on the imbue rune and invoke it. You will now have a one-use talisman with the power of the target rune. Using a talisman drains some health, so be careful with it. You can imbue a talisman with power of the following runes: summon tome, reveal, conceal, teleport, disable technology, communicate, deafen, blind and stun."
+		key_words = list("hell","technology","join")
+	sacrifice
+		name = "Sacrifice" //make this useful somehow? Make sword or armor slightly stronger per sacrifice? Allow use of runes without book after x sacrifices?
+		description = "Sacrifice rune allows you to sacrifice a living thing or a body to the Geometer of Blood. Monkeys and dead humans are the most basic sacrifices, they might or might not be enough to gain His favor. A living human is what a real sacrifice should be, however, you will need 3 people chanting the invocation to sacrifice a living person."
+		key_words = list("hell","blood","join")
+	create_wall
+		name = "Create Wall"
+		description = "Invoking this rune solidifies the air above it, creating an an invisible wall. To remove the wall, simply invoke the rune again."
+		key_words = list("destroy","travel","self")
+	free_cultist
+		name = "Free Cultist"
+		description = "This rune unhandcuffs and unbuckles any cultist of your choice, no matter where he is. You need to have 3 people invoking the rune for it to work. Invoking it takes heavy strain on the bodies of all chanting cultists."
+		key_words = list("travel","technology","other")
+	summon_cultist
+		name = "Summon Cultist"
+		description = "This rune allows you to summon a fellow cultist to your location. The target cultist must be unhandcuffed and not buckled to anything. You also need to have 3 people chanting at the rune to successfully invoke it. Invoking it takes heavy strain on the bodies of all chanting cultists."
+		key_words = list("join","other","self")
+	deafen
+		name = "Deafen"
+		description = "This rune temporarily deafens all non-cultists around you."
+		key_words = list("hide","other","see")
+	blind
+		name = "Blind"
+		description = "This rune temporarily blinds all non-cultists around you. Very robust. Use together with the deafen rune to leave your enemies completely helpless."
+		key_words = list("destroy","see","other")
+	blood_boil
+		name = "Blood Boil"
+		description = "This rune boils the blood all non-cultists in visible range. The damage is enough to instantly critically hurt any person. You need 3 cultists invoking the rune for it to work. This rune is unreliable and may cause unpredicted effect when invoked. It also drains significant amount of your health when successfully invoked."
+		key_words = list("destroy","see","blood")
+	communicate
+		name = "Communicate"
+		description = "Invoking this rune allows you to relay a message to all cultists on the station and nearby space objects."
+		key_words = list("self","other","technology")
+	stun
+		name = "Stun"
+		description = "When invoked directly as a rune, it releases some dark energy, briefly stunning everyone around. When imbued into a talisman, you can force some dark energy into a person, causing their eyes to flash, and their words to falter, keeping them quiet. However, the effect wears off rather fast."
+		key_words = list("join","hide","technology")
+	summon_armor
+		name = "Summon Armor"
+		description = "When this rune is invoked, either from a rune or a talisman, it will equip the user with the armor of the followers of Nar-Sie. To use this rune to its fullest extent, make sure you are not wearing any form of headgear, armor, gloves or shoes, and make sure you are not holding anything in your hands."
+		key_words = list("hell","destroy","other")
+	see_invisible
+		name = "See Invisible"
+		description = "When invoked when standing on it, this rune allows the user to see the world beyond as long as he does not move."
+		key_words = list("see","hell","join")
+
 /obj/effect/rune/cultify()
 	return
 
