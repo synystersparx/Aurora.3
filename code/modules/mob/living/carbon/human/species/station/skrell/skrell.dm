@@ -24,7 +24,8 @@
 	name_language = LANGUAGE_SKRELLIAN
 	rarity_value = 3
 
-	grab_mod = 1.25
+	grab_mod = 2
+	resist_mod = 0.5 // LIKE BABBY
 
 	spawn_flags = CAN_JOIN | IS_WHITELISTED
 	appearance_flags = HAS_HAIR_COLOR | HAS_LIPS | HAS_UNDERWEAR | HAS_SKIN_COLOR | HAS_SOCKS
@@ -36,12 +37,13 @@
 		BP_LIVER =    /obj/item/organ/internal/liver/skrell,
 		BP_KIDNEYS =  /obj/item/organ/internal/kidneys/skrell,
 		BP_BRAIN =    /obj/item/organ/internal/brain/skrell,
-		"appendix" = /obj/item/organ/appendix,
+		BP_STOMACH =  /obj/item/organ/internal/stomach,
+		BP_APPENDIX = /obj/item/organ/internal/appendix,
 		BP_EYES =     /obj/item/organ/internal/eyes/skrell
 		)
 
 	flesh_color = "#8CD7A3"
-	blood_color = "#1D2CBF"
+	blood_color = COLOR_SKRELL_BLOOD
 	base_color = "#006666"
 
 	reagent_tag = IS_SKRELL
@@ -51,17 +53,23 @@
 	stamina = 90
 	sprint_speed_factor = 1.25 //Evolved for rapid escapes from predators
 
-	inherent_verbs = list(
-	/mob/living/carbon/human/proc/commune,
-	/mob/living/carbon/human/proc/sonar_ping,
-	)
-
 	default_h_style = "Skrell Short Tentacles"
 
-	allowed_citizenships = list(CITIZENSHIP_JARGON, CITIZENSHIP_BIESEL, CITIZENSHIP_SOL, CITIZENSHIP_FRONTIER, CITIZENSHIP_ELYRA, CITIZENSHIP_ERIDANI, CITIZENSHIP_DOMINIA)
+	allowed_citizenships = list(CITIZENSHIP_JARGON, CITIZENSHIP_BIESEL, CITIZENSHIP_SOL, CITIZENSHIP_COALITION, CITIZENSHIP_ELYRA, CITIZENSHIP_ERIDANI, CITIZENSHIP_DOMINIA)
 	allowed_religions = list(RELIGION_QEBLAK, RELIGION_WEISHII, RELIGION_NONE, RELIGION_OTHER, RELIGION_CHRISTIANITY, RELIGION_ISLAM, RELIGION_MOROZ)
+	default_citizenship = CITIZENSHIP_JARGON
+
+	default_accent = ACCENT_SKRELL
+	allowed_accents = list(ACCENT_SKRELL, ACCENT_CETI, ACCENT_GIBSON, ACCENT_COC, ACCENT_ERIDANI, ACCENT_ERIDANIDREG, ACCENT_VENUS, ACCENT_JUPITER, ACCENT_MARTIAN, ACCENT_ELYRA, 
+							ACCENT_SILVERSUN, ACCENT_KONYAN)
 
 	zombie_type = "Skrell Zombie"
 
+/datum/species/skrell/handle_post_spawn(mob/living/carbon/human/H)
+	H.set_psi_rank(PSI_COERCION, PSI_RANK_OPERANT)
+
 /datum/species/skrell/can_breathe_water()
+	return TRUE
+
+/datum/species/skrell/can_commune()
 	return TRUE

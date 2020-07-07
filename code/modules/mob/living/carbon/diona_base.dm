@@ -50,12 +50,12 @@ var/list/diona_banned_languages = list(
 	DS.last_location = loc
 	if(light_amount)
 		adjustNutritionLoss(-light_amount) // regenerate our nutrition from light.
-	move_delay_mod = min(initial(move_delay_mod) - light_amount * 1.5, 0)
+	move_delay_mod = min(initial(move_delay_mod) - light_amount * 1, 0)
 	sprint_speed_factor = initial(sprint_speed_factor)
 	sprint_cost_factor = Clamp(initial(sprint_cost_factor) - light_amount * DIONA_LIGHT_COEFICIENT, 0, initial(sprint_cost_factor))
 	if (total_radiation)
-		move_delay_mod = max(move_delay_mod * total_radiation * 3, -7)
-		sprint_speed_factor = 0.75
+		move_delay_mod = max(move_delay_mod * total_radiation * 3, -4.5)
+		sprint_speed_factor = 0.65
 		sprint_cost_factor = 0
 
 /mob/living/carbon/alien/diona/death()
@@ -112,11 +112,6 @@ var/list/diona_banned_languages = list(
 	adjustHalLoss(severity*DS.pain_factor, 1)
 	DS.stored_energy = 0 //We reset the energy back to zero after calculating the damage. dont want it to go negative
 
-	//If the diona in question is a gestalt, then all the nymphs inside it will suffer damage too
-	if (DS.dionatype == DIONA_WORKER)
-		for(var/mob/living/carbon/alien/diona/D in src)
-			D.adjustBruteLoss(severity*DS.trauma_factor*0.5)
-
 /mob/living/carbon/proc/diona_handle_temperature(var/datum/dionastats/DS)
 	if (bodytemperature < TEMP_REGEN_STOP)
 		DS.healing_factor = 0
@@ -164,7 +159,7 @@ var/list/diona_banned_languages = list(
 	//Next up, damage healing. Diona are only vulnerable to four of the six damage types
 	//Oxyloss doesn't apply because they don't breathe, and are thus immune to aquiring it in any way
 	//Brain damage is irrelevant because they have no brain.
-	if (health < 100)
+	if (health < (species ? species.total_health : 200))
 		CL = getBruteLoss()
 
 		if (CL > 0)
@@ -281,19 +276,6 @@ var/list/diona_banned_languages = list(
 				O.damage += value/-3
 				DS.stored_energy -= value
 
-
-			//We only regenerate nymphs if the gestalt has plenty of energy to spare.
-			//Survival of the collective is prioritised over individual members
-				//And healing nymphs can suck up a lot of energy, which the gestalt may need
-			if (DS.stored_energy > (0.75 * DS.max_energy))
-				for (var/mob/living/carbon/alien/diona/D in bad_internal_organs)
-					if (!D.stat != DEAD)
-						D.diona_handle_regeneration(DS)
-						//IF a nymph inside the gestalt is damaged, we trigger its own regeneration function
-						//but we pass in the gestalt's Dionastats, so its energy/rads will be used to heal them
-
-
-
 	//Last up, growing brand new limbs and organs to replace those lost or removed.
 	if ((life_tick % (LIFETICK_INTERVAL_LESS*8) == 0) || bypass )
 		//We will only replace ONE organ or limb each time this procs
@@ -352,7 +334,7 @@ var/list/diona_banned_languages = list(
 		for (var/i in species.has_organ)
 			path = species.has_organ[i]
 			var/organ_exists = 0
-			for (var/obj/item/organ/diona/B in internal_organs)
+			for (var/obj/item/organ/internal/B in internal_organs)
 				if (B.type == path)
 					organ_exists = 1
 					break
@@ -376,7 +358,7 @@ var/list/diona_banned_languages = list(
 			var/obj/item/organ/O = new path(src)
 			internal_organs_by_name[O.organ_tag] = O
 			internal_organs.Add(O)
-			to_chat(src, "<span class='danger'>You feel a shifting sensation inside you as your nymphs move apart to make space, forming a new [O.name]</span>")
+			to_chat(src, "<span class='danger'>You feel a shifting sensation inside you as your nymphs move apart to make space, forming a new [O.name].</span>")
 			regenerate_icons()
 			DS.LMS = max(2, DS.LMS) //Prevents a message about darkness in light areas
 			update_dionastats() //Re-find the organs in case they were lost or regained
@@ -385,15 +367,6 @@ var/list/diona_banned_languages = list(
 
 		if (DS.stored_energy < REGROW_ENERGY_REQ || nutrition < REGROW_FOOD_REQ)
 			return
-
-		for (var/mob/living/carbon/alien/diona/D in bad_internal_organs)
-			if (D.stat == DEAD || D.health <= 0)
-				D.health = 1
-				D.stat = CONSCIOUS
-				to_chat(src, "<span class='danger'>You feel a stirring within you as [D.name] returns to life!</span>")
-				updatehealth()
-				return
-				//Only one per proc
 
 		//If we have less than six nymphs, we add one each proc
 		if (topup_nymphs())
@@ -471,20 +444,20 @@ var/list/diona_banned_languages = list(
 	if (DS.LMS == 1) //If we're full
 		if (DS.EP <= 0.8 && DS.last_lightlevel <= 0) //But at <=80% energy
 			DS.LMS = 2
-			to_chat(src, "<span class='warning'>The darkness makes you uncomfortable.</span>")
+			to_chat(src, "<span class='warning'>The darkness makes you uncomfortable...</span>")
 
 	else if (DS.LMS == 2)
 		if (DS.EP >= 0.99)
 			DS.LMS = 1
-			to_chat(src, "You bask in the light")
+			to_chat(src, span("notice", "You bask in the light."))
 		else if (DS.EP <= 0.4 && DS.last_lightlevel <= 0)
 			DS.LMS = 3
-			to_chat(src, "<span class='warning'>You feel lethargic as your energy drains away. Find some light soon!</span>")
+			to_chat(src, "<span class='warning'>You feel lethargic as your energy drains away. Find some light!</span>")
 
 	else if (DS.LMS == 3)
 		if (DS.EP >= 0.5)
 			DS.LMS = 2
-			to_chat(src, "You feel a little more energised as you return to the light. Stay awhile.")
+			to_chat(src, "You feel a little more energised as you return to the light. Stay here for a while.")
 		else if (DS.EP <= 0.0 && DS.last_lightlevel <= 0)
 			DS.LMS = 4
 			to_chat(src, "<span class='danger'>You feel sensory distress as your tendrils start to wither in the darkness. You will die soon without light.</span>")
@@ -645,8 +618,8 @@ var/list/diona_banned_languages = list(
 	var/restrictedlight_factor = 0.8 //A value between 0 and 1 that determines how much we nerf the strength of certain worn lights
 		//1 means flashlights work normally., 0 means they do nothing
 
-	var/obj/item/organ/diona/node/light_organ = null //The organ this gestalt uses to receive light. This is left null for nymphs
-	var/obj/item/organ/diona/nutrients/nutrient_organ = null //Organ
+	var/obj/item/organ/internal/diona/node/light_organ = null //The organ this gestalt uses to receive light. This is left null for nymphs
+	var/obj/item/organ/internal/diona/nutrients/nutrient_organ = null //Organ
 	var/LMS = 1 //Lightmessage state. Switching between states gives the user a message
 	var/dionatype //1 = nymph, 2 = worker gestalt
 	var/datum/weakref/nym

@@ -29,6 +29,7 @@
 	colour = "soghun"
 	key = "o"
 	flags = WHITELISTED|TCOMSSIM
+	allow_accents = TRUE
 	space_chance = 40
 	syllables = list(
 		"za", "az", "ze", "ez", "zi", "iz", "zo", "oz", "zu", "uz", "zs", "sz",
@@ -40,6 +41,7 @@
 		"a",  "a",  "e",  "e",  "i",  "i",  "o",  "o",  "u",  "u",  "s",  "s"
 	)
 	partial_understanding = list(LANGUAGE_AZAZIBA = 25)
+	allow_accents = TRUE
 
 // tajaran languages
 /datum/language/tajaran
@@ -56,6 +58,7 @@
 	"ka","aasi","far","wa","baq","ara","qara","zir","sam","mak","hrar","nja","rir","khan","jun","dar","rik","kah",
 	"hal","ket","jurl","mah","tul","cresh","azu","ragh","mro","mra","mrro","mrra")
 	partial_understanding = list(LANGUAGE_SIIK_TAJR = 50, LANGUAGE_YA_SSA = 25, LANGUAGE_DELVAHII = 50)
+	allow_accents = TRUE
 
 /datum/language/tajaran/get_random_name(var/gender)
 
@@ -108,6 +111,7 @@
 	"kan","aesi","fare","we","bash","arha","quara","zhir","sem","make","hrer","nja","rir","can","jhun","dar","rik","kah",
 	"hal","kete","juril","mah","tul","cresh","azu","ragh","miro","mara","mrero","mrara")
 	partial_understanding = list(LANGUAGE_SIIK_MAAS = 50)
+	allow_accents = TRUE
 
 /datum/language/delvahhi
 	name = LANGUAGE_DELVAHII
@@ -123,6 +127,7 @@
 	"ka","aasi","far","wa","baq","ara","qara","zir","sam","mak","hrar","nja","rir","khan","jun","dar","rik","kah",
 	"hal","ket","jurl","mah","tul","cresh","azu","ragh","mro","mra","mrro","mrra")
 	partial_understanding = list(LANGUAGE_SIIK_MAAS = 50)
+	allow_accents = TRUE
 
 /datum/language/skrell
 	name = LANGUAGE_SKRELLIAN
@@ -134,11 +139,12 @@
 	key = "k"
 	flags = WHITELISTED|TCOMSSIM
 	syllables = list("qr","qrr","xuq","qil","quum","xuqm","vol","xrim","zaoo","qu-uu","qix","qoo","zix","*","!")
+	allow_accents = TRUE
 
 /datum/language/skrell/get_random_name()
 	var/new_name = ""
 	var/suff = ""
-	var/name_pieces = list("Zish", "Kin", "Qu", "Sukak", "Shin", "Ulu", "Nini", "Nai", "Xunu", "Zix", "Ooo", "Paut", "Sulux", "Xiialt", "Riori", "Eqeq", "Xicic", "Ooin", "Kaaxi", "Nuux", "Iirun", "Akoox", "Nunuz", "Ouik", "Uptari", "Vuzu", "Weish", "Liise", "Xiiux", "Lesh", "Ezhin", "Vulun", "Ponoh", "Pish", "Nali", "Yonosh")
+	var/name_pieces = list("Qu", "Su", "Xu", "Xi", "Qi", "Si", "Ei", "Qui", "Iuq", "Qiu", "Kiu", "Uiu", "Eis", "Seq", "Eqa", "Uiq", "Kui", "Muu", "Muq", "Kuo", "Omq", "Xoi", "Liq", "Zuk", "Kono", "Koxi", "Auuo", "Iili", "Kesi", "Irek", "Quak", "Qoku", "Uokk", "Eeok", "Teie", "Xiou", "Xoku", "Xiru", "Qiuu", "Laqu", "Leua", "Olru", "Oquo", "Oeoo", "Isik", "Kiue", "Ruee", "Ouqu", "Kiiq", "Tesh", "Lish", "Ilin", "Shiq", "Quis", "Oquq", "Ququ", "Xoio", "Nolko", "Ruusi", "Ieliu", "Nuptu", "Eiuos", "Seiuu", "Xeriu", "Ioquk", "Teiqu", "Quoru", "Qiiuk", "Qeouu", "Quaoi", "Uieuu", "Koqun", "Nuouu", "Leuqo", "Luroq", "Urqul", "Uluqu", "Iequu", "Uiuou", "Suioq", "Urouu", "Xeouu", "Xeios", "Qarui", "Njubu", "Buquk", "Zueou", "Qosko", "Tuiru", "Tuquu", "Xorie", "Zouuo", "Euioi", "Liise", "Riori", "Iirun", "Akoox", "Nunuz", "Ezhin", "Vulun", "Ponoh", "Sulux", "Suqui", "Suqua", "Souqx", "Squix", "Quish", "Shiqu", "Jeshi", "Xushi", "Kiqui", "Liuiq", "Tuish", "Vuzuna", "Uptari", "Xiialt", "Yonosh", "Lieuqo", "Turiuu", "Utrieo", "Yutiex", "Xuitou", "Xieoru", "Xioshi", "Quisuu", "Juiqii", "Uituik", "Ruisui", "Tuisuh", "Jixktu", "Lioxui", "Shixul", "Iuoquu", "Nuitqu", "Kuixqu", "Oiquio", "Oiakuu", "Juukxu", "Iouiuu", "Tuirou", "Suahuk", "Seuaio", "Juirue", "Kioxui", "Xusuui", "Tuirul", "Luishi", "Liropo", "Lixuqe", "Urueir", "Queire", "Iuosuu", "Jaxxak", "Kqullu", "Xulluu", "Xikkuq", "Oiuqkk", "Tuiskk", "Liqukk", "Orueix", "Rkusix", "Turieu", "Kduish", "Xdurui", "Liquuq", "Shiruu", "Xuisoo", "Ooruex", "Uuooux", "Oieuix", "Laishi", "Xiaooi", "Oruexi", "Xiatal", "Xekkua")
 	var/first_name = "[pick(name_pieces)]"
 	name_pieces -= first_name
 	if(prob(40))
@@ -240,6 +246,7 @@
 	"shang", "shen", "sheng", "shi", "sho", "shui", "si", "su", "sui", "sum", "sun", "swi", "ta", "tae", "tai", "tame", "tamen", "tan", "te", "tei", "ti", "tian", "to", "ton", "tsu", "ul", "wa", "wan", "wang", "wei", "wo", "xi", "xian",
 	"xiao", "xing", "xiong", "xiu", "xu", "xuan", "xue", "ya", "yan", "yang", "yeong", "yi", "yige", "yin", "ying", "yiqi", "yong", "you", "yu", "yuli", "yuyi", "zai", "zao", "zhan", "zhang", "zhe", "zhen", "zheng", "zhuo", "zi", "zo",
 	"zu", "zun", "zuo")
+	allow_accents = TRUE
 
 /datum/language/human/get_spoken_verb(var/msg_end)
 	switch(msg_end)

@@ -83,13 +83,6 @@
 		/obj/item/circuitboard/telecomms                  = TRADER_BLACKLIST,
 		/obj/item/circuitboard/unary_atmos                = TRADER_BLACKLIST,
 		/obj/item/circuitboard/arcade                     = TRADER_BLACKLIST,
-		/obj/item/circuitboard/mecha                      = TRADER_BLACKLIST,
-		/obj/item/circuitboard/mecha/odysseus             = TRADER_BLACKLIST,
-		/obj/item/circuitboard/mecha/honker               = TRADER_BLACKLIST,
-		/obj/item/circuitboard/mecha/durand               = TRADER_BLACKLIST,
-		/obj/item/circuitboard/mecha/gygax                = TRADER_BLACKLIST,
-		/obj/item/circuitboard/mecha/ripley               = TRADER_BLACKLIST,
-		/obj/item/circuitboard/mecha/phazon               = TRADER_BLACKLIST,
 		/obj/item/circuitboard/broken                     = TRADER_BLACKLIST,
 		/obj/item/storage/box/lights/colored              = TRADER_SUBTYPES_ONLY,
 		/obj/item/stack/cable_coil                               = TRADER_SUBTYPES_ONLY,
@@ -142,12 +135,9 @@
 		/obj/item/clothing/under/pj                              = TRADER_BLACKLIST,
 		/obj/item/clothing/under/rank                            = TRADER_BLACKLIST,
 		/obj/item/clothing/under/shorts                          = TRADER_BLACKLIST,
-		/obj/item/clothing/under/stripper                        = TRADER_BLACKLIST_ALL,
 		/obj/item/clothing/under/swimsuit                        = TRADER_BLACKLIST,
 		/obj/item/clothing/under/syndicate                       = TRADER_BLACKLIST_ALL,
 		/obj/item/clothing/under/tactical                        = TRADER_BLACKLIST,
-		/obj/item/clothing/under/vox                             = TRADER_BLACKLIST_ALL,
-		/obj/item/clothing/under/wedding                         = TRADER_BLACKLIST,
 		/obj/item/clothing/under/punpun                          = TRADER_BLACKLIST,
 		/obj/item/clothing/under/fluff                           = TRADER_BLACKLIST_ALL,
 		/obj/item/clothing/under/dress/fluff                     = TRADER_BLACKLIST_ALL,
@@ -156,7 +146,7 @@
 		/obj/item/clothing/suit/storage/hooded/wintercoat/fluff  = TRADER_BLACKLIST_ALL,
 		/obj/item/clothing/suit/storage/toggle/labcoat           = TRADER_ALL,
 		/obj/item/clothing/suit/storage/toggle/labcoat/fluff     = TRADER_BLACKLIST_ALL,
-		/obj/item/clothing/suit/varsity                          = TRADER_ALL,
+		/obj/item/clothing/suit/storage/toggle/varsity                          = TRADER_ALL,
 		/obj/item/clothing/suit/storage/toggle/track             = TRADER_ALL,
 		/obj/item/clothing/suit/jacket/puffer                    = TRADER_ALL,
 		/obj/item/clothing/suit/storage/toggle/flannel           = TRADER_ALL
@@ -175,7 +165,6 @@
 		/obj/item/clothing/shoes/magboots               = TRADER_BLACKLIST_ALL,
 		/obj/item/clothing/shoes/swat                   = TRADER_BLACKLIST,
 		/obj/item/clothing/shoes/syndigaloshes          = TRADER_BLACKLIST,
-		/obj/item/clothing/shoes/jackboots/unathi/fluff = TRADER_BLACKLIST_ALL,
 		/obj/item/clothing/shoes/black/bst              = TRADER_BLACKLIST
 	)
 
@@ -194,8 +183,6 @@
 		/obj/item/clothing/gloves/rig                   = TRADER_BLACKLIST_ALL,
 		/obj/item/clothing/gloves/chameleon             = TRADER_BLACKLIST,
 		/obj/item/clothing/gloves/force                 = TRADER_BLACKLIST_ALL,
-		/obj/item/clothing/gloves/swat/fluff            = TRADER_BLACKLIST_ALL,
-		/obj/item/clothing/gloves/black/fluff           = TRADER_BLACKLIST_ALL,
 		/obj/item/clothing/gloves/swat/bst              = TRADER_BLACKLIST,
 		/obj/item/clothing/gloves/watch/fluff           = TRADER_BLACKLIST_ALL,
 		/obj/item/clothing/gloves/fluff                 = TRADER_BLACKLIST_ALL,
@@ -229,8 +216,6 @@ Sells devices, odds and ends, and medical stuff
 	possible_origins = list("Buy 'n Save", "Drug Carnival", "C&B", "Fentles", "Dr. Goods", "Beevees")
 	possible_trading_items = list(
 		/obj/item/device/flashlight                = TRADER_ALL,
-		/obj/item/device/kit/paint                 = TRADER_SUBTYPES_ONLY,
-		/obj/item/device/kit/paint/ripley/fluff    = TRADER_BLACKLIST_ALL,
 		/obj/item/aicard                    = TRADER_THIS_TYPE,
 		/obj/item/device/binoculars                = TRADER_THIS_TYPE,
 		/obj/item/device/flash                     = TRADER_THIS_TYPE,
@@ -265,7 +250,6 @@ Sells devices, odds and ends, and medical stuff
 		/obj/item/device/core_sampler              = TRADER_THIS_TYPE,
 		/obj/item/device/depth_scanner             = TRADER_THIS_TYPE,
 		/obj/item/device/beacon_locator            = TRADER_THIS_TYPE,
-		/obj/item/device/antibody_scanner          = TRADER_THIS_TYPE,
 		/obj/item/stack/medical/advanced           = TRADER_BLACKLIST
 	)
 
@@ -373,7 +357,7 @@ Sells devices, odds and ends, and medical stuff
 		/obj/item/clothing/suit/space/void/mining        = TRADER_THIS_TYPE,
 		/obj/machinery/mining/drill                      = TRADER_THIS_TYPE,
 		/obj/machinery/mining/brace                      = TRADER_THIS_TYPE,
-		/obj/mecha/working/ripley                        = TRADER_THIS_TYPE,
+		/mob/living/heavy_vehicle/premade/ripley                      = TRADER_THIS_TYPE,
 		/obj/item/custom_ka_upgrade/upgrade_chips        = TRADER_SUBTYPES_ONLY,
 		/obj/item/custom_ka_upgrade/barrels              = TRADER_SUBTYPES_ONLY,
 		/obj/item/custom_ka_upgrade/cells                = TRADER_SUBTYPES_ONLY

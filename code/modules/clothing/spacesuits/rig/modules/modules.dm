@@ -12,10 +12,10 @@
 	name = "hardsuit upgrade"
 	desc = "It looks pretty sciency."
 	icon = 'icons/obj/rig_modules.dmi'
-	icon_state = "module"
-	matter = list(DEFAULT_WALL_MATERIAL = 20000, "plastic" = 30000, "glass" = 5000)
+	icon_state = "generic"
+	matter = list(DEFAULT_WALL_MATERIAL = 20000, MATERIAL_PLASTIC = 30000, MATERIAL_GLASS = 5000)
 
-	var/list/construction_cost = list(DEFAULT_WALL_MATERIAL=7000,"glass"=7000)
+	var/list/construction_cost = list(DEFAULT_WALL_MATERIAL=7000, MATERIAL_GLASS =7000)
 	var/construction_time = 100
 
 	var/damage = 0
@@ -140,6 +140,17 @@
 	stat_modules +=	new/stat_rig_module/select(src)
 	stat_modules +=	new/stat_rig_module/charge(src)
 
+
+/obj/item/rig_module/Destroy()
+
+	for (var/sm in stat_modules)
+		qdel(sm)
+	stat_modules.Cut()
+
+	holder = null
+
+	return ..()
+
 // Called when the module is installed into a suit.
 /obj/item/rig_module/proc/installed(var/obj/item/rig/new_holder)
 	holder = new_holder
@@ -175,7 +186,7 @@
 	if(!holder.check_power_cost(usr, use_power_cost, 0, src, (istype(usr,/mob/living/silicon ? 1 : 0) ) ) )
 		return 0
 
-	if(!confined_use && istype(usr.loc, /obj/mecha))
+	if(!confined_use && istype(usr.loc, /mob/living/heavy_vehicle))
 		to_chat(usr, "<span class='danger'>You cannot use the suit in the confined space.</span>")
 		return 0
 
@@ -248,11 +259,9 @@
 		var/cell_status = R.cell ? "[R.cell.charge]/[R.cell.maxcharge]" : "ERROR"
 		stat("Suit charge", cell_status)
 		for(var/obj/item/rig_module/module in R.installed_modules)
-		{
 			for(var/stat_rig_module/SRM in module.stat_modules)
 				if(SRM.CanUse())
 					stat(SRM.module.interface_name,SRM)
-		}
 
 /stat_rig_module
 	parent_type = /atom/movable

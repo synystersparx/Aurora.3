@@ -48,9 +48,6 @@ var/datum/controller/subsystem/theming/SStheming
 	for(var/mob/M in mob_list)
 		if(M.client)
 			apply_theme_from_perfs(M.client)
-		var/mob/abstract/new_player/np = M
-		if(istype(np))
-			np.new_player_panel_proc()
 	..()
 
 /datum/controller/subsystem/theming/proc/apply_theme_from_perfs(var/user)
@@ -101,6 +98,7 @@ var/datum/controller/subsystem/theming/SStheming
 #ifdef UIDEBUG
 	user << browse_rsc(file("vueui/dist/app.js"), "vueui.js")
 	user << browse_rsc(file("vueui/dist/app.css"), "vueui.css")
+	user << browse_rsc(file("vueui/dist/app.js.map"), "app.js.map")
 #else
 	simple_asset_ensure_is_sent(user, /datum/asset/simple/vueui)
 #endif

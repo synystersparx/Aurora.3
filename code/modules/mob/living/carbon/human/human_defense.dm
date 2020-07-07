@@ -132,11 +132,13 @@ emp_act
 	if(!type || !def_zone) return 0
 	var/protection = 0
 	var/list/protective_gear = list(head, wear_mask, wear_suit, w_uniform, gloves, shoes)
-	for(var/gear in protective_gear)
-		if(gear && istype(gear ,/obj/item/clothing))
-			var/obj/item/clothing/C = gear
-			if(istype(C) && C.body_parts_covered & def_zone.body_part && C.armor)
-				protection = add_armor(protection, C.armor[type])
+	for(var/obj/item/clothing/gear in protective_gear)
+		if(!isnull(gear.armor) && gear.body_parts_covered & def_zone.body_part)
+			protection = add_armor(protection, gear.armor[type])
+		for(var/obj/item/clothing/accessory/A in gear.accessories)
+			if(!isnull(A.armor) && A.body_parts_covered & def_zone.body_part)
+				protection = add_armor(protection, A.armor[type])
+
 	return protection
 
 /mob/living/carbon/human/proc/check_head_coverage()
@@ -149,6 +151,13 @@ emp_act
 			if(C.body_parts_covered & HEAD)
 				return 1
 	return 0
+
+/mob/living/carbon/human/proc/check_head_airtight_coverage()
+	var/list/clothing = list(head, wear_mask, wear_suit)
+	for(var/obj/item/clothing/C in clothing)
+		if((C.body_parts_covered & HEAD) && (C.item_flags & (AIRTIGHT|STOPPRESSUREDAMAGE)))
+			return TRUE
+	return FALSE
 
 //Used to check if they can be fed food/drinks/pills
 /mob/living/carbon/human/proc/check_mouth_coverage()
@@ -167,7 +176,7 @@ emp_act
 
 /mob/living/carbon/human/emp_act(severity)
 	if(isipc(src))
-		var/obj/item/organ/surge/s = src.internal_organs_by_name["surge"]
+		var/obj/item/organ/internal/surge/s = src.internal_organs_by_name["surge"]
 		if(!isnull(s))
 			if(s.surge_left >= 1)
 				playsound(src.loc, 'sound/magic/LightningShock.ogg', 25, 1)
@@ -272,24 +281,19 @@ emp_act
 	if(effective_force > 10 || effective_force >= 5 && prob(33))
 		forcesay(hit_appends)	//forcesay checks stat already
 
-	if((I.damtype == BRUTE || I.damtype == HALLOSS) && prob(25 + (effective_force * 2)))
+	if((I.damtype == BRUTE || I.damtype == PAIN) && prob(25 + (effective_force * 2)))
 		if(!stat)
 			if(headcheck(hit_zone))
 				//Harder to score a stun but if you do it lasts a bit longer
 				if(prob(effective_force) && head && !istype(head, /obj/item/clothing/head/helmet))
 					visible_message("<span class='danger'>[src] [species.knockout_message]</span>")
 					apply_effect(20, PARALYZE, blocked)
-			else
-				//Easier to score a stun but lasts less time
-				if(prob(effective_force + 10))
-					visible_message("<span class='danger'>[src] has been knocked down!</span>")
-					apply_effect(6, WEAKEN, blocked)
 
 		//Apply blood
 		if(!(I.flags & NOBLOODY))
 			I.add_blood(src)
 
-		if(prob(33))
+		if(prob(effective_force * 2))
 			var/turf/location = loc
 			if(istype(location, /turf/simulated))
 				location.add_blood(src)
@@ -386,7 +390,8 @@ emp_act
 		var/armor = run_armor_check(affecting, "melee", O.armor_penetration, "Your armor has protected your [hit_area].", "Your armor has softened the hit to your [hit_area].") //I guess "melee" is the best fit here
 
 		if(armor < 100)
-			apply_damage(throw_damage, dtype, zone, armor, is_sharp(O), has_edge(O), O)
+			var/damage_flags = O.damage_flags()
+			apply_damage(throw_damage, dtype, zone, armor, O, damage_flags = damage_flags)
 
 		if(ismob(O.thrower))
 			var/mob/M = O.thrower
@@ -539,12 +544,12 @@ emp_act
 
 	var/obj/item/grab/G = new /obj/item/grab(user, src)
 	if(buckled)
-		to_chat(user, "<span class='notice'>You cannot grab [src], \he is buckled in!</span>")
+		to_chat(user, "<span class='notice'>You cannot grab [src], \he [gender_datums[gender].is] buckled in!</span>")
 	if(!G)	//the grab will delete itself in New if affecting is anchored
 		return
 	user.put_in_active_hand(G)
 	G.synch()
-	LAssailant = user
+	LAssailant = WEAKREF(user)
 
 	user.do_attack_animation(src)
 	playsound(loc, 'sound/weapons/thudswoosh.ogg', 50, 1, -1)

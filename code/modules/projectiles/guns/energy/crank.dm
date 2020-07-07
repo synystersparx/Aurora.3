@@ -1,6 +1,7 @@
 /obj/item/gun/energy/rifle/icelance
 	name = "icelance rifle"
 	desc = "A Tajaran made rifle, it houses a crank-chargable internal battery. It only holds three shots and each shot must be cranked manually."
+	icon = 'icons/obj/guns/icelance.dmi'
 	icon_state = "icelance"
 	item_state = "icelance"
 	fire_sound = 'sound/weapons/Laser.ogg'
@@ -23,7 +24,7 @@
 	knife_x_offset = 23
 	knife_y_offset = 13
 
-	description_fluff = "The Tui'ad \"Icelance\" laser rifle is an energy weapon of Tajaran design. Clumsy overheating handguns and rifles that slowly fire long bolts of \
+	desc_fluff = "The Tui'ad \"Icelance\" laser rifle is an energy weapon of Tajaran design. Clumsy overheating handguns and rifles that slowly fire long bolts of \
 	concentrated energy are used by high ranking soldiers or special operatives of the Republican army, but their durability is dubious in comparison to the mass-produced, \
 	single shot or bolt action rifles that the majority of Tajaran soldiers use."
 
@@ -39,6 +40,7 @@
 				)
 		playsound(user.loc, 'sound/items/crank.ogg', 60, 1)
 		is_charging = TRUE
+		flick("crank", src)
 		if(do_after(user,20))
 			to_chat(user, "<span class='notice'>You finish charging \the [src].</span>")
 			power_supply.give(charge_cost)

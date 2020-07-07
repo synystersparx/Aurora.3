@@ -9,6 +9,7 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
+	intro_prefix = "the"
 	supervisors = "company officials and Corporate Regulations"
 	selection_color = "#4747FF"
 	access = list() 			//See get_access()
@@ -21,6 +22,8 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 	ideal_character_age = 70 // Old geezer captains ftw
 
 	outfit = /datum/outfit/job/captain
+
+	blacklisted_species = list("Off-Worlder Human", "Tajara", "M'sai Tajara", "Zhan-Khazan Tajara", "Unathi", "Diona", "Baseline Frame", "Hephaestus G1 Industrial Frame", "Hephaestus G2 Industrial Frame", "Xion Industrial Frame", "Zeng-Hu Mobility Frame", "Bishop Accessory Frame", "Shell Frame", "Vaurca Worker", "Vaurca Warrior")
 
 /datum/outfit/job/captain
 	name = "Captain"
@@ -38,7 +41,7 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 	)
 
 	implants = list(
-		/obj/item/implant/loyalty
+		/obj/item/implant/mindshield
 	)
 
 	backpack = /obj/item/storage/backpack/captain
@@ -72,6 +75,7 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
+	intro_prefix = "the"
 	supervisors = "the captain"
 	selection_color = "#9696FF"
 	minimal_player_age = 10
@@ -92,6 +96,8 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 			            access_crematorium, access_kitchen, access_cargo, access_cargo_bot, access_mailsorting, access_qm, access_hydroponics,
 			            access_chapel_office, access_library, access_research, access_mining, access_mining_station, access_janitor,
 			            access_hop, access_RC_announce, access_keycard_auth, access_gateway, access_weapons, access_journalist)
+
+	blacklisted_species = list("M'sai Tajara", "Zhan-Khazan Tajara", "Diona", "Vaurca Worker", "Vaurca Warrior")
 
 /datum/outfit/job/hop
 	name = "Head of Personnel"

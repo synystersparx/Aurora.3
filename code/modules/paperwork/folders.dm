@@ -5,6 +5,7 @@
 	icon_state = "folder"
 	w_class = 2
 	drop_sound = 'sound/items/drop/paper.ogg'
+	pickup_sound = 'sound/items/pickup/paper.ogg'
 
 /obj/item/folder/blue
 	desc = "A blue folder."
@@ -114,3 +115,11 @@
 		attack_self(usr)
 		update_icon()
 	return
+
+/obj/item/folder/blue/nka/Initialize()
+	. = ..()
+	new /obj/item/paper/nka_pledge(src)
+	new /obj/item/paper/nka_pledge(src)
+	new /obj/item/paper/nka_pledge(src)
+	new /obj/item/paper/nka_pledge(src)
+	new /obj/item/paper/nka_pledge(src)

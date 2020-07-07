@@ -4,8 +4,8 @@
  *		Cakehat
  *		Ushanka
  *		Pumpkin head
- *		Kitty ears
- *
+ *		Chicken mask
+ *		Warning cone
  */
 
 /*
@@ -15,11 +15,12 @@
 	name = "welding helmet"
 	desc = "A head-mounted face cover designed to protect the wearer completely from space-arc eye."
 	icon_state = "welding"
+	item_state = "welding"
 	item_state_slots = list(
 		slot_l_hand_str = "welding",
 		slot_r_hand_str = "welding"
 		)
-	matter = list(DEFAULT_WALL_MATERIAL = 3000, "glass" = 1000)
+	matter = list(DEFAULT_WALL_MATERIAL = 3000, MATERIAL_GLASS = 1000)
 	var/up = 0
 	armor = list(melee = 10, bullet = 0, laser = 0,energy = 0, bomb = 0, bio = 0, rad = 0)
 	flags_inv = (HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE)
@@ -31,9 +32,12 @@
 	flash_protection = FLASH_PROTECTION_MAJOR
 	tint = TINT_HEAVY
 	sprite_sheets = list(
-		"Vox" = 'icons/mob/species/vox/head.dmi'
+		"Vox" = 'icons/mob/species/vox/head.dmi',
+		"Tajara" = 'icons/mob/species/tajaran/helmet.dmi',
+		"Unathi" = 'icons/mob/species/unathi/helmet.dmi'
 		)
 	drop_sound = 'sound/items/drop/helm.ogg'
+	pickup_sound = 'sound/items/pickup/helm.ogg'
 
 /obj/item/clothing/head/welding/attack_self()
 	if(!base_state)
@@ -49,25 +53,28 @@
 	if(!base_state)
 		base_state = icon_state
 
-	if(usr.canmove && !usr.stat && !usr.restrained())
-		if(src.up)
-			src.up = !src.up
-			body_parts_covered |= (EYES|FACE)
-			flags_inv |= (HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE)
-			flash_protection = initial(flash_protection)
-			tint = initial(tint)
-			icon_state = base_state
-			to_chat(usr, "You flip the [src] down to protect your eyes.")
-		else
-			src.up = !src.up
-			body_parts_covered &= ~(EYES|FACE)
-			flash_protection = FLASH_PROTECTION_NONE
-			tint = TINT_NONE
-			flags_inv &= ~(HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE)
-			icon_state = "[base_state]up"
-			to_chat(usr, "You push the [src] up out of your face.")
-		update_clothing_icon()	//so our mob-overlays
-		usr.update_action_buttons()
+	if(use_check_and_message(usr))
+		return
+
+	src.up = !src.up
+	if(!src.up)
+		body_parts_covered |= (EYES|FACE)
+		flags_inv |= (HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE)
+		flash_protection = initial(flash_protection)
+		tint = initial(tint)
+		icon_state = base_state
+		item_state = base_state
+		to_chat(usr, "You flip the [src] down to protect your eyes.")
+	else
+		body_parts_covered &= ~(EYES|FACE)
+		flash_protection = FLASH_PROTECTION_NONE
+		tint = TINT_NONE
+		flags_inv &= ~(HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE)
+		icon_state = "[base_state]up"
+		item_state = "[base_state]up"
+		to_chat(usr, "You push the [src] up out of your face.")
+	update_clothing_icon()	//so our mob-overlays
+	usr.update_action_buttons()
 
 
 /*
@@ -147,6 +154,7 @@
 	flags_inv = HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE|BLOCKHAIR
 	body_parts_covered = HEAD|FACE|EYES
 	drop_sound = 'sound/items/drop/herb.ogg'
+	pickup_sound = 'sound/items/pickup/herb.ogg'
 	w_class = 3
 	throwforce = 1
 	throw_speed = 0.5
@@ -189,7 +197,7 @@
 		if(WT.isOn()) //Badasses dont get blinded by lighting their candle with a welding tool
 			light()
 			to_chat(user, span("notice", "\The [user] casually lights \the [name] with [W]."))
-	else if(isflamesource(W))
+	else if(W.isFlameSource())
 		light()
 		to_chat(user, span("notice", "\The [user] lights \the [name]."))
 	else if(istype(W, /obj/item/flame/candle))
@@ -234,30 +242,8 @@
 		set_light(0)
 
 /*
- * Kitty ears
+ * Chicken mask
  */
-/obj/item/clothing/head/kitty
-	name = "kitty ears"
-	desc = "A pair of kitty ears. Meow!"
-	icon_state = "kitty"
-	siemens_coefficient = 1.5
-	item_icons = list()
-
-/obj/item/clothing/head/kitty/equipped(mob/living/carbon/human/user, slot)
-	. = ..()
-	if (slot == slot_head && istype(user))
-		var/hairgb = rgb(user.r_hair, user.g_hair, user.b_hair)
-		var/icon/blended = SSicon_cache.kitty_ear_cache[hairgb]
-		if (!blended)
-			blended = icon('icons/mob/head.dmi', "kitty")
-			blended.Blend(hairgb, ICON_ADD)
-			blended.Blend(icon('icons/mob/head.dmi', "kittyinner"), ICON_OVERLAY)
-
-			SSicon_cache.kitty_ear_cache[hairgb] = blended
-
-		icon_override = blended
-	else if (icon_override)
-		icon_override = null
 
 /obj/item/clothing/head/richard
 	name = "chicken mask"
@@ -265,3 +251,24 @@
 	icon_state = "richard"
 	body_parts_covered = HEAD|FACE
 	flags_inv = BLOCKHAIR
+
+/*
+ * Warning cone
+ */
+
+/obj/item/clothing/head/cone
+	name = "warning cone"
+	desc = "This cone is trying to warn you of something!"
+	desc_info = "It looks like you can wear it in your head slot."
+	icon_state = "cone"
+	item_state = "cone"
+	drop_sound = 'sound/items/drop/shoes.ogg'
+	pickup_sound = 'sound/items/pickup/shoes.ogg'
+	force = 1
+	throwforce = 3
+	throw_speed = 2
+	throw_range = 5
+	w_class = 2
+	body_parts_covered = HEAD
+	attack_verb = list("warned", "cautioned", "smashed")
+	armor = list("melee" = 5, "bullet" = 0, "laser" = 0,"energy" = 0, "bomb" = 0, "bio" = 0, "rad" = 0, "fire" = 0, "acid" = 0)

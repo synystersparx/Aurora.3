@@ -73,8 +73,9 @@ STOCK_ITEM_UNCOMMON(mediumcell, 3)
 
 STOCK_ITEM_UNCOMMON(chempack, 5)
 	var/list/chems = SSchemistry.chemical_reagents.Copy()
-	var/list/exclusion = list("drink", "reagent", "adminordrazine", "beer2", "azoth", "elixir_life", "liquid_fire", "philosopher_stone", "undead_ichor", "love", "shapesand", "usolve",\
-							 "sglue", "black_matter", "lightning", "trioxin", "phoron_salt", "nanites")
+	var/list/exclusion = list(/datum/reagent/drink, /datum/reagent, /datum/reagent/adminordrazine, /datum/reagent/chloralhydrate/beer2, /datum/reagent/azoth, /datum/reagent/elixir,\
+		/datum/reagent/liquid_fire, /datum/reagent/philosopher_stone, /datum/reagent/toxin/undead, /datum/reagent/love_potion, /datum/reagent/shapesand, /datum/reagent/usolve,\
+		/datum/reagent/sglue, /datum/reagent/black_matter, /datum/reagent/bottle_lightning, /datum/reagent/toxin/trioxin, /datum/reagent/toxin/phoron_salt, /datum/reagent/toxin/nanites, /datum/reagent/nitroglycerin)
 	chems -= exclusion
 	for (var/i in 1 to rand(2, 6))
 		var/obj/item/reagent_containers/chem_disp_cartridge/C = new /obj/item/reagent_containers/chem_disp_cartridge(L)
@@ -91,7 +92,7 @@ STOCK_ITEM_UNCOMMON(chempack, 5)
 
 STOCK_ITEM_UNCOMMON(robolimbs, 3)
 	for (var/i in 1 to rand(2, 5))
-		var/manuf = pick(chargen_robolimbs)
+		var/manuf = pick(fabricator_robolimbs)
 		var/type = pick( \
 			/obj/item/robot_parts/l_arm, \
 			/obj/item/robot_parts/r_arm, \
@@ -302,39 +303,11 @@ STOCK_ITEM_UNCOMMON(blade, 1.2)
 	var/type = pickweight(blades)
 	new type(L)
 
-// A single random exosuit attachment from a limited list
-//	with some of the more overpowered ones excluded.
-STOCK_ITEM_UNCOMMON(exoquip, 2)
-	var/list/equips = list(
-		/obj/item/mecha_parts/mecha_equipment/tool/hydraulic_clamp = 1,
-		/obj/item/mecha_parts/mecha_equipment/tool/drill = 1,
-		/obj/item/mecha_parts/mecha_equipment/tool/drill/diamonddrill = 0.7,
-		/obj/item/mecha_parts/mecha_equipment/tool/extinguisher = 1,
-		/obj/item/mecha_parts/mecha_equipment/tool/rfd_c = 0.08,
-		/obj/item/mecha_parts/mecha_equipment/teleporter = 0.3,
-		/obj/item/mecha_parts/mecha_equipment/wormhole_generator = 0.5,
-		/obj/item/mecha_parts/mecha_equipment/gravcatapult = 0.8,
-		/obj/item/mecha_parts/mecha_equipment/armor_booster/anticcw_armor_booster = 1,
-		/obj/item/mecha_parts/mecha_equipment/armor_booster/antiproj_armor_booster = 0.9,
-		/obj/item/mecha_parts/mecha_equipment/repair_droid = 0.7,
-		/obj/item/mecha_parts/mecha_equipment/tesla_energy_relay = 0.4,
-		/obj/item/mecha_parts/mecha_equipment/generator = 1.5,
-		/obj/item/mecha_parts/mecha_equipment/generator/nuclear = 0.8,
-		/obj/item/mecha_parts/mecha_equipment/tool/safety_clamp = 0.2,
-		/obj/item/mecha_parts/mecha_equipment/tool/passenger = 1,
-		/obj/item/mecha_parts/mecha_equipment/tool/sleeper = 0.9,
-		/obj/item/mecha_parts/mecha_equipment/tool/cable_layer = 1.2,
-		/obj/item/mecha_parts/mecha_equipment/tool/syringe_gun = 1
-	)
-
-	var/type = pickweight(equips)
-	new type(L)
-
 STOCK_ITEM_UNCOMMON(laserscalpel, 1.3)
 	var/list/lasers = list(
-		/obj/item/scalpel/laser1 = 3,
-		/obj/item/scalpel/laser2 = 2,
-		/obj/item/scalpel/laser3 = 1
+		/obj/item/surgery/scalpel/laser1 = 3,
+		/obj/item/surgery/scalpel/laser2 = 2,
+		/obj/item/surgery/scalpel/laser3 = 1
 	)
 	var/type = pickweight(lasers)
 	new type(L)

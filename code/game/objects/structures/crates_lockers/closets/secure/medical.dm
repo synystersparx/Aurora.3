@@ -17,8 +17,8 @@
 	new /obj/item/reagent_containers/dropper(src)
 	new /obj/item/reagent_containers/glass/beaker(src)
 	new /obj/item/reagent_containers/glass/beaker(src)
-	new /obj/item/reagent_containers/glass/bottle/inaprovaline(src)
-	new /obj/item/reagent_containers/glass/bottle/inaprovaline(src)
+	new /obj/item/reagent_containers/glass/bottle/norepinephrine(src)
+	new /obj/item/reagent_containers/glass/bottle/norepinephrine(src)
 	new /obj/item/reagent_containers/glass/bottle/antitoxin(src)
 	new /obj/item/reagent_containers/glass/bottle/antitoxin(src)
 
@@ -42,7 +42,7 @@
 	new /obj/item/clothing/mask/breath/medical(src)
 
 /obj/structure/closet/secure_closet/medical3
-	name = "medical doctor's locker"
+	name = "physician's locker"
 	req_access = list(access_medical_equip)
 	icon_state = "securemed1"
 	icon_closed = "securemed"
@@ -78,11 +78,11 @@
 			new /obj/item/clothing/under/rank/medical/purple(src)
 			new /obj/item/clothing/head/surgery/purple(src)
 	new /obj/item/clothing/under/rank/medical(src)
-	new /obj/item/clothing/under/rank/orderly(src)
 	new /obj/item/clothing/suit/storage/toggle/labcoat(src)
 	new /obj/item/clothing/suit/storage/toggle/fr_jacket(src)
 	new /obj/item/clothing/shoes/medical(src)
 	new /obj/item/device/radio/headset/headset_med(src)
+	new /obj/item/device/radio/headset/headset_med/alt(src)
 	new /obj/item/clothing/glasses/hud/health/aviator(src)
 	new /obj/item/clothing/glasses/eyepatch/hud/medical(src)
 	new /obj/item/clothing/suit/storage/medical_chest_rig(src)
@@ -108,8 +108,9 @@
 	new /obj/item/clothing/shoes/medical(src)
 	new /obj/item/clothing/under/rank/chief_medical_officer(src)
 	new /obj/item/cartridge/cmo(src)
-	new /obj/item/clothing/gloves/latex(src)
+	new /obj/item/clothing/gloves/latex/nitrile(src)
 	new /obj/item/device/radio/headset/heads/cmo(src)
+	new /obj/item/device/radio/headset/heads/cmo/alt(src)
 	new /obj/item/device/flash(src)
 	new /obj/item/reagent_containers/hypospray/cmo(src)
 	new /obj/item/clothing/suit/storage/toggle/labcoat/cmo(src)

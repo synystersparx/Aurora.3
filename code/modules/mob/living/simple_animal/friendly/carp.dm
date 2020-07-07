@@ -34,10 +34,16 @@
 	minbodytemp = 0
 
 	mob_size = 4
-	metabolic_factor = 0 // NEVER EAT HA HA HA - geeves
+	max_nutrition = 40
+	metabolic_factor = 0.2
+	bite_factor = 0.6 //Carp got big bites
+
+	stomach_size_mult = 3 //They're just baby
 
 	density = TRUE
 	pass_flags = PASSTABLE
+	canbrush = TRUE
+	brush = /obj/item/reagent_containers/glass/rag
 
 	possession_candidate = TRUE
 
@@ -70,7 +76,7 @@
 		var/current_dist = get_dist(src, friend)
 
 		if(movement_target != friend)
-			if(current_dist > follow_dist && friend in oview(src))
+			if(current_dist > follow_dist && (friend in oview(src)))
 				//stop existing movement
 				walk_to(src,0)
 				turns_since_scan = 0
@@ -87,9 +93,6 @@
 			stop_automated_movement = 0
 			if(prob(10))
 				say("Glub!")
-
-	if(!friend || movement_target != friend)
-		..()
 
 /mob/living/simple_animal/carp/fluff/verb/friend(var/mob/user)
 	set name = "Become Friends"

@@ -18,6 +18,8 @@
 	ethanol_resistance = 1 // Default value
 	climb_coeff = 1.1
 
+	resist_mod = 2 // ZHAN POWERRRRRR
+
 	cold_level_1 = 160 //RaceDefault 200 Default 260
 	cold_level_2 = 100 //RaceDefault 140 Default 200
 	cold_level_3 = 50  //RaceDefault 80 Default 120
@@ -28,7 +30,8 @@
 
 	primitive_form = "Zhan-Khazan Farwa"
 
-	num_alternate_languages = 1 // Only one Extra Language
+	allowed_accents = list(ACCENT_REPUBICLANSIIK, ACCENT_NAZIRASIIK, ACCENT_CREVAN, ACCENT_DASNRRASIIK, ACCENT_HIGHHARRSIIK, ACCENT_LOWHARRSIIK, ACCENT_AMOHDASIIK,
+							 ACCENT_RURALDELVAHHI, ACCENT_NOMADDELVAHHI)
 
 /datum/species/tajaran/m_sai
 	name = "M'sai Tajara"
@@ -56,3 +59,4 @@
 	primitive_form = "M'sai Farwa"
 
 	secondary_langs = list(LANGUAGE_SIIK_MAAS, LANGUAGE_SIIK_TAJR, LANGUAGE_SIGN_TAJARA)
+	allowed_accents = list(ACCENT_REPUBICLANSIIK, ACCENT_NAZIRASIIK, ACCENT_CREVAN, ACCENT_DASNRRASIIK, ACCENT_HIGHHARRSIIK, ACCENT_LOWHARRSIIK, ACCENT_AMOHDASIIK)

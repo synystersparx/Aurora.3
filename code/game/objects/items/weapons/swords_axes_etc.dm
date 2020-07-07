@@ -17,6 +17,8 @@
 	item_state = "classic_baton"
 	slot_flags = SLOT_BELT
 	force = 10
+	drop_sound = 'sound/items/drop/crowbar.ogg'
+	pickup_sound = 'sound/items/pickup/crowbar.ogg'
 
 /obj/item/melee/classic_baton/attack(mob/M as mob, mob/living/user as mob, var/target_zone)
 	if ((user.is_clumsy()) && prob(50))
@@ -40,8 +42,9 @@
 	slot_flags = SLOT_BELT
 	w_class = 2
 	force = 3
+	drop_sound = 'sound/items/drop/crowbar.ogg'
+	pickup_sound = 'sound/items/pickup/crowbar.ogg'
 	var/on = 0
-
 
 /obj/item/melee/telebaton/attack_self(mob/user as mob)
 	on = !on
@@ -50,7 +53,7 @@
 		"<span class='warning'>You extend the baton.</span>",\
 		"You hear an ominous click.")
 		icon_state = "telebaton_1"
-		item_state = "nullrod"
+		item_state = "telebaton_1"
 		w_class = 3
 		force = 15//quite robust
 		attack_verb = list("smacked", "struck", "slapped")
@@ -101,7 +104,7 @@
 					var/mob/living/carbon/human/T = target
 					var/armor = T.run_armor_check(target_zone,"melee")
 
-					T.apply_damage(40, HALLOSS, target_zone, armor)
+					T.apply_damage(40, PAIN, target_zone, armor)
 		return
 	else
 		return ..()

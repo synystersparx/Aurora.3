@@ -41,6 +41,7 @@
 	item_state = "paper"
 	body_parts_covered = 0
 	drop_sound = 'sound/items/drop/paper.ogg'
+	pickup_sound = 'sound/items/pickup/paper.ogg'
 
 /obj/item/clothing/head/collectable/tophat
 	name = "collectable top hat"
@@ -93,12 +94,6 @@
 	desc = "You'd make a great Dread Syndie Roberts!"
 	icon_state = "pirate"
 
-/obj/item/clothing/head/collectable/kitty
-	name = "collectable kitty ears"
-	desc = "The fur feels.....a bit too realistic."
-	icon_state = "kitty"
-	body_parts_covered = 0
-
 /obj/item/clothing/head/collectable/rabbitears
 	name = "collectable rabbit ears"
 	desc = "Not as lucky as the feet!"
@@ -113,7 +108,7 @@
 /obj/item/clothing/head/collectable/hardhat
 	name = "collectable hard hat"
 	desc = "WARNING! Offers no real protection, or luminosity, but it is damn fancy!"
-	icon_state = "hardhat0_yellow"
+	icon_state = "hardhat_yellow"
 
 /obj/item/clothing/head/collectable/HoS
 	name = "collectable HoS hat"

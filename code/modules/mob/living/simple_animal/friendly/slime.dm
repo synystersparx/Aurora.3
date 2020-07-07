@@ -8,13 +8,13 @@
 	speak_emote = list("chirps")
 	health = 100
 	maxHealth = 100
-	response_help  = "pets"
+	response_help   = "pets"
 	response_disarm = "shoos"
 	response_harm   = "stomps on"
 	emote_see = list("jiggles", "bounces in place")
 	var/colour = "grey"
 	mob_size = 3
-	composition_reagent = "slimejelly"
+	composition_reagent = /datum/reagent/slimejelly
 
 /mob/living/simple_animal/slime/can_force_feed(var/feeder, var/food, var/feedback)
 	if(feedback)
@@ -36,7 +36,7 @@
 	emote_see = list("jiggles", "bounces in place")
 	var/colour = "grey"
 	mob_size = 6
-	composition_reagent = "slimejelly"
+	composition_reagent = /datum/reagent/slimejelly
 
 /mob/living/simple_animal/adultslime/Initialize()
 	. = ..()

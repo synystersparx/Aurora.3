@@ -52,11 +52,11 @@
 /obj/machinery/computer/guestpass
 	name = "guest pass terminal"
 	desc = "Allows issuing temporary access to an area."
-	icon_state = "guest"
+	icon_state = "guestw"
 
 	light_color = LIGHT_COLOR_BLUE
-	icon_screen = "pass"
-	is_holographic = FALSE
+	icon_screen = "guest"
+	icon_scanline = "altcomputerw-scanline"
 	density = 0
 
 	var/obj/item/card/id/giver
@@ -129,7 +129,7 @@
 	if (href_list["choice"])
 		switch(href_list["choice"])
 			if ("giv_name")
-				var/nam = sanitize(input("Person pass is issued to", "Name", giv_name) as text|null)
+				var/nam = sanitizeName(input("Person pass is issued to", "Name", giv_name) as text|null)
 				if (nam)
 					giv_name = nam
 			if ("reason")
@@ -137,9 +137,9 @@
 				if(reas)
 					reason = reas
 			if ("duration")
-				var/dur = input("Duration (in minutes) during which pass is valid (up to 30 minutes).", "Duration") as num|null
+				var/dur = input("Duration (in minutes) during which pass is valid (up to 60 minutes).", "Duration") as num|null
 				if (dur)
-					if (dur > 0 && dur <= 30)
+					if (dur > 0 && dur <= 60)
 						duration = dur
 					else
 						to_chat(usr, "<span class='warning'>Invalid duration.</span>")

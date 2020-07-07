@@ -67,14 +67,14 @@
 	desc = "A beret with the Idris Incorporated insignia emblazoned on it."
 	icon_state = "idrissecberet"
 
-/obj/item/clothing/head/beret/sec/necro
-	name = "necropolis security beret"
-	desc = "A brown beret with the Necropolis Industries insignia emblazoned on it."
+/obj/item/clothing/head/beret/sec/zavodskoi
+	name = "zavodskoi interstellar security beret"
+	desc = "A brown beret with the Zavodskoi Interstellar insignia emblazoned on it."
 	icon_state = "necrosecberet"
 
-/obj/item/clothing/head/beret/sec/necro/alt
-	name = "necropolis security beret"
-	desc = "A black beret with the Necropolis Industries insignia emblazoned on it."
+/obj/item/clothing/head/beret/sec/zavodskoi/alt
+	name = "zavodskoi interstellar security beret"
+	desc = "A black beret with the Zavodskoi Interstellar insignia emblazoned on it."
 	icon_state = "necrosecaltberet"
 
 /obj/item/clothing/head/beret/sec/eri
@@ -107,6 +107,21 @@
 	desc = "A beret with the medical insignia emblazoned on it. For medical members that want to crush their brains after college left them in massive debt."
 	icon_state = "medberet"
 
+/obj/item/clothing/head/beret/zeng
+	name = "zeng-hu beret"
+	desc = "A purple beret with the Zeng-Hu insignia emblazoned on it."
+	icon_state = "zengberet"
+
+/obj/item/clothing/head/beret/zeng/alt
+	name = "zeng-hu beret"
+	desc = "A white beret with the Zeng-Hu insignia emblazoned on it."
+	icon_state = "zengaltberet"
+
+/obj/item/clothing/head/beret/heph
+	name = "hephaestus beret"
+	desc = "A green beret with the Hephaestus insignia emblazoned on it."
+	icon_state = "hephberet"
+
 /obj/item/clothing/head/beret/purple
 	name = "purple beret"
 	desc = "A stylish, if purple, beret."
@@ -137,6 +152,12 @@
 	name = "commanders beret"
 	desc = "A white beret adorned with the crest of an ERT detachment. Worn by commanders of Nanotrasen response teams."
 	icon_state = "centcomcaptain"
+
+/obj/item/clothing/head/beret/misc
+	name = "beret"
+	desc = "A colorful beret, treasured by artists and the French."
+	icon_state = "miscberet"
+	item_state = "miscberet"
 
 //Medical
 /obj/item/clothing/head/surgery

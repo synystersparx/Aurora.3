@@ -11,6 +11,7 @@
 	var/total_positions = 0               // How many players can be this job
 	var/spawn_positions = 0               // How many players can spawn in as this job
 	var/current_positions = 0             // How many players have this job
+	var/intro_prefix = "a"
 	var/supervisors = null                // Supervisors, who this person answers to directly
 	var/selection_color = "#888888"       // Selection screen color
 	var/list/alt_titles                   // List of alternate titles, if any
@@ -30,6 +31,7 @@
 
 	var/datum/outfit/outfit = null
 	var/list/alt_outfits = null           // A list of special outfits for the alt titles list("alttitle" = /datum/outfit)
+	var/list/blacklisted_species = null		  // A blacklist of species that can't be this job
 
 //Only override this proc
 /datum/job/proc/after_spawn(mob/living/carbon/human/H)

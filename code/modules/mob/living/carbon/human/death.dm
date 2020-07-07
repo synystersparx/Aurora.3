@@ -1,4 +1,5 @@
 /mob/living/carbon/human/gib()
+	vr_disconnect()
 
 	for(var/obj/item/organ/I in internal_organs)
 		I.removed()
@@ -18,14 +19,18 @@
 	gibs(loc, viruses, dna, null, species.flesh_color, species.blood_color)
 
 /mob/living/carbon/human/dust()
+	vr_disconnect()
+
 	if(species)
 		..(species.dusted_anim, species.remains_type)
 	else
 		..()
 
 /mob/living/carbon/human/death(gibbed)
+	if(stat == DEAD)
+		return
 
-	if(stat == DEAD) return
+	vr_disconnect()
 
 	BITSET(hud_updateflag, HEALTH_HUD)
 	BITSET(hud_updateflag, STATUS_HUD)
@@ -39,7 +44,7 @@
 	var/obj/item/organ/external/head = get_organ(BP_HEAD)
 	var/mob/living/simple_animal/borer/B
 
-	if (head)
+	if(head)
 		for(var/I in head.implants)
 			if(istype(I,/mob/living/simple_animal/borer))
 				B = I
@@ -47,7 +52,7 @@
 			if(!B.ckey && ckey && B.controlling)
 				B.ckey = ckey
 				B.controlling = 0
-			if(B.host_brain.ckey)
+			if(B.host_brain?.ckey)
 				ckey = B.host_brain.ckey
 				B.host_brain.ckey = null
 				B.host_brain.name = "host brain"
@@ -57,8 +62,9 @@
 
 	callHook("death", list(src, gibbed))
 
-	if(!gibbed && species.death_sound)
-		playsound(loc, species.death_sound, 80, 1, 1)
+	if(!gibbed)
+		if(species.death_sound)
+			playsound(loc, species.death_sound, 80, 1, 1)
 
 	if(SSticker.mode)
 		sql_report_death(src)
@@ -67,11 +73,16 @@
 	if(wearing_rig)
 		wearing_rig.notify_ai("<span class='danger'>Warning: user death event. Mobility control passed to integrated intelligence system.</span>")
 
-	. = ..(gibbed,species.death_message, species.death_message_range)
+	. = ..(gibbed, species.death_message, species.death_message_range)
+
+	if(!gibbed) //We want to handle organs one last time to make sure that hearts don't report a positive pulse after death.
+		handle_organs()
+
 	handle_hud_list()
 
 /mob/living/carbon/human/proc/ChangeToHusk()
-	if(HUSK in mutations)	return
+	if(HUSK in mutations)
+		return
 
 	if(f_style)
 		f_style = "Shaved"		//we only change the icon_state of the hair datum, so it doesn't mess up their UI/UE
@@ -79,9 +90,14 @@
 		h_style = "Bald"
 	update_hair(0)
 
+	name = "Unknown"
+	real_name = "Unknown"
+
+	scrub_flavor_text()
+
 	mutations.Add(HUSK)
 	status_flags |= DISFIGURED	//makes them unknown without fucking up other stuff like admintools
-	update_body(1)
+	update_body(TRUE)
 	return
 
 /mob/living/carbon/human/proc/Drain()
@@ -89,7 +105,7 @@
 	mutations |= HUSK
 	return
 
-/mob/living/carbon/human/proc/ChangeToSkeleton()
+/mob/living/carbon/human/proc/ChangeToSkeleton(var/keep_name = FALSE)
 	if(SKELETON in src.mutations)	return
 
 	if(f_style)
@@ -98,7 +114,21 @@
 		h_style = "Bald"
 	update_hair(0)
 
+	if(!keep_name)
+		name = "Unknown"
+		real_name = "Unknown"
+		scrub_flavor_text()
+
 	mutations.Add(SKELETON)
 	status_flags |= DISFIGURED
-	update_body(0)
+	update_body(TRUE)
 	return
+
+/mob/living/carbon/human/proc/scrub_flavor_text()
+	for(var/text in flavor_texts)
+		flavor_texts[text] = null
+
+/mob/living/carbon/human/proc/vr_disconnect()
+	if(remote_network)
+		SSvirtualreality.remove_robot(src, remote_network)
+		remote_network = null

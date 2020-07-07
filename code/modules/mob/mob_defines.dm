@@ -7,6 +7,7 @@
 	var/datum/mind/mind
 
 	var/stat = 0 //Whether a mob is alive or dead. TODO: Move this to living - Nodrak
+	var/can_buckle = TRUE
 
 	var/obj/screen/flash = null
 	var/obj/screen/blind = null
@@ -71,6 +72,7 @@
 	var/med_record = ""
 	var/sec_record = ""
 	var/list/incidents = list()
+	var/list/additional_vision_handlers = list()
 	var/gen_record = ""
 	var/ccia_record = ""
 	var/list/ccia_actions = list()
@@ -123,10 +125,10 @@
 	var/overeatduration = 0		// How long this guy is overeating //Carbon
 	var/overdrinkduration = 0	// How long this guy is overdrinking //Carbon
 
-	var/paralysis = 0.0
-	var/stunned = 0.0
-	var/weakened = 0.0
-	var/losebreath = 0.0//Carbon
+	var/paralysis = 0
+	var/stunned = 0
+	var/weakened = 0
+	var/losebreath = 0 //Carbon
 	var/intent = null//Living
 	var/shakecamera = 0
 	var/a_intent = I_HELP//Living
@@ -191,7 +193,7 @@
 	var/datum/weakref/LAssailant
 
 //Wizard mode, but can be used in other modes thanks to the brand new "Give Spell" badmin button
-	var/spell/list/spell_list
+	var/list/spell/spell_list
 
 //List of active diseases
 

@@ -142,9 +142,10 @@
 		to_chat(M, "<span class='notice'>\The [T] is blocking \the [src].</span>")
 		return FALSE
 	for(var/atom/A in T)
-		if(!A.CanPass(M, M.loc, 1.5, 0))
-			to_chat(M, "<span class='notice'>\The [A] is blocking \the [src].</span>")
-			return FALSE
+		if(!isliving(A))
+			if(!A.CanPass(M, M.loc, 1.5, 0))
+				to_chat(M, "<span class='notice'>\The [A] is blocking \the [src].</span>")
+				return FALSE
 	playsound(src, pick(climbsounds), 50)
 	playsound(target_ladder, pick(climbsounds), 50)
 	var/obj/item/grab/G = M.l_hand
@@ -152,7 +153,7 @@
 		G = M.r_hand
 	if (istype(G))
 		G.affecting.forceMove(T)
-	return M.Move(T)
+	return M.forceMove(T)
 
 /obj/structure/ladder/CanPass(obj/mover, turf/source, height, airflow)
 	return airflow || !density
@@ -170,7 +171,7 @@
 
 /obj/structure/stairs
 	name = "stairs"
-	desc = "Stairs leading to another deck.  Not too useful if the gravity goes out."
+	desc = "Stairs leading to another level.  Not too useful if the gravity goes out."
 	icon = 'icons/obj/stairs.dmi'
 	density = 0
 	opacity = 0
@@ -205,6 +206,9 @@
 			var/mob/living/L = A
 			if(L.pulling)
 				L.pulling.forceMove(target)
+			if(ishuman(A))
+				playsound(src, 'sound/effects/stairs_step.ogg', 50)
+				playsound(target, 'sound/effects/stairs_step.ogg', 50)
 
 /obj/structure/stairs/proc/upperStep(var/turf/T)
 	return (T == loc)

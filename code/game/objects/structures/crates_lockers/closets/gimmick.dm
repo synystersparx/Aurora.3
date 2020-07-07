@@ -18,8 +18,6 @@
 			var/obj/item/grab/G = W
 			MouseDrop_T(G.affecting, user)      //act like they were dragged onto the closet
 			return 0
-		if(istype(W,/obj/item/tk_grab))
-			return 0
 		if(!dropsafety(W))
 			return
 		if(W)
@@ -61,12 +59,6 @@
 	new /obj/item/clothing/head/ushanka/grey(src)
 	new /obj/item/clothing/head/ushanka/grey(src)
 	new /obj/item/clothing/head/ushanka/grey(src)
-	new /obj/item/clothing/under/soviet(src)
-	new /obj/item/clothing/under/soviet(src)
-	new /obj/item/clothing/under/soviet(src)
-	new /obj/item/clothing/under/soviet(src)
-	new /obj/item/clothing/under/soviet(src)
-
 
 /obj/structure/closet/gimmick/tacticool
 	name = "tacticool gear closet"
@@ -148,3 +140,9 @@
 	new /obj/item/clothing/head/helmet/thunderdome(src)
 	new /obj/item/clothing/head/helmet/thunderdome(src)
 	new /obj/item/clothing/head/helmet/thunderdome(src)
+
+/obj/structure/closet/skrell
+	icon_state = "skrell"
+	icon_closed = "skrell"
+	icon_opened = "skrellopen"
+	layer = OBJ_LAYER - 0.01

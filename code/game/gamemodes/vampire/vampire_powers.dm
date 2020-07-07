@@ -41,6 +41,10 @@
 	if(T.head && (T.head.item_flags & AIRTIGHT))
 		to_chat(src, span("warning", "[T]'s headgear is blocking the way to the neck."))
 		return
+	var/obj/item/blocked = check_mouth_coverage()
+	if(blocked)
+		to_chat(src, SPAN_WARNING("\The [blocked] is in the way of your fangs!"))
+		return
 	if (vampire.status & VAMP_DRAINING)
 		to_chat(src, span("warning", "Your fangs are already sunk into a victim's neck!"))
 		return
@@ -48,6 +52,8 @@
 	var/datum/vampire/draining_vamp = null
 	if (T.mind && T.mind.vampire)
 		draining_vamp = T.mind.vampire
+
+	var/target_aware = !!T.client
 
 	var/blood = 0
 	var/blood_total = 0
@@ -81,7 +87,7 @@
 		blood_total = vampire.blood_total
 		blood_usable = vampire.blood_usable
 
-		if (!T.vessel.get_reagent_amount("blood"))
+		if (!T.vessel.get_reagent_amount(/datum/reagent/blood))
 			to_chat(src, span("danger", "[T] has no more blood left to give."))
 			break
 
@@ -91,8 +97,8 @@
 		var/frenzy_lower_chance = 0
 
 		// Alive and not of empty mind.
-		if (T.stat < 2 && T.client)
-			blood = min(15, T.vessel.get_reagent_amount("blood"))
+		if (check_drain_target_state(T))
+			blood = min(15, T.vessel.get_reagent_amount(/datum/reagent/blood))
 			vampire.blood_total += blood
 			vampire.blood_usable += blood
 
@@ -110,7 +116,7 @@
 				frenzy_lower_chance = 0
 		// SSD/protohuman or dead.
 		else
-			blood = min(5, T.vessel.get_reagent_amount("blood"))
+			blood = min(5, T.vessel.get_reagent_amount(/datum/reagent/blood))
 			vampire.blood_usable += blood
 
 			frenzy_lower_chance = 40
@@ -127,7 +133,7 @@
 
 			to_chat(src, update_msg)
 		check_vampire_upgrade()
-		T.vessel.remove_reagent("blood", 25)
+		T.vessel.remove_reagent(/datum/reagent/blood, 5)
 
 	vampire.status &= ~VAMP_DRAINING
 
@@ -135,12 +141,18 @@
 	if(vampire.stealth)
 		endsuckmsg += "They will remember nothing of this occurance, provided they survived."
 	visible_message("<span class='danger'>[src.name] stops biting [T.name]'s neck!</span>", "<span class='notice'>[endsuckmsg]</span>")
-	if(T.stat != 2 && vampire.stealth)
-		to_chat(T, span("warning", "You remember nothing about being fed upon. Instead, you simply remember having a pleasant encounter with [src.name]."))
+	if(target_aware)
 		T.paralysis = 0
-	else if(T.stat != 2)
-		to_chat(T, span("warning", "You remember everything about being fed upon. How you react to [src.name]'s actions is up to you."))
-		T.paralysis = 0
+		if(T.stat != DEAD && vampire.stealth)
+			to_chat(T.find_mob_consciousness(), span("warning", "You remember nothing about being fed upon. Instead, you simply remember having a pleasant encounter with [src.name]."))
+		else if(T.stat != DEAD)
+			to_chat(T.find_mob_consciousness(), span("warning", "You remember everything about being fed upon. How you react to [src.name]'s actions is up to you."))
+
+// Check that our target is alive, logged in, and any other special cases
+/mob/living/carbon/human/proc/check_drain_target_state(var/mob/living/carbon/human/T)
+	if(T.stat < DEAD)
+		if(T.client || (T.bg && T.bg.client))
+			return TRUE
 
 // Small area of effect stun.
 /mob/living/carbon/human/proc/vampire_glare()
@@ -167,6 +179,7 @@
 
 		H.Weaken(8)
 		H.stuttering = 20
+		H.confused = 10
 		to_chat(H, "<span class='danger'>You are blinded by [src]'s glare!</span>")
 		flick("flash", H.flash)
 		victims += H
@@ -668,6 +681,8 @@
 	admin_attack_log(src, T, "used dominate on [key_name(T)]", "was dominated by [key_name(src)]", "used dominate and issued the command of '[command]' to")
 
 	show_browser(T, "<center>You feel a strong presence enter your mind. For a moment, you hear nothing but what it says, <b>and are compelled to follow its direction without question or hesitation:</b><br>[command]</center>", "window=vampiredominate")
+	to_chat(T, span("notice", "You feel a strong presence enter your mind. For a moment, you hear nothing but what it says, and are compelled to follow its direction without question or hesitation:"))
+	to_chat(T, "<span style='color: green;'><i><em>[command]</em></i></span>")
 	to_chat(src, "<span class='notice'>You command [T], and they will obey.</span>")
 	emote("me", 1, "whispers.")
 
@@ -717,7 +732,7 @@
 		return
 
 	to_chat(T, "<span class='danger'>Your mind blanks as you finish feeding from [src]'s wrist.</span>")
-	vampire_thrall.add_antagonist(T.mind, 1, 1, 0, 1, 1)
+	thralls.add_antagonist(T.mind, 1, 1, 0, 1, 1)
 
 	T.mind.vampire.master = src
 	vampire.thralls += T
@@ -728,48 +743,6 @@
 	vampire.use_blood(150)
 	verbs -= /mob/living/carbon/human/proc/vampire_enthrall
 	ADD_VERB_IN_IF(src, 2800, /mob/living/carbon/human/proc/vampire_enthrall, CALLBACK(src, .proc/finish_vamp_timeout))
-
-// Gives a lethal disease to the target.
-/mob/living/carbon/human/proc/vampire_diseasedtouch()
-	set category = "Vampire"
-	set name = "Diseased Touch (100)"
-	set desc = "Infects the victim with corruption from the Veil, causing their organs to fail."
-
-	var/datum/vampire/vampire = vampire_power(100, 0)
-	if (!vampire)
-		return
-
-	var/list/victims = list()
-	for (var/mob/living/carbon/human/H in view(1))
-		if (H == src)
-			continue
-		victims += H
-	if (!victims.len)
-		to_chat(src, "<span class='warning'>No suitable targets.</span>")
-		return
-
-	var/mob/living/carbon/human/T = input(src, "Select Victim") as null|mob in victims
-
-	if (!vampire_can_affect_target(T))
-		return
-
-	to_chat(src, "<span class='notice'>You infect [T] with a deadly disease. They will soon fade away.</span>")
-
-	T.help_shake_act(src)
-
-	var/datum/disease2/disease/lethal = new
-	lethal.makerandom(3)
-	lethal.infectionchance = 1
-	lethal.stage = lethal.max_stage
-	lethal.spreadtype = "None"
-
-	infect_mob(T, lethal)
-
-	admin_attack_log(src, T, "used diseased touch on [key_name(T)]", "was given a lethal disease by [key_name(src)]", "used diseased touch (<a href='?src=\ref[lethal];info=1'>virus info</a>) on")
-
-	vampire.use_blood(100)
-	verbs -= /mob/living/carbon/human/proc/vampire_diseasedtouch
-	ADD_VERB_IN_IF(src, 1800, /mob/living/carbon/human/proc/vampire_diseasedtouch, CALLBACK(src, .proc/finish_vamp_timeout))
 
 // Makes the vampire appear 'friendlier' to others.
 /mob/living/carbon/human/proc/vampire_presence()
@@ -858,8 +831,8 @@
 	to_chat(T, span("notice", "You feel pure bliss as [src] touches you."))
 	vampire.use_blood(50)
 
-	T.reagents.add_reagent("rezadone", 3)
-	T.reagents.add_reagent("oxycodone", 0.15) //enough to get back onto their feet
+	T.reagents.add_reagent(/datum/reagent/rezadone, 3)
+	T.reagents.add_reagent(/datum/reagent/oxycodone, 0.15) //enough to get back onto their feet
 
 // Convert a human into a vampire.
 /mob/living/carbon/human/proc/vampire_embrace()
@@ -913,7 +886,7 @@
 				to_chat(src, "<span class='notice'>[denial_response]</span>")
 				return
 
-			vampire_thrall.remove_antagonist(T.mind, 0, 0)
+			thralls.remove_antagonist(T.mind, 0, 0)
 			qdel(draining_vamp)
 			draining_vamp = null
 		else
@@ -930,11 +903,11 @@
 		if (!mind.vampire)
 			to_chat(src, "<span class='alert'>Your fangs have disappeared!</span>")
 			return
-		if (!T.vessel.get_reagent_amount("blood"))
+		if (!T.vessel.get_reagent_amount(/datum/reagent/blood))
 			to_chat(src, "<span class='alert'>[T] is now drained of blood. You begin forcing your own blood into their body, spreading the corruption of the Veil to their body.</span>")
 			break
 
-		T.vessel.remove_reagent("blood", 50)
+		T.vessel.remove_reagent(/datum/reagent/blood, 50)
 
 	T.revive()
 
@@ -1010,7 +983,7 @@
 		else
 			use_hand = "right"
 
-	src.visible_message("<span class='warning'><b>\The [src]</b> seizes [T] aggressively!</span>")
+	src.visible_message("<span class='warning'><b>[src]</b> seizes [T] aggressively!</span>")
 
 	var/obj/item/grab/G = new(src, T)
 	if (use_hand == "left")

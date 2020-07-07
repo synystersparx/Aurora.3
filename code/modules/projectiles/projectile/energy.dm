@@ -23,6 +23,7 @@
 	//blind adjacent people
 	for (var/mob/living/carbon/M in viewers(T, flash_range))
 		if(M.eyecheck() < FLASH_PROTECTION_MODERATE)
+			M.confused = rand(5,15)
 			flick("e_flash", M.flash)
 
 	//snap pop
@@ -43,10 +44,11 @@
 /obj/item/projectile/energy/electrode
 	name = "electrode"
 	icon_state = "spark"
-	nodamage = 1
+	damage = 2 //Flavor.
+	damage_type = BURN
 	taser_effect = 1
 	agony = 40
-	damage_type = HALLOSS
+	eyeblur = 1
 	//Damage will be handled on the MOB side, to prevent window shattering.
 
 /obj/item/projectile/energy/electrode/stunshot
@@ -158,6 +160,15 @@
 	. = ..()
 	if(isliving(target))
 		tesla_zap(target, 3, 5000)
+
+/obj/item/projectile/energy/tesla/master
+	damage = 15
+
+/obj/item/projectile/energy/tesla/grandmaster
+	damage = 20
+
+/obj/item/projectile/energy/tesla/paramount
+	damage = 25
 
 /obj/item/projectile/energy/gravitydisabler
 	name = "gravity disabler"

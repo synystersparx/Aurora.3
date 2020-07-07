@@ -15,13 +15,11 @@
 
 
 /obj/item/storage/fancy
-	name = "donut box"
-	desc = "A box of half-a-dozen donuts."
-	icon = 'icons/obj/food.dmi'
-	icon_state = "donutbox6"
-	var/icon_type = "donut"
+	item_state = "box" //placeholder, many of these don't have inhands
+	var/icon_type = null
 	var/storage_type = "box"
-	drop_sound = 'sound/items/drop/box.ogg'
+	drop_sound = 'sound/items/drop/cardboardbox.ogg'
+	pickup_sound = 'sound/items/pickup/cardboardbox.ogg'
 	use_sound = 'sound/items/storage/box.ogg'
 
 /obj/item/storage/fancy/update_icon(var/itemremoved = 0)
@@ -29,7 +27,7 @@
 	src.icon_state = "[src.icon_type]box[total_contents]"
 	return
 
-/obj/item/storage/fancy/examine(mob/user)
+/obj/item/storage/fancy/examine(mob/user as mob)
 	if(!..(user, 1))
 		return
 
@@ -43,14 +41,46 @@
 	return
 
 /*
+ * Donut Box
+ */
+
+/obj/item/storage/fancy/donut
+	name = "donut box"
+	desc = "A box of half-a-dozen donuts."
+	icon = 'icons/obj/food.dmi'
+	icon_state = "donutbox"
+	icon_type = "donut"
+	center_of_mass = list("x" = 16,"y" = 9)
+	can_hold = list(/obj/item/reagent_containers/food/snacks/donut)
+	starts_with = list(/obj/item/reagent_containers/food/snacks/donut/normal = 6)
+	storage_slots = 6
+
+/obj/item/storage/fancy/donut/fill()
+	. = ..()
+	update_icon()
+
+/obj/item/storage/fancy/donut/update_icon()
+	cut_overlays()
+	var/i = 0
+	for(var/obj/item/reagent_containers/food/snacks/donut/D in contents)
+		add_overlay("[i][D.overlay_state]")
+		i++
+
+/obj/item/storage/fancy/donut/empty
+	starts_with = null
+	max_storage_space = 12
+
+
+/*
  * Egg Box
  */
 /obj/item/storage/fancy/egg_box
-	name = "egg box"
+	name = "egg carton"
 	desc = "A carton of eggs."
 	icon = 'icons/obj/food.dmi'
 	icon_state = "eggbox"
 	icon_type = "egg"
+	storage_type = "carton"
 	center_of_mass = list("x" = 16,"y" = 7)
 	storage_slots = 12
 	can_hold = list(
@@ -84,8 +114,7 @@
 	icon = 'icons/obj/crayons.dmi'
 	icon_state = "crayonbox"
 	icon_type = "crayon"
-	drop_sound = 'sound/items/drop/box.ogg'
-	w_class = 2.0
+	w_class = ITEMSIZE_SMALL
 	can_hold = list(
 		/obj/item/pen/crayon
 	)
@@ -123,20 +152,26 @@
 //CIG PACK//
 ////////////
 /obj/item/storage/fancy/cigarettes
-	name = "cigarette packet"
-	desc = "The most popular brand of Space Cigarettes, sponsors of the Space Olympics."
+	name = "Trans-Stellar Duty Frees cigarette packet"
+	desc = "A ubiquitous brand of cigarettes, found in the facilities of every major spacefaring corporation in the universe. As mild and flavorless as it gets."
+	desc_info = "You can put a cigarette directly in your mouth by selecting the mouth region and clicking on yourself with a cigarette packet in hand."
 	icon = 'icons/obj/cigs_lighters.dmi'
 	icon_state = "cigpacket"
 	item_state = "cigpacket"
+	icon_type = "cigarette"
+	item_icons = list(
+		slot_l_hand_str = 'icons/mob/items/lefthand_cigs_lighters.dmi',
+		slot_r_hand_str = 'icons/mob/items/righthand_cigs_lighters.dmi',
+		)
 	drop_sound = 'sound/items/drop/gloves.ogg'
-	use_sound = 'sound/items/drop/paper.ogg'
-	w_class = 1
+	pickup_sound = 'sound/items/pickup/gloves.ogg'
+	use_sound = 'sound/items/drop/wrapper.ogg'
+	w_class = ITEMSIZE_TINY
 	throwforce = 2
 	slot_flags = SLOT_BELT
 	storage_slots = 6
 	var/cigarette_to_spawn = /obj/item/clothing/mask/smokable/cigarette
-	can_hold = list(/obj/item/clothing/mask/smokable/cigarette, /obj/item/flame/lighter)
-	icon_type = "cigarette"
+	can_hold = list(/obj/item/clothing/mask/smokable/cigarette, /obj/item/flame/lighter, /obj/item/trash/cigbutt)
 
 /obj/item/storage/fancy/cigarettes/Initialize()
 	flags |= NOREACT
@@ -160,10 +195,10 @@
 	if(!istype(M, /mob))
 		return
 
-	if(M == user && target_zone == "mouth" && contents.len > 0 && !user.wear_mask)
+	if(M == user && target_zone == BP_MOUTH && contents.len > 0 && !user.wear_mask)
 		var/obj/item/clothing/mask/smokable/cigarette/W = new cigarette_to_spawn(user)
 		if(!istype(W))
-			to_chat(user, "<span class ='notice'>The [W] is blocking the cigarettes.</span>")
+			to_chat(user, SPAN_NOTICE("The [W] is in the way."))
 			return
 		//Checking contents of packet so lighters won't be cigarettes.
 		for (var/i = contents.len; i > 0; i--)
@@ -177,7 +212,7 @@
 		reagents.trans_to_obj(W, (reagents.total_volume/contents.len))
 		user.equip_to_slot_if_possible(W, slot_wear_mask)
 		reagents.maximum_volume = 15 * contents.len
-		to_chat(user, "<span class='notice'>You take a cigarette out of the pack.</span>")
+		user.visible_message("<b>[user]</b> casually pulls out a [icon_type] from \the [src] with their mouth.", range = 3)
 		update_icon()
 	else
 		..()
@@ -185,85 +220,65 @@
 // get it? A - AcmeCo, B - Blank, C - Cigar, D - DromedaryCo. How convenient is that? - Wezzy
 
 /obj/item/storage/fancy/cigarettes/acmeco
-	name = "\improper AcmeCo packet"
-	desc = "A packet of six AcmeCo cigarettes. For those who somehow want to obtain the record for the most amount of cancerous tumors."
+	name = "\improper AcmeCo cigarette packet"
+	desc = "For those who somehow want to obtain the record for the most amount of cancerous tumors."
 	icon_state = "Apacket"
-	item_state = "Apacket" //Doesn't have an inhand state, but neither does dromedary, so, ya know..
+	item_state = "Apacket"
 	cigarette_to_spawn = /obj/item/clothing/mask/smokable/cigarette/acmeco
 
 /obj/item/storage/fancy/cigarettes/blank
-	name = "\improper blank packet"
-	desc = "A packet of six blank cigarettes. The healthiest cigarettes on the market!"
+	name = "\improper blank cigarette packet"
+	desc = "The healthiest cigarettes on the market! Wait, isn't this just a roll of paper?"
 	icon_state = "Bpacket"
-	item_state = "Bpacket" //Doesn't have an inhand state, but neither does dromedary, so, ya know..
+	item_state = "Bpacket"
 	cigarette_to_spawn = /obj/item/clothing/mask/smokable/cigarette/blank
 
+/obj/item/storage/fancy/cigarettes/cigar
+	name = "cigar case"
+	desc = "A luxurious tote for your fat tokes."
+	icon_state = "cigarcase"
+	item_state = "cigarcase"
+	icon_type = "cigar"
+	drop_sound = 'sound/items/drop/weldingtool.ogg'
+	pickup_sound = 'sound/items/pickup/weldingtool.ogg'
+	use_sound = 'sound/items/storage/briefcase.ogg'
+	storage_slots = 8
+	can_hold = list(/obj/item/clothing/mask/smokable/cigarette/cigar)
+	cigarette_to_spawn = /obj/item/clothing/mask/smokable/cigarette/cigar
+
 /obj/item/storage/fancy/cigarettes/dromedaryco
-	name = "\improper DromedaryCo packet"
-	desc = "A packet of six imported DromedaryCo cancer sticks. A label on the packaging reads, \"Wouldn't a slow death make a change?\""
+	name = "\improper DromedaryCo cigarette packet"
+	desc = "A label on the packaging reads, \"Wouldn't a slow death make a change?\""
 	icon_state = "Dpacket"
 	item_state = "Dpacket"
 	cigarette_to_spawn = /obj/item/clothing/mask/smokable/cigarette/dromedaryco
 
-/obj/item/storage/fancy/cigar
-	name = "cigar case"
-	desc = "A case for holding your cigars when you are not smoking them."
-	icon_state = "cigarcase"
-	item_state = "cigarcase"
-	icon = 'icons/obj/cigs_lighters.dmi'
-	drop_sound = 'sound/items/drop/gloves.ogg'
-	use_sound = 'sound/items/drop/paper.ogg'
-	w_class = 1
-	throwforce = 2
-	slot_flags = SLOT_BELT
-	storage_slots = 7
-	can_hold = list(/obj/item/clothing/mask/smokable/cigarette/cigar)
-	icon_type = "cigar"
+/obj/item/storage/fancy/cigarettes/nicotine
+	name = "\improper Nico-Tine cigarette packet"
+	desc = "An Eridani marketing triumph - the jingle still torments people to this day."
+	icon_state = "Epacket"
+	item_state = "Epacket"
+	cigarette_to_spawn = /obj/item/clothing/mask/smokable/cigarette/nicotine
 
-/obj/item/storage/fancy/cigar/Initialize()
-	. = ..()
-	flags |= NOREACT
-	create_reagents(15 * storage_slots)
-
-/obj/item/storage/fancy/cigar/fill()
-	..()
-	for(var/i = 1 to storage_slots)
-		new /obj/item/clothing/mask/smokable/cigarette/cigar(src)
-
-/obj/item/storage/fancy/cigar/update_icon()
-	icon_state = "[initial(icon_state)][contents.len]"
-	return
-
-/obj/item/storage/fancy/cigar/remove_from_storage(obj/item/W as obj, atom/new_location)
-		var/obj/item/clothing/mask/smokable/cigarette/cigar/C = W
-		if(!istype(C)) return
-		reagents.trans_to_obj(C, (reagents.total_volume/contents.len))
-		..()
-
-/obj/item/storage/fancy/cigar/attack(mob/living/carbon/M as mob, mob/living/carbon/user as mob, var/target_zone)
-	if(!istype(M, /mob))
-		return
-
-	if(M == user && target_zone == "mouth" && contents.len > 0 && !user.wear_mask)
-		var/obj/item/clothing/mask/smokable/cigarette/cigar/W = new /obj/item/clothing/mask/smokable/cigarette/cigar(user)
-		reagents.trans_to_obj(W, (reagents.total_volume/contents.len))
-		user.equip_to_slot_if_possible(W, slot_wear_mask)
-		reagents.maximum_volume = 15 * contents.len
-		contents.len--
-		to_chat(user, "<span class='notice'>You take a cigar out of the case.</span>")
-		update_icon()
-	else
-		..()
+/obj/item/storage/fancy/cigarettes/rugged
+	name = "\improper Laissez-Faires cigarette packet"
+	desc = "Rumored to have outlived its original purpose as part of an Idris money laundering scheme."
+	icon_state = "Fpacket"
+	item_state = "Fpacket"
+	cigarette_to_spawn = /obj/item/clothing/mask/smokable/cigarette/rugged
 
 /*
  * Vial Box
  */
 /obj/item/storage/fancy/vials
 	name = "vial storage box"
+	desc = "A box of vials."
 	icon = 'icons/obj/vialbox.dmi'
 	icon_state = "vialbox6"
 	icon_type = "vial"
-	drop_sound = 'sound/items/drop/metalboots.ogg'
+	use_sound = 'sound/items/drop/glass.ogg'
+	drop_sound = 'sound/items/drop/toolbox.ogg'
+	pickup_sound = 'sound/items/pickup/toolbox.ogg'
 	storage_slots = 6
 	can_hold = list(/obj/item/reagent_containers/glass/beaker/vial)
 	starts_with = list(/obj/item/reagent_containers/glass/beaker/vial = 6)
@@ -273,9 +288,11 @@
 	desc = "A locked box for keeping things away from children."
 	icon = 'icons/obj/vialbox.dmi'
 	icon_state = "vialbox0"
-	item_state = "syringe_kit"
-	drop_sound = 'sound/items/drop/metalboots.ogg'
-	max_w_class = 2
+	item_state = "box"
+	use_sound = 'sound/items/drop/glass.ogg'
+	drop_sound = 'sound/items/drop/toolbox.ogg'
+	pickup_sound = 'sound/items/pickup/toolbox.ogg'
+	max_w_class = ITEMSIZE_SMALL
 	can_hold = list(/obj/item/reagent_containers/glass/beaker/vial)
 	max_storage_space = 12 //The sum of the w_classes of all the items in this storage item.
 	storage_slots = 6
@@ -301,10 +318,11 @@
 	update_icon()
 
 /obj/item/storage/fancy/chocolate_box
+	name = "chocolate box"
+	desc = "A lot like life, you never know what you're going to get."
 	icon = 'icons/obj/chocolate.dmi'
 	icon_state = "chocolatebox"
 	icon_type = "chocolate"
-	name = "chocolate box"
 	storage_slots = 8
 	can_hold = list(
 		/obj/item/reagent_containers/food/snacks/truffle/random

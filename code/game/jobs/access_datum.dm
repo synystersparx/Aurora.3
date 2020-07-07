@@ -389,10 +389,10 @@
 	desc = "Medical Equipment"
 	region = ACCESS_REGION_MEDBAY
 
-/var/const/access_paramedic = 67
-/datum/access/access_paramedic
-	id = access_paramedic
-	desc = "Paramedic Equipment"
+/var/const/access_emt = 67
+/datum/access/access_emt
+	id = access_emt
+	desc = "EMT Equipment"
 	region = ACCESS_REGION_MEDBAY
 
 /var/const/access_detective = 68
@@ -487,6 +487,31 @@ var/const/access_distress = 112
 	id = access_distress
 	desc = "General ERT Base Access"
 	access_type = ACCESS_TYPE_CENTCOM
+
+
+/****************************
+* Kataphract Chapter Access *
+****************************/
+var/const/access_kataphract = 113
+/datum/access/kataphract
+	id = access_kataphract
+	desc = "Kataphract Chapter Access"
+	access_type = ACCESS_TYPE_CENTCOM
+
+var/const/access_kataphract_knight = 114
+/datum/access/kataphract/knight
+	id = access_kataphract_knight
+	desc = "Kataphract Knight Access"
+
+var/const/access_kataphract_quartermaster = 115
+/datum/access/kataphract/quartermaster
+	id = access_kataphract_quartermaster
+	desc = "Kataphract Quartermaster Access"
+
+var/const/access_kataphract_trader = 116
+/datum/access/kataphract/trader
+	id = access_kataphract_trader
+	desc = "Kataphract Trader Access"
 
 /***************
 * Antag access *

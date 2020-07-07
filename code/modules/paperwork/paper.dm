@@ -4,7 +4,7 @@
  */
 
 /obj/item/paper
-	name = "sheet of paper"
+	name = "paper"
 	gender = NEUTER
 	icon = 'icons/obj/bureaucracy.dmi'
 	icon_state = "paper"
@@ -29,7 +29,7 @@
 	var/list/offset_x[0] //offsets stored for later
 	var/list/offset_y[0] //usage by the photocopier
 	var/rigged = 0
-	var/spam_flag = 0
+	var/last_honk = 0
 	var/old_name		// The name of the paper before it was folded into a plane.
 
 	var/const/deffont = "Verdana"
@@ -38,6 +38,7 @@
 	var/const/fountainfont = "Segoe Script"
 
 	drop_sound = 'sound/items/drop/paper.ogg'
+	pickup_sound = 'sound/items/pickup/paper.ogg'
 
 /obj/item/paper/Initialize(mapload, text, title)
 	. = ..()
@@ -54,7 +55,6 @@
 	if(title)
 		name = title
 	if (text && length(text))
-		info = html_encode(text)
 		info = parsepencode(text)
 	else
 		info = ""
@@ -80,9 +80,9 @@
 	if(icon_state == "paper_talisman")
 		return
 	else if (info && length(trim(info)))
-		icon_state = "paper_words"
+		icon_state = "[initial(icon_state)]_words"
 	else
-		icon_state = "paper"
+		icon_state = "[initial(icon_state)]"
 
 /obj/item/paper/proc/update_space(var/new_text)
 	if(new_text)
@@ -93,7 +93,7 @@
 	if (old_name && icon_state == "paper_plane")
 		to_chat(user, span("notice", "You're going to have to unfold it before you can read it."))
 		return
-	if(name != "sheet of paper")
+	if(name != initial(name))
 		to_chat(user,"It's titled '[name]'.")
 	if(in_range(user, src) || isobserver(user))
 		show_content(usr)
@@ -117,17 +117,20 @@
 	if((usr.is_clumsy()) && prob(50))
 		to_chat(usr, span("warning", "You cut yourself on the paper."))
 		return
-	var/n_name = sanitizeSafe(input(usr, "What would you like to label the paper?", "Paper Labelling", null)  as text, MAX_NAME_LEN)
+	var/n_name = sanitizeSafe(input(usr, "What would you like to label the paper?", "Paper Labelling", null) as text, MAX_NAME_LEN)
 
 	// We check loc one level up, so we can rename in clipboards and such. See also: /obj/item/photo/rename()
-	if((loc == usr || loc.loc && loc.loc == usr) && usr.stat == 0 && n_name)
-		name = n_name
+	if((loc == usr || loc.loc && loc.loc == usr) && usr.stat == 0)
+		if(n_name)
+			name = "[initial(name)] ([n_name])"
+		else
+			name = initial(name)
 		add_fingerprint(usr)
 
 /obj/item/paper/attack_self(mob/living/user as mob)
 	if(user.a_intent == I_HURT)
 		if(icon_state == "scrap")
-			user.show_message("<span class='warning'>\The [src] is already crumpled.</span>")
+			user.show_message(span("warning", "\The [src] is already crumpled."))
 			return
 		//crumple dat paper
 		info = stars(info,85)
@@ -162,22 +165,21 @@
 
 	user.examinate(src)
 	if(rigged && (Holiday == "April Fool's Day"))
-		if(spam_flag == 0)
-			spam_flag = 1
-			playsound(loc, 'sound/items/bikehorn.ogg', 50, 1)
-			spawn(20)
-				spam_flag = 0
+		if(last_honk <= world.time - 20) //Spam limiter.
+			last_honk = world.time
+			playsound(src.loc, 'sound/items/bikehorn.ogg', 50, 1)
+		src.add_fingerprint(user)
 
 /obj/item/paper/attack_ai(var/mob/living/silicon/ai/user)
 	show_content(user)
 
 /obj/item/paper/attack(mob/living/carbon/M as mob, mob/living/carbon/user as mob, var/target_zone)
 	if(target_zone == BP_EYES)
-		user.visible_message("<span class='notice'>You show the paper to [M]. </span>", \
-			"<span class='notice'> [user] holds up a paper and shows it to [M]. </span>")
+		user.visible_message(span("notice", "You show the paper to [M]."), \
+			span("notice", "[user] holds up a paper and shows it to [M]."))
 		M.examinate(src)
 
-	else if(target_zone == "mouth") // lipstick wiping
+	else if(target_zone == BP_MOUTH) // lipstick wiping
 		if(ishuman(M))
 			var/mob/living/carbon/human/H = M
 			if(H == user)
@@ -185,11 +187,11 @@
 				H.lip_style = null
 				H.update_body()
 			else
-				user.visible_message("<span class='warning'>[user] begins to wipe [H]'s lipstick off with \the [src].</span>", \
-								 	 "<span class='notice'>You begin to wipe off [H]'s lipstick.</span>")
+				user.visible_message(span("warning", "[user] begins to wipe [H]'s lipstick off with \the [src]."), \
+								 	 span("notice", "You begin to wipe off [H]'s lipstick."))
 				if(do_after(user, 10) && do_after(H, 10, 0))	//user needs to keep their active hand, H does not.
-					user.visible_message("<span class='notice'>[user] wipes [H]'s lipstick off with \the [src].</span>", \
-										 "<span class='notice'>You wipe off [H]'s lipstick.</span>")
+					user.visible_message(span("notice", "[user] wipes [H]'s lipstick off with \the [src]."), \
+										 span("notice", "You wipe off [H]'s lipstick."))
 					H.lip_style = null
 					H.update_body()
 
@@ -284,7 +286,7 @@
 		t = replacetext(t, "\[logo_zh\]", "")
 		t = replacetext(t, "\[logo_idris\]", "")
 		t = replacetext(t, "\[logo_eridani\]", "")
-		t = replacetext(t, "\[logo_necro\]", "")
+		t = replacetext(t, "\[logo_zavodskoi\]", "")
 		t = replacetext(t, "\[logo_hp\]", "")
 		t = replacetext(t, "\[logo_be\]", "")
 
@@ -309,29 +311,19 @@
 	return t
 
 
-/obj/item/paper/proc/burnpaper(obj/item/flame/P, mob/user)
+/obj/item/paper/proc/burnpaper(obj/item/P, mob/user)
 	var/class = "warning"
-
-	if (!user.restrained())
-		if (istype(P, /obj/item/flame))
-			var/obj/item/flame/F = P
-			if (!F.lit)
-				return
-		else if (P.iswelder())
-			var/obj/item/weldingtool/F = P
-			if (!F.welding)//welding tools are 0 when off
-				return
-		else
-			//If we got here somehow, the item is incompatible and can't burn things
-			return
-
+	if(!use_check_and_message(user))
 		if(istype(P, /obj/item/flame/lighter/zippo))
 			class = "rose"
-
+			
 		user.visible_message("<span class='[class]'>[user] holds \the [P] up to \the [src], it looks like \he's trying to burn it!</span>", \
 		"<span class='[class]'>You hold \the [P] up to \the [src], burning it slowly.</span>")
 		playsound(src.loc, 'sound/bureaucracy/paperburn.ogg', 50, 1)
-		flick("paper_onfire", src)
+		if(icon_state == "scrap")
+			flick("scrap_onfire", src)
+		else
+			flick("paper_onfire", src)
 
 		//I was going to add do_after in here, but keeping the current method allows people to burn papers they're holding, while they move. That seems fine to keep -Nanako
 		spawn(20)
@@ -388,7 +380,11 @@
 			iscrayon = TRUE
 
 		if(istype(i, /obj/item/pen/fountain))
-			isfountain = TRUE
+			var/obj/item/pen/fountain/f = i
+			if(f.cursive)
+				isfountain = TRUE
+			else
+				isfountain = FALSE
 
 		// if paper is not in usr, then it must be near them, or in a clipboard or folder, which must be in or near usr
 		if(src.loc != usr && !src.Adjacent(usr) && !((istype(src.loc, /obj/item/clipboard) || istype(src.loc, /obj/item/folder)) && (src.loc.loc == usr || src.loc.Adjacent(usr)) ) )
@@ -420,11 +416,8 @@
 			c.update_icon()
 
 
-/obj/item/paper/attackby(obj/item/P as obj, mob/user as mob)
+/obj/item/paper/attackby(var/obj/item/P, mob/user)
 	..()
-	var/clown = 0
-	if(user.mind && (user.mind.assigned_role == "Clown"))
-		clown = 1
 
 	if(istype(P, /obj/item/tape_roll))
 		var/obj/item/tape_roll/tape = P
@@ -456,13 +449,13 @@
 			else if (h_user.l_store == src)
 				h_user.drop_from_inventory(src)
 				B.forceMove(h_user)
-				B.layer = 20
+				B.layer = SCREEN_LAYER+0.01
 				h_user.l_store = B
 				h_user.update_inv_pockets()
 			else if (h_user.r_store == src)
 				h_user.drop_from_inventory(src)
 				B.forceMove(h_user)
-				B.layer = 20
+				B.layer = SCREEN_LAYER+0.01
 				h_user.r_store = B
 				h_user.update_inv_pockets()
 			else if (h_user.head == src)
@@ -512,11 +505,6 @@
 		stampoverlay.pixel_x = x
 		stampoverlay.pixel_y = y
 
-		if(istype(P, /obj/item/stamp/clown))
-			if(!clown)
-				to_chat(user, span("notice", "You are totally unable to use the stamp. HONK!"))
-				return
-
 		if(!ico)
 			ico = new
 		ico += "paper_[P.icon_state]"
@@ -530,9 +518,7 @@
 		playsound(src, 'sound/bureaucracy/stamp.ogg', 50, 1)
 		to_chat(user, span("notice", "You stamp the paper with \the [P]."))
 
-	else if(istype(P, /obj/item/flame) || P.iswelder())
-		burnpaper(P, user)
-	else if(P.iswelder())
+	else if(P.isFlameSource())
 		burnpaper(P, user)
 
 	update_icon()
@@ -590,3 +576,9 @@ Please note: Cell timers will \[b\]NOT\[/b\] function without a valid incident f
 
 /obj/item/paper/sentencing/update_icon()
 	return
+
+/obj/item/paper/nka_pledge
+	name = "imperial volunteer Alam'ardii corps pledge"
+
+/obj/item/paper/nka_pledge/New()
+	info = "<center><b><u>Imperial Volunteer Alam'ardii Corps Pledge</u></b></center> <hr> <center><i><u>May the Gods bless his Kingdom and Dynasty</u></i></center> <hr> I, <field>, hereby declare, under a vow of loyalty and compromise, that I shall serve as a volunteer in the Imperial Volunteer Alam'ardii Corps, for the mininum duration of three years or until discharge. I accept the duty of aiding the New Kingdom of Adhomai and His Majesty, King Vahzirthaamro Azunja, in this struggle and I shall not relinquish this pledge. <hr> Volunteer Signature: <field> <hr> Recruiting Officer Stamp:"

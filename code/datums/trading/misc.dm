@@ -136,7 +136,6 @@
 		/obj/item/shield/buckler                 = TRADER_THIS_TYPE,
 		/obj/item/clothing/head/redcoat                 = TRADER_THIS_TYPE,
 		/obj/item/clothing/head/powdered_wig            = TRADER_THIS_TYPE,
-		/obj/item/clothing/head/hasturhood              = TRADER_THIS_TYPE,
 		/obj/item/clothing/head/helmet/gladiator        = TRADER_THIS_TYPE,
 		/obj/item/clothing/head/plaguedoctorhat         = TRADER_THIS_TYPE,
 		/obj/item/clothing/head/helmet/unathi           = TRADER_THIS_TYPE,
@@ -154,8 +153,6 @@
 		/obj/item/clothing/suit/armor/tajara            = TRADER_THIS_TYPE,
 		/obj/item/clothing/under/gladiator              = TRADER_THIS_TYPE,
 		/obj/item/clothing/under/kilt                   = TRADER_THIS_TYPE,
-		/obj/item/clothing/under/redcoat                = TRADER_THIS_TYPE,
-		/obj/item/clothing/under/soviet                 = TRADER_THIS_TYPE,
 		/obj/item/material/harpoon               = TRADER_THIS_TYPE,
 		/obj/item/material/sword                 = TRADER_ALL,
 		/obj/item/material/scythe                = TRADER_THIS_TYPE,
@@ -163,7 +160,8 @@
 		/obj/item/material/twohanded/baseballbat = TRADER_THIS_TYPE,
 		/obj/item/material/twohanded/pike        = TRADER_ALL,
 		/obj/item/material/twohanded/zweihander  = TRADER_THIS_TYPE,
-		/obj/item/melee/whip                     = TRADER_THIS_TYPE
+		/obj/item/melee/whip                     = TRADER_THIS_TYPE,
+		/obj/item/grenade/dynamite               = TRADER_THIS_TYPE
 	)
 
 

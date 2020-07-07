@@ -93,53 +93,70 @@
 
 			visible_message("<span class='danger'>[H] has punched [src]!</span>")
 
-			apply_damage(damage, HALLOSS, affecting, armor_block)
+			apply_damage(damage, PAIN, affecting, armor_block)
 			if(damage >= 9)
 				visible_message("<span class='danger'>[H] has weakened [src]!</span>")
 				apply_effect(4, WEAKEN, armor_block)
 
 			return
 
-	if(istype(M,/mob/living/carbon))
-		M.spread_disease_to(src, "Contact")
-
 	var/datum/martial_art/attacker_style = H.martial_art
 
 	switch(M.a_intent)
 		if(I_HELP)
-			if(istype(H) && health < config.health_threshold_crit && health > config.health_threshold_dead)
-				if(!H.check_has_mouth())
-					to_chat(H, "<span class='danger'>You don't have a mouth, you cannot perform CPR!</span>")
-					return
-				if(!check_has_mouth())
-					to_chat(H, "<span class='danger'>They don't have a mouth, you cannot perform CPR!</span>")
-					return
-				if((H.head && (H.head.body_parts_covered & FACE)) || (H.wear_mask && (H.wear_mask.body_parts_covered & FACE)))
-					to_chat(H, "<span class='notice'>Remove your mask!</span>")
-					return 0
-				if((head && (head.body_parts_covered & FACE)) || (wear_mask && (wear_mask.body_parts_covered & FACE)))
-					to_chat(H, "<span class='notice'>Remove [src]'s mask!</span>")
-					return 0
-
+			if(H != src && istype(H) && (is_asystole() || (status_flags & FAKEDEATH) || failed_last_breath))
 				if (!cpr_time)
 					return 0
 
 				cpr_time = 0
-				spawn(30)
+
+				H.visible_message("<span class='notice'>\The [H] is trying to perform CPR on \the [src].</span>")
+
+				if(!do_after(H, rand(3, 5), src))
 					cpr_time = 1
-
-				H.visible_message("<span class='danger'>\The [H] is trying perform CPR on \the [src]!</span>")
-
-				if(!do_after(H, 30))
 					return
+				cpr_time = 1
 
-				adjustOxyLoss(-(min(getOxyLoss(), 5)))
-				updatehealth()
-				H.visible_message("<span class='danger'>\The [H] performs CPR on \the [src]!</span>")
-				to_chat(src, "<span class='notice'>You feel a breath of fresh air enter your lungs. It feels good.</span>")
-				to_chat(H, "<span class='warning'>Repeat at least every 7 seconds.</span>")
+				H.visible_message("<span class='notice'>\The [H] performs CPR on \the [src]!</span>")
 
-			else if(!(apply_pressure(M, M.zone_sel.selecting)))
+				if(is_asystole())
+					if(prob(5 * rand(2, 3)))
+						var/obj/item/organ/external/chest = get_organ(BP_CHEST)
+						if(chest)
+							chest.fracture()
+
+					var/obj/item/organ/internal/heart/heart = internal_organs_by_name[BP_HEART]
+					if(heart)
+						heart.external_pump = list(world.time, 0.4 + 0.1 + rand(-0.1,0.1))
+
+					if(stat != DEAD && prob(10 * rand(0.5, 1)))
+						resuscitate()
+
+				if(!H.check_has_mouth())
+					to_chat(H, "<span class='warning'>You don't have a mouth, you cannot do mouth-to-mouth resuscitation!</span>")
+					return
+				if(!check_has_mouth())
+					to_chat(H, "<span class='warning'>They don't have a mouth, you cannot do mouth-to-mouth resuscitation!</span>")
+					return
+				if((H.head && (H.head.body_parts_covered & FACE)) || (H.wear_mask && (H.wear_mask.body_parts_covered & FACE)))
+					to_chat(H, "<span class='warning'>You need to remove your mouth covering for mouth-to-mouth resuscitation!</span>")
+					return 0
+				if((head && (head.body_parts_covered & FACE)) || (wear_mask && (wear_mask.body_parts_covered & FACE)))
+					to_chat(H, "<span class='warning'>You need to remove \the [src]'s mouth covering for mouth-to-mouth resuscitation!</span>")
+					return 0
+				if (!H.internal_organs_by_name[H.species.breathing_organ])
+					to_chat(H, "<span class='danger'>You need lungs for mouth-to-mouth resuscitation!</span>")
+					return
+				if(!need_breathe())
+					return
+				var/obj/item/organ/internal/lungs/L = internal_organs_by_name[species.breathing_organ]
+				if(L)
+					var/datum/gas_mixture/breath = H.get_breath_from_environment()
+					var/fail = L.handle_breath(breath, 1)
+					if(!fail)
+						to_chat(src, "<span class='notice'>You feel a breath of fresh air enter your lungs. It feels good.</span>")
+
+			else if(!(M == src && apply_pressure(M, M.zone_sel.selecting)))
 				help_shake_act(M)
 			return 1
 
@@ -166,7 +183,7 @@
 
 			var/obj/item/grab/G = new /obj/item/grab(M, src)
 			if(buckled)
-				to_chat(M, "<span class='notice'>You cannot grab [src], \he is buckled in!</span>")
+				to_chat(M, "<span class='notice'>You cannot grab [src], \he [gender_datums[gender].is] buckled in!</span>")
 			if(!G)	//the grab will delete itself in New if affecting is anchored
 				return
 			M.put_in_active_hand(G)
@@ -288,8 +305,7 @@
 
 			var/real_damage = rand_damage
 			var/hit_dam_type = attack.damage_type
-			var/is_sharp = 0
-			var/is_edge = 0
+			var/damage_flags = attack.damage_flags()
 
 			real_damage += attack.get_unarmed_damage(H)
 			real_damage *= damage_multiplier
@@ -307,30 +323,23 @@
 					real_damage += G.punch_force
 					hit_dam_type = G.punch_damtype
 					if(H.pulling_punches)
-						hit_dam_type = HALLOSS
-
-					if(G.sharp)
-						is_sharp = 1
-
-					if(G.edge)
-						is_edge = 1
+						hit_dam_type = PAIN
 
 					if(istype(H.gloves,/obj/item/clothing/gloves/force))
 						var/obj/item/clothing/gloves/force/X = H.gloves
 						real_damage *= X.amplification
-
-			if(attack.sharp)
-				is_sharp = 1
-
-			if(attack.edge)
-				is_edge = 1
 
 			var/armour = run_armor_check(hit_zone, "melee")
 			// Apply additional unarmed effects.
 			attack.apply_effects(H, src, armour, rand_damage, hit_zone)
 
 			// Finally, apply damage to target
-			apply_damage(real_damage, hit_dam_type, hit_zone, armour, sharp=is_sharp, edge=is_edge)
+			apply_damage(real_damage, hit_dam_type, hit_zone, armour, damage_flags = damage_flags)
+
+
+			if(M.resting && src.help_up_offer)
+				M.visible_message(span("warning", "[M] slaps away [src]'s hand!"))
+				src.help_up_offer = 0
 
 		if(I_DISARM)
 			var/disarm_cost

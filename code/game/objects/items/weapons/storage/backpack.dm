@@ -6,9 +6,10 @@
 /obj/item/storage/backpack
 	name = "backpack"
 	desc = "You wear this on your back and put items into it."
+	description_cult = "This can be reforged to become a cult backpack. Any stored items will be transferred."
 	item_icons = list(//ITEM_ICONS ARE DEPRECATED. USE CONTAINED SPRITES IN FUTURE
-		slot_l_hand_str = 'icons/mob/items/lefthand_backpacks.dmi',
-		slot_r_hand_str = 'icons/mob/items/righthand_backpacks.dmi'
+		slot_l_hand_str = 'icons/mob/items/storage/lefthand_backpacks.dmi',
+		slot_r_hand_str = 'icons/mob/items/storage/righthand_backpacks.dmi'
 		)
 	icon_state = "backpack"
 	item_state = null
@@ -24,10 +25,11 @@
 	max_storage_space = 28
 	var/species_restricted = list("exclude","Vaurca Breeder","Vaurca Warform")
 	drop_sound = 'sound/items/drop/backpack.ogg'
+	pickup_sound = 'sound/items/pickup/backpack.ogg'
 	allow_quick_empty = TRUE
 	empty_delay = 0.5 SECOND
 
-/obj/item/storage/backpack/mob_can_equip(M as mob, slot)
+/obj/item/storage/backpack/mob_can_equip(M as mob, slot, disable_warning = FALSE)
 
 	//if we can't equip the item anyway, don't bother with species_restricted (cuts down on spam)
 	if (!..())
@@ -110,6 +112,7 @@
 /obj/item/storage/backpack/cultpack
 	name = "trophy rack"
 	desc = "It's useful for both carrying extra gear and proudly declaring your insanity."
+	description_cult = null
 	icon_state = "cultpack"
 
 /obj/item/storage/backpack/cultpack/adorned
@@ -209,6 +212,16 @@
 	New()
 		..()
 		new /obj/item/storage/wallet/random( src )
+
+/obj/item/storage/backpack/satchel/hegemony
+	name = "hegemony satchel"
+	desc = "A rugged satchel with many pouches, seen commonly within the Hegemony Levies."
+	icon = 'icons/obj/unathi_items.dmi'
+	icon_state = "hegemony_satchel"
+	item_state = "hegemony_satchel"
+	contained_sprite = TRUE
+	max_storage_space = 32
+	allow_quick_empty = FALSE // Pouches 'n shit.
 
 /obj/item/storage/backpack/satchel_norm
 	name = "satchel"

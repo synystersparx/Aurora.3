@@ -1,4 +1,8 @@
 /obj/structure/girder
+	desc = "The basic building block of all walls."
+	desc_info = "Use metal sheets on this to build a normal wall.<br>\
+	A false wall can be made by using a crowbar on this girder, and then adding some material.<br>\
+	You can dismantle the grider with a wrench, or add support struts with a screwdriver to enable further reinforcement."
 	icon_state = "girder"
 	anchored = 1
 	density = 1
@@ -10,19 +14,27 @@
 	var/material/reinf_material
 	var/reinforcing = 0
 
+/obj/structure/girder/examine(mob/user, distance, infix, suffix)
+	. = ..()
+	var/state
+	var/current_damage = health / initial(health)
+	switch(current_damage)
+		if(0 to 0.2)
+			state = "<span class='danger'>The support struts are collapsing!</span>"
+		if(0.2 to 0.4)
+			state = "<span class='warning'>The support struts are warped!</span>"
+		if(0.4 to 0.8)
+			state = "<span class='notice'>The support struts are dented, but holding together.</span>"
+		if(0.8 to 1)
+			state = "<span class='notice'>The support struts look completely intact.</span>"
+	to_chat(user, state)
+
 /obj/structure/girder/displaced
+	name = "displaced girder"
 	icon_state = "displaced"
 	anchored = 0
 	health = 50
 	cover = 25
-
-/obj/structure/girder/attack_generic(var/mob/user, var/damage, var/attack_message = "smashes apart", var/wallbreaker)
-	if(!damage || !wallbreaker)
-		return 0
-	user.do_attack_animation(src)
-	visible_message("<span class='danger'>[user] [attack_message] the [src]!</span>")
-	spawn(1) dismantle()
-	return 1
 
 /obj/structure/girder/bullet_act(var/obj/item/projectile/Proj)
 	//Girders only provide partial cover. There's a chance that the projectiles will just pass through. (unless you are trying to shoot the girder)
@@ -36,12 +48,15 @@
 	if(!istype(Proj, /obj/item/projectile/beam))
 		damage *= 0.4 //non beams do reduced damage
 
-	health -= damage
-	..()
-	if(health <= 0)
-		dismantle()
+	take_damage(damage)
 
-	return
+	return ..()
+
+/obj/structure/girder/proc/take_damage(var/damage)
+	health -= damage
+	if(health <= 0)
+		visible_message("<span class='warning'>\The [src] falls apart!</span>")
+		dismantle()
 
 /obj/structure/girder/proc/reset_girder()
 	anchored = 1
@@ -124,13 +139,15 @@
 			playsound(src.loc, W.usesound, 100, 1)
 			to_chat(user, "<span class='notice'>Now unsecuring support struts...</span>")
 			if(do_after(user,40/W.toolspeed))
-				if(!src) return
+				if(!src)
+					return
 				to_chat(user, "<span class='notice'>You unsecured the support struts!</span>")
 				state = 1
 		else if(anchored && !reinf_material)
 			playsound(src.loc, W.usesound, 100, 1)
 			reinforcing = !reinforcing
 			to_chat(user, "<span class='notice'>\The [src] can now be [reinforcing? "reinforced" : "constructed"]!</span>")
+			return
 
 	else if(W.iswirecutter() && state == 1)
 		playsound(src.loc, 'sound/items/Wirecutter.ogg', 100, 1)
@@ -160,15 +177,31 @@
 			if(!construct_wall(W, user))
 				return ..()
 
-	else
-		return ..()
+	else if(W.force)
+		var/damage_to_deal = W.force
+		var/weaken = 0
+		if(reinf_material)
+			weaken += reinf_material.integrity * 3 //Since girders don't have a secondary material, buff 'em up a bit.
+		weaken /= 100
+		do_attack_animation(src)
+		playsound(src, 'sound/weapons/smash.ogg', 50)
+		if(damage_to_deal > weaken && (damage_to_deal > MIN_DAMAGE_TO_HIT))
+			damage_to_deal -= weaken
+			visible_message("<span class='warning'>[user] strikes \the [src] with \the [W], [is_sharp(W) ? "slicing" : "denting"] a support rod!</span>")
+			take_damage(damage_to_deal)
+		else
+			visible_message("<span class='warning'>[user] strikes \the [src] with \the [W], but it bounces off!</span>")
+		user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
+		return
+
+	return ..()
 
 /obj/structure/girder/proc/construct_wall(obj/item/stack/material/S, mob/user)
 	if(S.get_amount() < 2)
 		to_chat(user, "<span class='notice'>There isn't enough material here to construct a wall.</span>")
 		return 0
 
-	var/material/M = name_to_material[S.default_type]
+	var/material/M = SSmaterials.get_material_by_name(S.default_type)
 	if(!istype(M))
 		return 0
 
@@ -209,7 +242,7 @@
 		to_chat(user, "<span class='notice'>There isn't enough material here to reinforce the girder.</span>")
 		return 0
 
-	var/material/M = name_to_material[S.default_type]
+	var/material/M = SSmaterials.get_material_by_name(S.default_type)
 	if(!istype(M) || M.integrity < 50)
 		to_chat(user, "You cannot reinforce \the [src] with that; it is too soft.")
 		return 0
@@ -266,6 +299,14 @@
 	if(health <= 0)
 		dismantle()
 	return
+
+/obj/structure/girder/attack_generic(var/mob/user, var/damage, var/attack_message = "smashes apart", var/wallbreaker)
+	if(!damage || !wallbreaker)
+		return FALSE
+	user.do_attack_animation(src)
+	visible_message("<span class='danger'>[user] [attack_message] \the [src]!</span>")
+	dismantle()
+	return TRUE
 
 /obj/structure/girder/cult
 	icon= 'icons/obj/cult.dmi'

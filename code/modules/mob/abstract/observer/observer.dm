@@ -143,11 +143,7 @@ Works together with spawning an observer, noted above.
 	if(!loc) return
 	if(!client) return 0
 
-
-	if(client.images.len)
-		for(var/image/hud in client.images)
-			if(copytext(hud.icon_state,1,4) == "hud")
-				client.images.Remove(hud)
+	handle_hud_glasses()
 
 	if(antagHUD)
 		var/list/target_list = list()
@@ -285,12 +281,12 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 		return
 	if(mind.current.ajourn && mind.current.stat != DEAD) //check if the corpse is astral-journeying (it's client ghosted using a cultist rune).
 		var/found_rune
-		for(var/obj/effect/rune/R in mind.current.loc)   //whilst corpse is alive, we can only reenter the body if it's on the rune
-			if(R && R.word1 == cultwords["hell"] && R.word2 == cultwords["travel"] && R.word3 == cultwords["self"]) // Found an astral journey rune.
-				found_rune = 1
+		for(var/obj/effect/rune/R in get_turf(mind.current)) //whilst corpse is alive, we can only reenter the body if it's on the rune
+			if(R.rune.type == /datum/rune/ethereal)
+				found_rune = TRUE
 				break
 		if(!found_rune)
-			to_chat(usr, "<span class='warning'>The astral cord that ties your body and your spirit has been severed. You are likely to wander the realm beyond until your body is finally dead and thus reunited with you.</span>")
+			to_chat(usr, span("cult", "The astral cord that ties your body and your spirit has been severed. You are likely to wander the realm beyond until your body is finally dead and thus reunited with you."))
 			return
 	stop_following()
 	mind.current.ajourn=0
@@ -357,13 +353,13 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 	var/holyblock = 0
 
 	if(usr.invisibility <= SEE_INVISIBLE_LIVING || (usr.mind in cult.current_antagonists))
-		for(var/turf/T in get_area_turfs(thearea.type))
+		for(var/turf/T in get_area_turfs(thearea))
 			if(!T.holy)
 				L+=T
 			else
 				holyblock = 1
 	else
-		for(var/turf/T in get_area_turfs(thearea.type))
+		for(var/turf/T in get_area_turfs(thearea))
 			L+=T
 
 	if(!L || !L.len)
@@ -401,13 +397,13 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 	moved_event.register(following, src, /atom/movable/proc/move_to_destination)
 	destroyed_event.register(following, src, /mob/abstract/observer/proc/stop_following)
 
-	to_chat(src, "<span class='notice'>Now following \the [following]</span>")
+	to_chat(src, SPAN_NOTICE("Now following \the <b>[following]</b>."))
 	move_to_destination(following, following.loc, following.loc)
 	updateghostsight()
 
 /mob/abstract/observer/proc/stop_following()
 	if(following)
-		to_chat(src, "<span class='notice'>No longer following \the [following]</span>")
+		to_chat(src, SPAN_NOTICE("No longer following \the <b>[following]</b>."))
 		moved_event.unregister(following, src)
 		destroyed_event.unregister(following, src)
 		following = null
@@ -696,7 +692,7 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 	is_manifest = 0
 	if(!is_manifest)
 		is_manifest = 1
-		verbs += /mob/abstract/observer/proc/toggle_visibility
+		verbs += /mob/abstract/observer/proc/toggle_visibility_verb
 		verbs += /mob/abstract/observer/proc/ghost_whisper
 		verbs += /mob/abstract/observer/proc/move_item
 
@@ -728,11 +724,14 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 		var/image/J = image('icons/mob/mob.dmi', loc = src, icon_state = icon)
 		client.images += J
 
-/mob/abstract/observer/proc/toggle_visibility(var/forced = 0)
+/mob/abstract/observer/proc/toggle_visibility_verb()
 	set category = "Ghost"
 	set name = "Toggle Visibility"
 	set desc = "Allows you to turn (in)visible (almost) at will."
 
+	toggle_visibility()
+
+/mob/abstract/observer/proc/toggle_visibility(var/forced = 0)
 	var/toggled_invisible
 	if(!forced && invisibility && world.time < toggled_invisible + 600)
 		to_chat(src, "You must gather strength before you can turn visible again...")
@@ -909,15 +908,15 @@ mob/abstract/observer/MayRespawn(var/feedback = 0, var/respawn_type = null)
 
 /mob/extra_ghost_link(var/atom/ghost)
 	if(client && eyeobj)
-		return "|<a href='byond://?src=\ref[ghost];track=\ref[eyeobj]'>\[E\]</a>"
+		return "|\[<a href='byond://?src=\ref[ghost];track=\ref[eyeobj]'>E</a>\]"
 
 /mob/abstract/observer/extra_ghost_link(var/atom/ghost)
 	if(mind && mind.current)
-		return "|<a href='byond://?src=\ref[ghost];track=\ref[mind.current]'>\[B\]</a>"
+		return "|\[<a href='byond://?src=\ref[ghost];track=\ref[mind.current]'>B</a>\]"
 
 /proc/ghost_follow_link(var/atom/target, var/atom/ghost)
 	if((!target) || (!ghost)) return
-	. = "<a href='byond://?src=\ref[ghost];track=\ref[target]'>\[F\]</a>"
+	. = "\[<a href='byond://?src=\ref[ghost];track=\ref[target]'>F</a>\]"
 	. += target.extra_ghost_link(ghost)
 
 
@@ -931,3 +930,21 @@ mob/abstract/observer/MayRespawn(var/feedback = 0, var/respawn_type = null)
 		return
 
 	SSghostroles.vui_interact(src)
+
+/mob/abstract/observer/verb/submitpai()
+	set category = "Ghost"
+	set name = "Submit pAI personality"
+	set desc = "Submits you pAI personality to the pAI candidate pool."
+
+	if(jobban_isbanned(src, "pAI"))
+		to_chat(src, "You are job banned from the pAI position.")
+		return
+	SSpai.recruitWindow(src)
+
+/mob/abstract/observer/verb/revokepai()
+	set category = "Ghost"
+	set name = "Revoke pAI personality"
+	set desc = "Removes you from the pAI candidite pool."
+
+	if(SSpai.revokeCandidancy(src))
+		to_chat(src, "You have been removed from the pAI candidate pool.")

@@ -1,6 +1,7 @@
 /obj/item/gun/projectile/cannon
 	name = "hand cannon"
 	desc = "An amalgamation of ancient and modern tajaran technology. This old naval cannon was turned into a portable firearm."
+	icon = 'icons/obj/guns/cannon.dmi'
 	icon_state = "cannon"
 	item_state = "cannon"
 	caliber = "cannon"
@@ -17,7 +18,7 @@
 
 	is_wieldable = TRUE
 
-	description_fluff = "The adhomian hand cannon was created due the shortage of weapons that happened in the New Kingdom of Adhomai during the second civil war. Old naval culverins \
+	desc_fluff = "The adhomian hand cannon was created due the shortage of weapons that happened in the New Kingdom of Adhomai during the second civil war. Old naval culverins \
 	found in museums and forgotten warehouses were adapted into portable weapons, combining modern and ancient tajaran technology. This weapon is usually found in the hands of the \
 	sailors and marines of the Royal Navy."
 
@@ -38,6 +39,7 @@
 /obj/item/gun/projectile/nuke
 	name = "nuclear launcher"
 	desc = "A launcher weapon designated to fire miniaturized nuclear warheads."
+	icon = 'icons/obj/guns/blockbuster.dmi' // hoh
 	icon_state = "blockbuster"
 	item_state = "blockbuster"
 	caliber = "nuke"
@@ -56,7 +58,7 @@
 
 	is_wieldable = TRUE
 
-	description_fluff = "The People's Republic of Adhomai is the only Adhomian faction able to master the nuclear fission. Atomic weapons were used before in the tajaran civil war, \
+	desc_fluff = "The People's Republic of Adhomai is the only Adhomian faction able to master the nuclear fission. Atomic weapons were used before in the tajaran civil war, \
 	causing the annihilation of the military base of Quizosa. The nuclear launcher was created by republican scientists as way to deploy this destructive force while on the field."
 
 /obj/item/gun/projectile/nuke/update_icon()

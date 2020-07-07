@@ -1,5 +1,5 @@
 
-/var/list/gender_datums = list()
+var/list/datum/gender/gender_datums = list()
 
 /hook/startup/proc/populate_gender_datum_list()
 	for(var/type in typesof(/datum/gender))
@@ -18,6 +18,7 @@
 	var/has  = "have"
 	var/is   = "are"
 	var/does = "do"
+	var/self = "themselves"
 
 /datum/gender/male
 	key  = "male"
@@ -30,6 +31,7 @@
 	has  = "has"
 	is   = "is"
 	does = "does"
+	self = "himself"
 
 /datum/gender/female
 	key  = "female"
@@ -42,6 +44,7 @@
 	has  = "has"
 	is   = "is"
 	does = "does"
+	self = "herself"
 
 /datum/gender/neuter
 	key = "neuter"
@@ -54,3 +57,4 @@
 	has  = "has"
 	is   = "is"
 	does = "does"
+	self = "itself"

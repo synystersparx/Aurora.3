@@ -10,7 +10,7 @@
 #define STORAGE_SPACE_CAP 200
 
 /obj/storage_bullshit
-	layer = 19
+	layer = SCREEN_LAYER
 
 /obj/item/storage
 	name = "storage"
@@ -30,7 +30,9 @@
 	var/obj/screen/storage/stored_continue
 	var/obj/screen/storage/stored_end
 	var/obj/screen/close/closer
+	var/care_about_storage_depth = TRUE
 	var/use_to_pickup	//Set this to make it possible to use this item in an inverse way, so you can have the item in your hand and click items on the floor to pick them up.
+	var/list/pickup_blacklist = list() // If you click a blacklisted item, it won't try to pick it up if use_to_pickup is true
 	var/display_contents_with_number	//Set this to make the storage item group contents of the same type and display them as a number.
 	var/allow_quick_empty	//Set this variable to allow the object to have the 'empty' verb, which dumps all the contents on the floor.
 	var/allow_quick_gather	//Set this variable to allow the object to have the 'toggle mode' verb, which quickly collects all items from a tile.
@@ -51,32 +53,29 @@
 	QDEL_NULL(closer)
 	return ..()
 
-/obj/item/storage/MouseDrop(obj/over_object as obj)
-
+/obj/item/storage/MouseDrop(obj/over_object)
 	if(!canremove)
 		return
-
-	if (ishuman(usr) || issmall(usr)) //so monkeys can take off their backpacks -- Urist
-
-		if (istype(usr.loc,/obj/mecha)) // stops inventory actions in a mech. why?
+	if(!over_object || over_object == src)
+		return
+	if(istype(over_object, /obj/screen/inventory))
+		var/obj/screen/inventory/S = over_object
+		if(S.slot_id == src.equip_slot)
 			return
-
+	if(ishuman(usr) || issmall(usr)) //so monkeys can take off their backpacks -- Urist
 		if(over_object == usr && Adjacent(usr)) // this must come before the screen objects only block
 			src.open(usr)
 			return
-
-		if (!( istype(over_object, /obj/screen) ))
+		if(!(istype(over_object, /obj/screen)))
 			return ..()
 
 		//makes sure that the storage is equipped, so that we can't drag it into our hand from miles away.
 		//there's got to be a better way of doing this.
-		if (!(src.loc == usr) || (src.loc && src.loc.loc == usr))
+		if(!(src.loc == usr) || (src.loc && src.loc.loc == usr))
 			return
-
-		if (( usr.restrained() ) || ( usr.stat ))
+		if(use_check_and_message(usr))
 			return
-
-		if ((src.loc == usr) && !usr.unEquip(src))
+		if((src.loc == usr) && !usr.unEquip(src))
 			return
 
 		switch(over_object.name)
@@ -87,7 +86,6 @@
 				usr.u_equip(src)
 				usr.put_in_l_hand(src,FALSE)
 		src.add_fingerprint(usr)
-
 
 /obj/item/storage/proc/return_inv()
 	. = contents.Copy()
@@ -175,7 +173,7 @@
 	src.boxes.screen_loc = "[tx]:,[ty] to [mx],[my]"
 	for(var/obj/O in src.contents)
 		O.screen_loc = "[cx],[cy]"
-		O.layer = 20
+		O.layer = SCREEN_LAYER+0.01
 		cx++
 		if (cx > mx)
 			cx = tx
@@ -193,7 +191,7 @@
 		for(var/datum/numbered_display/ND in display_contents)
 			ND.sample_object.screen_loc = "[cx]:16,[cy]:16"
 			ND.sample_object.maptext = "<font color='white'>[(ND.number > 1)? "[ND.number]" : ""]</font>"
-			ND.sample_object.layer = 20
+			ND.sample_object.layer = SCREEN_LAYER+0.01
 			cx++
 			if (cx > (4+cols))
 				cx = 4
@@ -202,7 +200,7 @@
 		for(var/obj/O in contents)
 			O.screen_loc = "[cx]:16,[cy]:16"
 			O.maptext = ""
-			O.layer = 20
+			O.layer = SCREEN_LAYER+0.01
 			cx++
 			if (cx > (4+cols))
 				cx = 4
@@ -248,7 +246,7 @@
 
 		O.screen_loc = "4:[round((startpoint+endpoint)/2)+2],2:16"
 		O.maptext = ""
-		O.layer = 20
+		O.layer = SCREEN_LAYER+0.01
 
 	if (!defer_overlays)
 		storage_start.compile_overlays()
@@ -311,7 +309,7 @@
 	if(src.loc == W)
 		return 0 //Means the item is already in the storage item
 	if(storage_slots != null && contents.len >= storage_slots)
-		if(!stop_messages)
+		if(!stop_messages || is_type_in_list(W, pickup_blacklist)) // the is_type_in_list is a bit risky, but you tend to not want to pick up things in your blacklist anyway
 			to_chat(usr, "<span class='notice'>[src] is full, make some space.</span>")
 		return 0 //Storage item is full
 
@@ -366,7 +364,8 @@
 	W.on_enter_storage(src)
 	if(user)
 		W.dropped(user)
-		add_fingerprint(user)
+		if(!istype(W, /obj/item/forensics))
+			add_fingerprint(user)
 
 		if(!prevent_warning)
 			for(var/mob/M in viewers(user, null))
@@ -405,23 +404,24 @@
 	queue_icon_update()
 
 //Call this proc to handle the removal of an item from the storage item. The item will be moved to the atom sent as new_target
-/obj/item/storage/proc/remove_from_storage(obj/item/W as obj, atom/new_location)
-	if(!istype(W)) return 0
+/obj/item/storage/proc/remove_from_storage(obj/item/W, atom/new_location)
+	if(!istype(W))
+		return FALSE
 
 	if(istype(src, /obj/item/storage/fancy))
 		var/obj/item/storage/fancy/F = src
-		F.update_icon(1)
+		F.update_icon(TRUE)
 
-	for(var/mob/M in range(1, src.loc))
-		if (M.s_active == src)
-			if (M.client)
+	for(var/mob/M in range(1, get_turf(src)))
+		if(M.s_active == src)
+			if(M.client)
 				M.client.screen -= W
 
 	if(new_location)
 		if(ismob(loc))
 			W.dropped(usr)
 		if(ismob(new_location))
-			W.layer = 20
+			W.layer = SCREEN_LAYER + 0.01
 		else
 			W.layer = initial(W.layer)
 		W.forceMove(new_location)
@@ -436,31 +436,30 @@
 		W.maptext = ""
 	W.on_exit_storage(src)
 	update_icon()
-	return 1
+	return TRUE
 
 /obj/item/storage/proc/remove_from_storage_deferred(obj/item/W, atom/new_location, mob/user)
-	if (!istype(W))
+	if(!istype(W))
 		return FALSE
 
 	// fuck if I know.
-	for(var/mob/M in range(1, src.loc))
-		if (M.s_active == src)
-			if (M.client)
+	for(var/mob/M in range(1, get_turf(src)))
+		if(M.s_active == src)
+			if(M.client)
 				M.client.screen -= W
 
-	if (new_location)
-		if (ismob(loc))
+	if(new_location)
+		if(ismob(loc))
 			W.dropped(user)
-		if (ismob(new_location))
-			W.layer = 20
+		if(ismob(new_location))
+			W.layer = SCREEN_LAYER + 0.01
 		else
 			W.layer = initial(W.layer)
-
 		W.forceMove(new_location)
 	else
 		W.forceMove(get_turf(src))
 
-	if (W.maptext)
+	if(W.maptext)
 		W.maptext = ""
 
 	W.on_exit_storage(src)
@@ -566,7 +565,7 @@
 		return
 
 	if(empty_delay)
-		visible_message("\The [usr] starts to empty the contents of \the [src].")
+		usr.visible_message("\The [usr] starts to empty the contents of \the [src]...", SPAN_NOTICE("You start emptying the contents of \the [src]..."))
 
 	if(!do_after(usr, contents.len * empty_delay, act_target=usr))
 		return
@@ -579,9 +578,7 @@
 		CHECK_TICK
 
 	post_remove_from_storage_deferred(loc, usr)
-
-	if(empty_delay)
-		visible_message("\The [usr] empties the contents of \the [src].")
+	usr.visible_message("<b>\The [usr]</b> empties the contents of \the [src].", , SPAN_NOTICE("You empty the contents of \the [src]."))
 
 // Override this to fill the storage object with stuff.
 /obj/item/storage/proc/fill()
@@ -629,13 +626,13 @@
 
 	closer = new /obj/screen/close{
 		icon_state = "x";
-		layer = 20
+		layer = SCREEN_LAYER
 	}
 	closer.master = src
 	orient2hud(null, mapload)
 
 	if (defer_shrinkwrap)	// Caller wants to defer shrinkwrapping until after the current callstack; probably putting something in.
-		addtimer(CALLBACK(src, .proc/shrinkwrap), 0)
+		INVOKE_ASYNC(src, .proc/shrinkwrap)
 	else
 		shrinkwrap()
 
@@ -658,6 +655,13 @@
 		if(src.verbs.Find(/obj/item/storage/verb/quick_empty))
 			src.quick_empty()
 			return 1
+
+/obj/item/storage/CtrlClick(mob/user)
+	if(user.get_active_hand() == src)
+		if(src.verbs.Find(/obj/item/storage/verb/quick_empty))
+			src.quick_empty()
+			return
+	..()
 
 /obj/item/storage/proc/make_exact_fit()
 	storage_slots = contents.len
@@ -686,6 +690,11 @@
 	var/depth = 0
 	var/atom/cur_atom = src
 
+	if(istype(cur_atom.loc, /obj/item/storage))
+		var/obj/item/storage/S = cur_atom.loc
+		if(!S.care_about_storage_depth)
+			return 1
+
 	while (cur_atom && !(cur_atom in container.contents))
 		if (isarea(cur_atom))
 			return -1
@@ -703,6 +712,11 @@
 /atom/proc/storage_depth_turf()
 	var/depth = 0
 	var/atom/cur_atom = src
+
+	if(istype(cur_atom.loc, /obj/item/storage))
+		var/obj/item/storage/S = cur_atom.loc
+		if(!S.care_about_storage_depth)
+			return 1
 
 	while (cur_atom && !isturf(cur_atom))
 		if (isarea(cur_atom))

@@ -16,11 +16,15 @@
 	)
 	primitive_form = "Stok"
 	darksight = 3
-	gluttonous = 1
+	gluttonous = GLUT_MESSY
+	stomach_capacity = 7
 	slowdown = 0.5
+
 	brute_mod = 0.8
-	grab_mod = 0.75
 	fall_mod = 1.2
+	grab_mod = 1.25 // Huge, usually have horns
+	resist_mod = 2.5 // Arguably our strongest organic species
+
 	ethanol_resistance = 0.4
 	taste_sensitivity = TASTE_SENSITIVE
 	economic_modifier = 7
@@ -28,11 +32,14 @@
 	num_alternate_languages = 2
 	secondary_langs = list(LANGUAGE_UNATHI, LANGUAGE_AZAZIBA)
 	name_language = LANGUAGE_UNATHI
+
 	stamina	=	120			  // Unathi have the shortest but fastest sprint of all
-	sprint_speed_factor = 3.2
 	stamina_recovery = 5
+
 	sprint_cost_factor = 1.45
+	sprint_speed_factor = 3.2
 	exhaust_threshold = 65
+
 	rarity_value = 3
 	breakcuffs = list(MALE)
 	mob_size = 10
@@ -55,8 +62,6 @@
 	heat_level_3 = 1100 //Default 1000
 
 	inherent_verbs = list(
-		/mob/living/proc/devour,
-		/mob/living/carbon/human/proc/regurgitate,
 		/mob/living/carbon/human/proc/tongue_flick
 	)
 
@@ -83,15 +88,29 @@
 		"Your scales bristle against the cold."
 		)
 
+	pain_emotes_with_pain_level = list(
+			list(/decl/emote/audible/wheeze, /decl/emote/audible/roar, /decl/emote/audible/bellow) = 80,
+			list(/decl/emote/audible/grunt, /decl/emote/audible/groan, /decl/emote/audible/wheeze, /decl/emote/audible/hiss) = 50,
+			list(/decl/emote/audible/grunt, /decl/emote/audible/groan, /decl/emote/audible/hiss) = 20,
+		)
+
+	pain_messages = list("It hurts so much", "You really need some painkillers", "Ancestors, it hurts")
+
 	move_trail = /obj/effect/decal/cleanable/blood/tracks/claw
 
-	allowed_citizenships = list(CITIZENSHIP_IZWESKI, CITIZENSHIP_DOMINIA, CITIZENSHIP_BIESEL, CITIZENSHIP_SOL, CITIZENSHIP_FRONTIER, CITIZENSHIP_ELYRA, CITIZENSHIP_ERIDANI)
-	allowed_religions = list(RELIGION_THAKH, RELIGION_SKAKH, RELIGION_AUTAKH, RELIGION_MOROZ, RELIGION_NONE, RELIGION_OTHER, RELIGION_CHRISTIANITY, RELIGION_ISLAM)
+	allowed_citizenships = list(CITIZENSHIP_IZWESKI, CITIZENSHIP_DOMINIA, CITIZENSHIP_BIESEL, CITIZENSHIP_SOL, CITIZENSHIP_COALITION, CITIZENSHIP_ELYRA, CITIZENSHIP_ERIDANI)
+	allowed_religions = list(RELIGION_THAKH, RELIGION_SKAKH, RELIGION_SIAKH, RELIGION_AUTAKH, RELIGION_MOROZ, RELIGION_NONE, RELIGION_OTHER, RELIGION_CHRISTIANITY, RELIGION_ISLAM)
+	default_citizenship = CITIZENSHIP_IZWESKI
 
 	zombie_type = "Unathi Zombie"
 
-/datum/species/unathi/before_equip(var/mob/living/carbon/human/H)
+	default_accent = ACCENT_HEGEMON_PEASANT
+	allowed_accents = list(ACCENT_HEGEMON_NOBLE, ACCENT_HEGEMON_PEASANT, ACCENT_TRAD_NOBLE, ACCENT_TRAD_PEASANT, ACCENT_DOMINIA)
+
+/datum/species/unathi/after_equip(var/mob/living/carbon/human/H)
 	. = ..()
+	if(H.shoes)
+		return
 	var/obj/item/clothing/shoes/sandal/S = new /obj/item/clothing/shoes/sandal(H)
 	if(H.equip_to_slot_or_del(S,slot_shoes))
 		S.autodrobe_no_remove = 1

@@ -5,14 +5,13 @@
 // Bitflags
 #define FIREDOOR_ALERT_HOT      1
 #define FIREDOOR_ALERT_COLD     2
-// Not used #define FIREDOOR_ALERT_LOWPRESS 4
 
 /obj/machinery/door/firedoor
-	name = "\improper Emergency Shutter"
+	name = "\improper emergency shutter"
 	desc = "Emergency air-tight shutter, capable of sealing off breached areas."
 	icon = 'icons/obj/doors/DoorHazard.dmi'
 	icon_state = "door_open"
-	req_one_access = list(access_atmospherics, access_engine_equip, access_paramedic)
+	req_one_access = list(access_atmospherics, access_engine_equip, access_emt)
 	opacity = 0
 	density = 0
 	layer = DOOR_OPEN_LAYER - 0.01
@@ -143,7 +142,7 @@
 	..()
 
 /obj/machinery/door/firedoor/get_material()
-	return get_material_by_name(DEFAULT_WALL_MATERIAL)
+	return SSmaterials.get_material_by_name(DEFAULT_WALL_MATERIAL)
 
 /obj/machinery/door/firedoor/examine(mob/user)
 	. = ..(user, 1)
@@ -189,13 +188,6 @@
 		return
 	if(!density)
 		return ..()
-	if(istype(AM, /obj/mecha))
-		var/obj/mecha/mecha = AM
-		if(mecha.occupant)
-			var/mob/M = mecha.occupant
-			if(world.time - M.last_bumped <= 10) return //Can bump-open one airlock per second. This is to prevent popup message spam.
-			M.last_bumped = world.time
-			attack_hand(M)
 	return 0
 
 /obj/machinery/door/firedoor/attack_hand(mob/user as mob)
@@ -212,7 +204,6 @@
 		if(A.fire || A.air_doors_activated)
 			alarmed = 1
 	if(user.incapacitated() || (get_dist(src, user) > 1  && !issilicon(user)))
-		to_chat(user, "Sorry, you must remain able bodied and close to \the [src] in order to use it.")
 		return
 
 	if(ishuman(user))
@@ -236,8 +227,8 @@
 		to_chat(user, "<span class='warning'>Access denied.  Please wait for authorities to arrive, or for the alert to clear.</span>")
 		return
 	else
-		user.visible_message("<span class='notice'>\The [src] [density ? "open" : "close"]s for \the [user].</span>",\
-		"\The [src] [density ? "open" : "close"]s.",\
+		user.visible_message("[user] [density ? "open" : "close"]s \an [src].",\
+		"You [density ? "open" : "close"] \the [src].",\
 		"You hear a beep, and a door opening.")
 
 	var/needs_to_close = 0
@@ -267,7 +258,8 @@
 		close()
 
 /obj/machinery/door/firedoor/attackby(obj/item/C as obj, mob/user as mob)
-	add_fingerprint(user)
+	if(!istype(C, /obj/item/forensics))
+		add_fingerprint(user)
 	if(operating)
 		return//Already doing something.
 	if(C.iswelder() && !repairing)
@@ -532,4 +524,5 @@
 	icon = 'icons/obj/doors/DoorHazard2x1.dmi'
 	width = 2
 	dir = EAST
+
 	enable_smart_generation = FALSE

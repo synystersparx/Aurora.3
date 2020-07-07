@@ -507,7 +507,7 @@ datum/objective/steal
 				return found_amount>=target_amount
 
 			if("50 coins (in bag)")
-				var/obj/item/moneybag/B = locate() in all_items
+				var/obj/item/storage/bag/money/B = locate() in all_items
 
 				if(B)
 					var/target = text2num(target_name)
@@ -869,7 +869,7 @@ datum/objective/heist/salvage
 				possible_targets += player.mind
 	if(possible_targets.len > 0)
 		target = pick(possible_targets)
-	if(target) explanation_text = "Sacrifice [target.name], the [target.assigned_role]. You will need the sacrifice rune (Hell blood join) and three acolytes to do so."
+	if(target) explanation_text = "Sacrifice [target.name], the [target.assigned_role]. You will need the sacrifice rune and three acolytes to do so."
 
 /datum/objective/cult/sacrifice/check_completion()
 	return (target && cult && !cult.sacrificed.Find(target))

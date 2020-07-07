@@ -12,6 +12,10 @@
 	var/base_block_chance = 25
 	var/shield_power = 100
 	var/can_block_bullets = 0
+	item_icons = list(
+		slot_l_hand_str = 'icons/mob/items/weapons/lefthand_energy.dmi',
+		slot_r_hand_str = 'icons/mob/items/weapons/righthand_energy.dmi'
+		)
 
 /obj/item/melee/energy/proc/activate(mob/living/user)
 	if(active)
@@ -207,6 +211,9 @@
 	color
 	name = "energy sword"
 	desc = "May the force be within you."
+	desc_antag = "The energy sword is a very strong melee weapon, capable of severing limbs easily, if they are targeted.  It can also has a chance \
+	to block projectiles and melee attacks while it is on and being held.  The sword can be toggled on or off by using it in your hand.  While it is off, \
+	it can be concealed in your pocket or bag."
 	icon_state = "sword0"
 	active_force = 30
 	active_throwforce = 20
@@ -270,6 +277,22 @@
 	desc = "An energy with a curved output, useful for defense and intimidation."
 	active_force = 20 // 20 damage per hit, seems more balanced for what it can do
 
+/obj/item/melee/energy/sword/hegemony
+	name = "hegemony energy blade"
+	desc = "A righteous hardlight blade to strike down the dishonourable."
+	slot_flags = SLOT_BELT
+	icon_state = "kataphract-esword0"
+
+/obj/item/melee/energy/sword/hegemony/activate(mob/living/user)
+	..()
+	icon_state = "kataphract-esword1"
+	to_chat(user, span("notice", "\The [src] is now energised."))
+
+/obj/item/melee/energy/sword/hegemony/deactivate(mob/living/user)
+	..()
+	icon_state = initial(icon_state)
+	to_chat(user, span("notice", "\The [src] is de-energised."))
+
 /obj/item/melee/energy/sword/knife
 	name = "energy utility knife"
 	desc = "Some cheap energy blade, branded at the hilt with the logo of the Tau Ceti Foreign Legion."
@@ -291,16 +314,27 @@
 /obj/item/melee/energy/sword/powersword
 	name = "power sword"
 	desc = "For when you really want to ruin someone's day. It is extremely heavy."
-	icon_state = "powerswordoff"
+	icon = 'icons/obj/sword.dmi'
+	icon_state = "runesword0"
+	item_state = "runesword0" //same icon, lol
+	contained_sprite = TRUE
 	base_reflectchance = 65
 	active_force = 40
 	base_block_chance = 65
 	active_w_class = 3
 	w_class = 3
+	drop_sound = 'sound/items/drop/sword.ogg'
+	pickup_sound = 'sound/items/pickup/sword.ogg'
 
 /obj/item/melee/energy/sword/powersword/activate(mob/living/user)
 	..()
-	icon_state = "powerswordon"
+	icon_state = "runesword1"
+	item_state = "runesword1"
+
+/obj/item/melee/energy/sword/powersword/deactivate(mob/living/user)
+	..()
+	icon_state = "runesword0"
+	item_state = "runesword0"
 
 /obj/item/melee/energy/sword/powersword/attack_self(mob/living/user as mob)
 	..()
@@ -333,13 +367,16 @@
 	shield_power = 150
 	can_block_bullets = 1
 	active = 1
+	var/datum/effect_system/sparks/spark_system
 
 /obj/item/melee/energy/blade/Initialize()
 	. = ..()
+	spark_system = bind_spark(src, 3)
 	START_PROCESSING(SSprocessing, src)
 
 /obj/item/melee/energy/blade/Destroy()
 	STOP_PROCESSING(SSprocessing, src)
+	QDEL_NULL(spark_system)
 	return ..()
 
 /obj/item/melee/energy/blade/deactivate(mob/living/user)

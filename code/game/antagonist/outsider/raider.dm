@@ -8,7 +8,7 @@ var/datum/antagonist/raider/raiders
 	antag_indicator = "mutineer"
 	landmark_id = "voxstart"
 	welcome_text = "Use :H to talk on your encrypted channel."
-	flags = ANTAG_OVERRIDE_JOB | ANTAG_CLEAR_EQUIPMENT | ANTAG_CHOOSE_NAME | ANTAG_VOTABLE | ANTAG_SET_APPEARANCE | ANTAG_HAS_LEADER
+	flags = ANTAG_OVERRIDE_JOB | ANTAG_CLEAR_EQUIPMENT | ANTAG_CHOOSE_NAME | ANTAG_VOTABLE | ANTAG_SET_APPEARANCE | ANTAG_HAS_LEADER | ANTAG_NO_FLAVORTEXT
 	antaghud_indicator = "hudmutineer"
 	required_age = 10
 
@@ -36,6 +36,7 @@ var/datum/antagonist/raider/raiders
 		/obj/item/gun/launcher/crossbow,
 		/obj/item/gun/launcher/grenade,
 		/obj/item/gun/launcher/pneumatic,
+		/obj/item/gun/launcher/harpoon,
 		/obj/item/gun/projectile/automatic/mini_uzi,
 		/obj/item/gun/projectile/automatic/c20r,
 		/obj/item/gun/projectile/automatic/wt550,
@@ -49,6 +50,7 @@ var/datum/antagonist/raider/raiders
 		/obj/item/gun/projectile/shotgun/doublebarrel/pellet,
 		/obj/item/gun/projectile/shotgun/doublebarrel/sawn,
 		/obj/item/gun/projectile/shotgun/pump/rifle,
+		/obj/item/gun/projectile/shotgun/foldable,
 		/obj/item/gun/projectile/colt,
 		/obj/item/gun/projectile/sec,
 		/obj/item/gun/projectile/pistol,
@@ -259,20 +261,27 @@ var/datum/antagonist/raider/raiders
 			var/grenade_type = pick(grenades)
 			new grenade_type(ammobox)
 		player.put_in_any_hand_if_possible(ammobox)
+	if(istype(gun, /obj/item/gun/launcher/harpoon))
+		var/obj/item/storage/backpack/duffel/bag = new(get_turf(player))
+		for(var/i in 1 to 4)
+			new /obj/item/material/harpoon(bag)
+		player.put_in_any_hand_if_possible(bag)
 
 /datum/antagonist/raider/proc/equip_vox(var/mob/living/carbon/human/player)
 
-	var/uniform_type = pick(list(/obj/item/clothing/under/vox/vox_robes,/obj/item/clothing/under/vox/vox_casual))
-
-	player.equip_to_slot_or_del(new uniform_type(player), slot_w_uniform)
 	player.equip_to_slot_or_del(new /obj/item/clothing/shoes/magboots/vox(player), slot_shoes) // REPLACE THESE WITH CODED VOX ALTERNATIVES.
 	player.equip_to_slot_or_del(new /obj/item/clothing/gloves/yellow/vox(player), slot_gloves) // AS ABOVE.
 	player.equip_to_slot_or_del(new /obj/item/clothing/mask/gas/swat/vox(player), slot_wear_mask)
 	player.equip_to_slot_or_del(new /obj/item/tank/nitrogen(player), slot_back)
 	player.equip_to_slot_or_del(new /obj/item/device/flashlight(player), slot_r_store)
+	player.equip_to_slot_or_del(new /obj/item/device/radio/headset/raider(player), slot_l_ear)
+	player.equip_to_slot_or_del(new /obj/item/card/id/syndicate/raider(player), slot_wear_id)
 
 	player.internal = locate(/obj/item/tank) in player.contents
 	if(istype(player.internal,/obj/item/tank) && player.internals)
 		player.internals.icon_state = "internal1"
 
 	return 1
+
+/datum/antagonist/raider/get_antag_radio()
+	return "Raider"

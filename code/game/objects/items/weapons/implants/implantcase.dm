@@ -96,12 +96,12 @@
 
 
 /obj/item/implantcase/loyalty
-	name = "glass case - 'loyalty'"
-	desc = "A case containing a loyalty implant."
+	name = "glass case - 'mind shield'"
+	desc = "A case containing a mind shield implant."
 	icon_state = "implantcase-r"
 
 /obj/item/implantcase/loyalty/New()
-	src.imp = new /obj/item/implant/loyalty( src )
+	src.imp = new /obj/item/implant/mindshield( src )
 	..()
 	return
 
@@ -157,5 +157,27 @@
 
 /obj/item/implantcase/health/New()
 	src.imp = new /obj/item/implant/health( src )
+	..()
+	return
+
+
+/obj/item/implantcase/aggression
+	name = "glass case - 'aggression'"
+	desc = "A case containing an aggression inducing implant."
+	icon_state = "implantcase-b"
+
+/obj/item/implantcase/aggression/New()
+	src.imp = new /obj/item/implant/aggression(src)
+	..()
+	return
+
+
+/obj/item/implantcase/anti_augment
+	name = "glass case - 'augmentation disrupter'"
+	desc = "A case containing an augmentation disrupter implant."
+	icon_state = "implantcase-b"
+
+/obj/item/implantcase/anti_augment/New()
+	src.imp = new /obj/item/implant/anti_augment(src)
 	..()
 	return

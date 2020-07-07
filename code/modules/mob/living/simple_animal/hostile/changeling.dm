@@ -38,6 +38,7 @@
 	max_tox = 0
 
 	var/is_devouring = FALSE
+	var/mob/living/carbon/human/occupant = null
 
 /mob/living/simple_animal/hostile/true_changeling/Initialize()
 	. = ..()
@@ -50,6 +51,8 @@
 		icon_living = "horror_alt"
 		icon_dead = "horror_alt_dead"
 
+/mob/living/simple_animal/hostile/true_changeling/do_animate_chat(var/message, var/datum/language/language, var/small, var/list/show_to, var/duration, var/list/message_override)
+	INVOKE_ASYNC(src, /atom/movable/proc/animate_chat, message, language, small, show_to, duration)
 
 /mob/living/simple_animal/hostile/true_changeling/Life()
 	..()
@@ -64,6 +67,8 @@
 	if(!gibbed)
 		visible_message("<b>[src]</b> lets out a waning scream as it falls, twitching, to the floor!")
 		playsound(loc, 'sound/effects/creepyshriek.ogg', 30, 1)
+		if(occupant)
+			qdel(occupant)
 		gibs(src.loc)
 		qdel(src)
 		return

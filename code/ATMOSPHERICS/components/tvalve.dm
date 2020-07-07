@@ -1,9 +1,9 @@
 /obj/machinery/atmospherics/tvalve
+	name = "manual switching valve"
+	desc = "A pipe valve."
+	desc_info = "Click this to toggle the mode.  The direction with the green light is where the gas will flow."
 	icon = 'icons/atmos/tvalve.dmi'
 	icon_state = "map_tvalve0"
-
-	name = "manual switching valve"
-	desc = "A pipe valve"
 
 	level = 1
 	dir = SOUTH
@@ -252,7 +252,7 @@
 
 	return 1
 
-/obj/machinery/atmospherics/tvalve/return_network_air(datum/network/reference)
+/obj/machinery/atmospherics/tvalve/return_network_air(datum/pipe_network/reference)
 	return null
 
 /obj/machinery/atmospherics/tvalve/disconnect(obj/machinery/atmospherics/reference)

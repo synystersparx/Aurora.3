@@ -1,6 +1,5 @@
 /datum/reagent
 	var/name = "Reagent"
-	var/id = "reagent"
 	var/description = "A non-descript chemical."
 	var/taste_description = "old rotten bandaids"
 	var/taste_mult = 1 //how this taste compares to others. Higher values means it is more noticable
@@ -24,6 +23,10 @@
 	var/glass_name = null
 	var/glass_desc = null
 	var/glass_center_of_mass = null
+	var/condiment_icon_state = null
+	var/condiment_name = null
+	var/condiment_desc = null
+	var/condiment_center_of_mass = null
 	var/color = "#000000"
 	var/color_weight = 1
 	var/unaffected_species = IS_DIONA | IS_MACHINE	// Species that aren't affected by this reagent. Does not prevent affect_touch.
@@ -46,10 +49,9 @@
 
 /datum/reagent/proc/remove_self(var/amount) // Shortcut
 	if (!holder)
-		//PROCLOG_WEIRD("Null holder found. Name: [name], id: [id]")
 		return
 
-	holder.remove_reagent(id, amount)
+	holder.remove_reagent(type, amount)
 
 // This doesn't apply to skin contact - this is for, e.g. extinguishers and sprays. The difference is that reagent is not directly on the mob's skin - it might just be on their clothing.
 /datum/reagent/proc/touch_mob(var/mob/living/M, var/amount)
@@ -107,6 +109,10 @@
 				affect_breathe(M, alien, removed)
 
 	remove_self(removed)
+
+// Called when a beaker is thrown or something is hit with it, AND the beaker doesn't break.
+/datum/reagent/proc/apply_force(var/force)
+	return force
 
 //Initial effect is called once when the reagent first starts affecting a mob.
 /datum/reagent/proc/initial_effect(var/mob/living/carbon/M, var/alien)

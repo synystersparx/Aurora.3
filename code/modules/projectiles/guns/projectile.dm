@@ -6,7 +6,9 @@
 /obj/item/gun/projectile
 	name = "gun"
 	desc = "A gun that fires bullets."
-	icon_state = "revolver"
+	desc_info = "This is a ballistic weapon.  To fire the weapon, ensure your intent is *not* set to 'help', have your gun mode set to 'fire', \
+	then click where you want to fire.  To reload, click the weapon in your hand to unload (if needed), then add the appropiate ammo.  The description \
+	will tell you what caliber you need."
 	origin_tech = list(TECH_COMBAT = 2, TECH_MATERIAL = 2)
 	w_class = 3
 	matter = list(DEFAULT_WALL_MATERIAL = 1000)
@@ -29,7 +31,8 @@
 	var/auto_eject = 0			//if the magazine should automatically eject itself when empty.
 	var/auto_eject_sound = null
 
-	var/is_jammed = 0           //Whether this gun is jammed
+	var/jam_num = 0             //Whether this gun is jammed and how many self-uses until it's unjammed
+	var/unjam_cooldown = 0      //Gives the unjammer some time after spamming unjam to not eject their mag
 	var/jam_chance = 0          //Chance it jams on fire
 
 	//TODO generalize ammo icon states for guns
@@ -47,8 +50,8 @@
 	update_icon()
 
 /obj/item/gun/projectile/consume_next_projectile()
-	if(is_jammed)
-		return 0
+	if(jam_num)
+		return FALSE
 	//get the next casing
 	if(loaded.len)
 		chambered = loaded[1] //load next casing.
@@ -59,7 +62,7 @@
 		if(handle_casings != HOLD_CASINGS)
 			ammo_magazine.stored_ammo -= chambered
 
-	if (chambered)
+	if(chambered)
 		return chambered.BB
 	return null
 
@@ -68,6 +71,7 @@
 	if(chambered)
 		chambered.expend()
 		process_chambered()
+	update_maptext()
 
 /obj/item/gun/projectile/handle_click_empty()
 	..()
@@ -75,12 +79,13 @@
 
 /obj/item/gun/projectile/special_check(var/mob/user)
 	if(!..())
-		return 0
-	if(!is_jammed && jam_chance)
+		return FALSE
+	if(!jam_num && jam_chance && get_ammo())
 		if(prob(jam_chance))
+			playsound(src.loc, 'sound/items/trayhit2.ogg', 50, 1)
 			to_chat(user, "<span class='danger'>\The [src] jams!</span>")
-			is_jammed = 1
-	return 1
+			jam_num = rand(2, 5) // gotta attackself two to five times to unjam
+	return TRUE
 
 /obj/item/gun/projectile/proc/process_chambered()
 	if (!chambered) return
@@ -100,6 +105,7 @@
 			qdel(chambered)
 		if(EJECT_CASINGS) //eject casing onto ground.
 			chambered.forceMove(get_turf(src))
+			chambered.throw_at(get_ranged_target_turf(get_turf(src),turn(loc.dir,270),1), rand(0,1), 5)
 			playsound(chambered, "sound/weapons/casingdrop[rand(1,5)].ogg", 50, 1)
 		if(CYCLE_CASINGS) //cycle the casing back to the end.
 			if(ammo_magazine)
@@ -164,10 +170,11 @@
 		user.visible_message("[user] inserts \a [C] into [src].", "<span class='notice'>You insert \a [C] into [src].</span>")
 		playsound(src.loc, 'sound/weapons/empty.ogg', 50, 1)
 
+	update_maptext()
 	update_icon()
 
 //attempts to unload src. If allow_dump is set to 0, the speedloader unloading method will be disabled
-/obj/item/gun/projectile/proc/unload_ammo(mob/user, var/allow_dump=1)
+/obj/item/gun/projectile/proc/unload_ammo(mob/user, var/allow_dump = 1)
 	if(ammo_magazine)
 		user.put_in_hands(ammo_magazine)
 		user.visible_message("[user] removes [ammo_magazine] from [src].", "<span class='notice'>You remove [ammo_magazine] from [src].</span>")
@@ -194,29 +201,33 @@
 			user.visible_message("[user] removes \a [C] from [src].", "<span class='notice'>You remove \a [C] from [src].</span>")
 	else
 		to_chat(user, "<span class='warning'>[src] is empty.</span>")
+	update_maptext()
 	update_icon()
 
-/obj/item/gun/projectile/attackby(var/obj/item/A as obj, mob/user as mob)
+/obj/item/gun/projectile/attackby(obj/item/A, mob/user)
 	..()
 	load_ammo(A, user)
 
-/obj/item/gun/projectile/attack_self(mob/user as mob)
-	if(is_jammed)
-		to_chat(user, "<span class='notice'>\The [user] unjams \the [src]!</span>")
-		if(do_after(user, 5))
-			playsound(src.loc, 'sound/weapons/empty.ogg', 100, 1)
-			is_jammed = 0
+/obj/item/gun/projectile/attack_self(mob/user)
+	if(jam_num)
+		playsound(src.loc, 'sound/weapons/empty.ogg', 50, 1)
+		jam_num--
+		if(!jam_num)
+			visible_message(span("danger", "\The [user] unjams \the [src]!"))
+			playsound(src.loc, 'sound/items/glowstick.ogg', 100, 1)
+			unjam_cooldown = world.time
+	else if(unjam_cooldown + 2 SECONDS > world.time)
+		return
 	else if(firemodes.len > 1)
 		..()
 	else
 		unload_ammo(user)
 
-/obj/item/gun/projectile/attack_hand(mob/user as mob)
+/obj/item/gun/projectile/attack_hand(mob/user)
 	if(user.get_inactive_hand() == src)
 		unload_ammo(user, allow_dump=0)
 	else
 		return ..()
-
 
 /obj/item/gun/projectile/afterattack(atom/A, mob/living/user)
 	..()
@@ -234,14 +245,16 @@
 
 /obj/item/gun/projectile/examine(mob/user)
 	..(user)
-	if(is_jammed)
+	if(get_dist(src, user) > 1)
+		return
+	if(jam_num)
 		to_chat(user, "<span class='warning'>It looks jammed.</span>")
 	if(ammo_magazine)
 		to_chat(user, "It has \a [ammo_magazine] loaded.")
-	to_chat(user, "Has [getAmmo()] round\s remaining.")
+	to_chat(user, "Has [get_ammo()] round\s remaining.")
 	return
 
-/obj/item/gun/projectile/proc/getAmmo()
+/obj/item/gun/projectile/get_ammo()
 	var/bullets = 0
 	if(loaded)
 		bullets += loaded.len
@@ -250,15 +263,3 @@
 	if(chambered)
 		bullets += 1
 	return bullets
-
-/* Unneeded -- so far.
-//in case the weapon has firemodes and can't unload using attack_hand()
-/obj/item/gun/projectile/verb/unload_gun()
-	set name = "Unload Ammo"
-	set category = "Object"
-	set src in usr
-
-	if(usr.stat || usr.restrained()) return
-
-	unload_ammo(usr)
-*/

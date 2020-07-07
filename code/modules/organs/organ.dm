@@ -2,6 +2,7 @@
 	name = "organ"
 	icon = 'icons/obj/surgery.dmi'
 	drop_sound = 'sound/items/drop/flesh.ogg'
+	pickup_sound = 'sound/items/pickup/flesh.ogg'
 	default_action_type = /datum/action/item_action/organ
 	germ_level = 0
 
@@ -11,12 +12,13 @@
 	var/status = 0
 	var/vital //Lose a vital limb, die immediately.
 	var/rejecting   // Is this organ already being rejected?
+	var/is_augment = FALSE
 
 	//Organ damage stats.
 	var/damage = 0 // amount of damage to the organ
 	var/min_broken_damage = 30
 	var/min_bruised_damage = 10 // Damage before considered bruised
-	var/max_damage
+	var/max_damage = 30
 
 	//Strings.
 	var/organ_tag = "organ"
@@ -28,24 +30,30 @@
 	var/robotic_name
 	var/robotic_sprite
 	var/emp_coeff = 1 //coefficient for damages taken by EMP, if the organ is robotic.
-	
+
 	//Lists.
 	var/list/transplant_data
 	var/list/datum/autopsy_data/autopsy_data = list()
 	var/list/organ_verbs	//verb that are added when you gain the organ
 	var/list/trace_chemicals = list() // traces of chemicals in the organ,
 									  // links chemical IDs to number of ticks for which they'll stay in the blood
-	
+
 	//DNA stuff.
 	var/datum/dna/dna
 	var/datum/species/species
 	var/force_skintone = FALSE		// If true, icon generation will skip is-robotic checks. Used for synthskin limbs.
+	var/list/species_restricted //used by augments and biomods to see what species can have this augment
 
 /obj/item/organ/New(loc, ...)
 	..()
 	if (!initialized && istype(loc, /mob/living/carbon/human/dummy/mannequin))
 		args[1] = TRUE
 		SSatoms.InitAtom(src, args)
+
+	if(max_damage)
+		min_broken_damage = Floor(max_damage / 2)
+	else
+		max_damage = min_broken_damage * 2
 
 /obj/item/organ/Destroy()
 	STOP_PROCESSING(SSprocessing, src)
@@ -121,9 +129,6 @@
 	if(owner && vital)
 		owner.death()
 
-/obj/item/organ/proc/is_damaged()
-	return damage > 1
-
 /obj/item/organ/proc/is_bruised()
 	return damage >= min_bruised_damage
 
@@ -134,7 +139,7 @@
 	return (!BP_IS_ROBOTIC(src) && (!species || !(species.flags & NO_PAIN)))
 
 /obj/item/organ/proc/can_recover()
-	return (max_damage > 0) && !(status & ORGAN_DEAD)
+	return max_damage > 0
 
 /obj/item/organ/process()
 
@@ -166,7 +171,7 @@
 
 		var/datum/reagent/blood/B = locate(/datum/reagent/blood) in reagents.reagent_list
 		if(B && !(status & ORGAN_ROBOT) && prob(40))
-			reagents.remove_reagent("blood",0.1)
+			reagents.remove_reagent(/datum/reagent/blood,0.1)
 			if (isturf(loc))
 				blood_splatter(src,B,1)
 		if(config.organs_decay) damage += rand(1,3)
@@ -196,7 +201,11 @@
 
 /obj/item/organ/proc/handle_germ_effects()
 	//** Handle the effects of infections
-	var/antibiotics = owner.reagents.get_reagent_amount("thetamycin")
+	var/antibiotics = 0
+	if(!owner)
+		return
+	if (CE_ANTIBIOTIC in owner.chem_effects)
+		antibiotics = owner.chem_effects[CE_ANTIBIOTIC]
 
 	if (germ_level > 0 && germ_level < INFECTION_LEVEL_ONE/2 && prob(30))
 		germ_level--
@@ -207,8 +216,7 @@
 			germ_level++
 
 	if(germ_level >= INFECTION_LEVEL_ONE)
-		var/fever_temperature = (owner.species.heat_level_1 - owner.species.body_temperature - 5)* min(germ_level/INFECTION_LEVEL_TWO, 1) + owner.species.body_temperature
-		owner.bodytemperature += between(0, (fever_temperature - T20C)/BODYTEMP_COLD_DIVISOR + 1, fever_temperature - owner.bodytemperature)
+		owner.add_chemical_effect(CE_FEVER, germ_level/INFECTION_LEVEL_ONE) //10u of paracetamol minimum for a level 3 infection
 
 	if (germ_level >= INFECTION_LEVEL_TWO)
 		var/obj/item/organ/external/parent = owner.get_organ(parent_organ)
@@ -238,7 +246,7 @@
 						germ_level += rand(2,3)
 					if(501 to INFINITY)
 						germ_level += rand(3,5)
-						owner.reagents.add_reagent("toxin", rand(1,2))
+						owner.reagents.add_reagent(/datum/reagent/toxin, rand(1,2))
 
 /obj/item/organ/proc/receive_chem(chemical as obj)
 	return 0
@@ -246,12 +254,22 @@
 /obj/item/organ/proc/rejuvenate()
 	damage = 0
 
+/obj/item/organ/proc/heal_damage(amount)
+	if(can_recover())
+		damage = between(0, damage - round(amount, 0.1), max_damage)
+
 /obj/item/organ/proc/is_broken()
 	return (damage >= min_broken_damage || (status & ORGAN_CUT_AWAY) || (status & ORGAN_BROKEN))
 
+/obj/item/organ/proc/is_usable()
+	return !(status & (ORGAN_CUT_AWAY|ORGAN_MUTATED|ORGAN_DEAD))
+
 //Germs
 /obj/item/organ/proc/handle_antibiotics()
-	var/antibiotics = owner.reagents.get_reagent_amount("thetamycin")
+	if(!owner)
+		return
+
+	var/antibiotics = owner.reagents?.get_reagent_amount(/datum/reagent/thetamycin)
 
 	if (!germ_level || antibiotics < 5)
 		return
@@ -276,7 +294,7 @@
 	W.time_inflicted = world.time
 
 //Note: external organs have their own version of this proc
-/obj/item/organ/proc/take_damage(amount, var/silent=0)
+/obj/item/organ/proc/take_damage(var/amount, var/silent = 0)
 	if(src.status & ORGAN_ROBOT)
 		src.damage = between(0, src.damage + (amount * 0.8), max_damage)
 	else
@@ -290,12 +308,8 @@
 
 /obj/item/organ/proc/robotize() //Being used to make robutt hearts, etc
 	robotic = 2
-	src.status &= ~ORGAN_BROKEN
-	src.status &= ~ORGAN_BLEEDING
-	src.status &= ~ORGAN_SPLINTED
-	src.status &= ~ORGAN_CUT_AWAY
-	src.status |= ORGAN_ROBOT
-	src.status |= ORGAN_ASSISTED
+	status = ORGAN_ROBOT
+	status |= ORGAN_ASSISTED
 	if(robotic_name)
 		name = robotic_name
 	if(robotic_sprite)
@@ -303,10 +317,8 @@
 
 /obj/item/organ/proc/mechassist() //Used to add things like pacemakers, etc
 	robotize()
-	src.status &= ~ORGAN_ROBOT
+	status = ORGAN_ASSISTED
 	robotic = 1
-	min_bruised_damage = 15
-	min_broken_damage = 35
 	if(!robotize_type)
 		name = initial(name)
 		icon_state = initial(icon_state)
@@ -355,7 +367,7 @@
 
 	if(owner && vital)
 		if(user)
-			user.attack_log += "\[[time_stamp()]\]<font color='red'> removed a vital organ ([src]) from [owner.name] ([owner.ckey]) (INTENT: [uppertext(user.a_intent)])</font>"
+			user.attack_log += "\[[time_stamp()]\]<font color='red'> removed a vital organ ([src]) from [owner.name] ([owner.ckey]) [user ? "(INTENT: [uppertext(user.a_intent)])" : ""]</font>"
 			owner.attack_log += "\[[time_stamp()]\]<font color='orange'> had a vital organ ([src]) removed by [user.name] ([user.ckey]) (INTENT: [uppertext(user.a_intent)])</font>"
 			msg_admin_attack("[user.name] ([user.ckey]) removed a vital organ ([src]) from [owner.name] ([owner.ckey]) (INTENT: [uppertext(user.a_intent)]) (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(owner))
 		owner.death()
@@ -363,34 +375,13 @@
 	owner.update_action_buttons()
 	owner = null
 
-	if(!owner.isonlifesupport())
-		owner.death()
-
-/obj/item/organ/proc/replaced(var/mob/living/carbon/human/target,var/obj/item/organ/external/affected)
-
-	if(!istype(target)) return
-
-	var/datum/reagent/blood/transplant_blood = locate(/datum/reagent/blood) in reagents.reagent_list
-	transplant_data = list()
-	if(!transplant_blood)
-		transplant_data["species"] =    target.species.name
-		transplant_data["blood_type"] = target.dna.b_type
-		transplant_data["blood_DNA"] =  target.dna.unique_enzymes
-	else
-		transplant_data["species"] =    transplant_blood.data["species"]
-		transplant_data["blood_type"] = transplant_blood.data["blood_type"]
-		transplant_data["blood_DNA"] =  transplant_blood.data["blood_DNA"]
-
+/obj/item/organ/proc/replaced(var/mob/living/carbon/human/target, var/obj/item/organ/external/affected)
 	owner = target
 	action_button_name = initial(action_button_name)
-	src.forceMove(owner)
-	STOP_PROCESSING(SSprocessing, src)
-	target.internal_organs |= src
-	affected.internal_organs |= src
-	target.internal_organs_by_name[organ_tag] = src
-	if(robotic)
-		robotize()
-	owner.update_action_buttons()
+	forceMove(owner) //just in case
+	if(BP_IS_ROBOTIC(src))
+		set_dna(owner.dna)
+	return 1
 
 /obj/item/organ/internal/eyes/replaced(var/mob/living/carbon/human/target)
 
@@ -425,3 +416,7 @@
 	user.put_in_active_hand(O)
 	qdel(src)
 	target.attackby(O, user)
+
+//used by stethoscope
+/obj/item/organ/proc/listen()
+	return

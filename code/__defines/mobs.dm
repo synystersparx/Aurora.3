@@ -14,6 +14,7 @@
 #define FAKEDEATH   0x2000  // Replaces stuff like changeling.changeling_fakedeath.
 #define DISFIGURED  0x4000  // Set but never checked. Remove this sometime and replace occurences with the appropriate organ code
 #define XENO_HOST   0x8000  // Tracks whether we're gonna be a baby alien's mummy.
+#define NO_ANTAG    0x10000  // Players are restricted from gaining antag roles when occupying this mob
 
 // Grab levels.
 #define GRAB_PASSIVE    1
@@ -45,6 +46,28 @@
 #define PULSE_THREADY 5 // Occurs during hypovolemic shock
 #define GETPULSE_HAND 0 // Less accurate. (hand)
 #define GETPULSE_TOOL 1 // More accurate. (med scanner, sleeper, etc.)
+#define PULSE_MAX_BPM 250 // Highest, readable BPM by machines and humans.
+
+// Blood pressure levels, simplified
+#define BP_HIGH_SYSTOLIC 		140
+#define BP_PRE_HIGH_SYSTOLIC 	125
+#define BP_IDEAL_SYSTOLIC		80
+
+#define BP_HIGH_DIASTOLIC 		100
+#define BP_PRE_HIGH_DIASTOLIC	85
+#define BP_IDEAL_DIASTOLIC 		60
+
+#define BLOOD_PRESSURE_HIGH     4
+#define BLOOD_PRESSURE_PRE_HIGH 3
+#define BLOOD_PRESSURE_IDEAL    2
+#define BLOOD_PRESSURE_LOW      1
+
+// total_radiation levels (Note that total_radiation can be above RADS_MAX until handle_mutations_and_radiation() runs)
+#define RADS_NONE 0
+#define RADS_LOW 1
+#define RADS_MED 50
+#define RADS_HIGH 75
+#define RADS_MAX 100
 
 //intent flags, why wasn't this done the first time?
 #define I_HELP		"help"
@@ -68,12 +91,14 @@
 #define BP_IS_ROBOTIC(org)  (org.status & ORGAN_ROBOT)
 
 //Generic organs
+#define BP_MOUTH    "mouth"
 #define BP_EYES     "eyes"
 #define BP_HEART    "heart"
 #define BP_LUNGS    "lungs"
 #define BP_BRAIN    "brain"
 #define BP_LIVER    "liver"
 #define BP_KIDNEYS  "kidneys"
+#define BP_STOMACH  "stomach"
 #define BP_APPENDIX "appendix"
 
 //Aut'akh organs
@@ -86,8 +111,28 @@
 #define BP_OPTICS   "optics"
 #define BP_IPCTAG   "ipc tag"
 
+//Augment organs
+#define BP_AUG_TIMEPIECE    "integrated timepiece"
+#define BP_AUG_PDA          "integrated pda"
+#define BP_AUG_TOOL         "retractable combitool"
+#define BP_AUG_PEN          "retractable combipen"
+#define BP_AUG_LIGHTER      "retractable lighter"
+#define BP_AUG_HEALTHSCAN   "integrated health scanner"
+#define BP_AUG_TESLA        "tesla spine"
+#define BP_AUG_EYE_SENSORS  "integrated eyes sensors"
+#define BP_AUG_HAIR         "synthetic hair extensions"
+#define BP_AUG_SUSPENSION   "calf suspension"
+#define BP_AUG_TASTE_BOOSTER   "taste booster"
+#define BP_AUG_RADIO        "integrated radio"
+#define BP_AUG_FUEL_CELL    "integrated fuel cell"
+#define BP_AUG_AIR_ANALYZER "integrated air analyzer"
+#define BP_AUG_LANGUAGE     "integrated language processor"
+#define BP_AUG_PSI         "psionic receiver"
+#define BP_AUG_CALF_OVERRIDE     "calf overdrive"
+
 //Organ defines
 #define PROCESS_ACCURACY 10
+#define DEFAULT_BLOOD_AMOUNT 560 //Default blood amount in units
 
 //These are used Bump() code for living mobs, in the mob_bump_flag, mob_swap_flags, and mob_push_flags vars to determine whom can bump/swap with whom.
 #define HUMAN 1
@@ -139,6 +184,11 @@
 #define INV_W_UNIFORM_DEF_ICON 'icons/mob/uniform.dmi'
 #define INV_ACCESSORIES_DEF_ICON 'icons/mob/ties.dmi'
 #define INV_SUIT_DEF_ICON 'icons/mob/suit.dmi'
+
+// IPC tags
+#define IPC_OWNERSHIP_SELF "Self Owned"
+#define IPC_OWNERSHIP_COMPANY "Company Owned"
+#define IPC_OWNERSHIP_PRIVATE "Privately Owned"
 
 // NT's alignment towards the character
 #define COMPANY_LOYAL 			"Loyal"
@@ -201,6 +251,22 @@
 #define ANIMAL_SPAWN_DELAY round(config.respawn_delay / 6)
 #define DRONE_SPAWN_DELAY  round(config.respawn_delay / 3)
 
+// Gluttony levels.
+#define GLUT_TINY 1       // Eat anything tiny and smaller
+#define GLUT_SMALLER 2    // Eat anything smaller than we are
+#define GLUT_ANYTHING 4   // Eat anything, ever
+#define GLUT_MESSY 8      // Only eat mobs, and eat them in chunks.
+
+#define GLUT_ITEM_TINY 16         // Eat items with a w_class of small or smaller
+#define GLUT_ITEM_NORMAL 32      // Eat items with a w_class of normal or smaller
+#define GLUT_ITEM_ANYTHING 64    // Eat any item
+#define GLUT_PROJECTILE_VOMIT 128 // When vomitting, does it fly out?
+
+
+// Devour speeds, returned by can_devour()
+#define DEVOUR_SLOW 1
+#define DEVOUR_FAST 2
+
 // Incapacitation flags, used by the mob/proc/incapacitated() proc
 #define INCAPACITATION_NONE 0
 #define INCAPACITATION_RESTRAINED 1
@@ -248,6 +314,10 @@
 #define TASTE_DULL 0.5 //anything below 30%
 #define TASTE_NUMB 0.1 //anything below 150%
 
+//Used by emotes
+#define VISIBLE_MESSAGE 1
+#define AUDIBLE_MESSAGE 2
+
 //helper for inverting armor blocked values into a multiplier
 #define BLOCKED_MULT(blocked) max(1 - (blocked/100), 0)
 
@@ -262,6 +332,7 @@
 #define PROSTHETIC_XMG "Xion Manufacturing Group"
 #define PROSTHETIC_DIONA "Unknown Model"
 #define PROSTHETIC_AUTAKH "Aut'akh Manufactured"
+#define PROSTHETIC_TESLA "Tesla Powered Prosthetics"
 
 //Brain Damage defines
 #define BRAIN_DAMAGE_MILD 10
@@ -276,3 +347,15 @@
 #define CURE_HYPNOSIS "hypnosis"
 #define CURE_SURGERY "surgery"
 #define CURE_ADMIN "all"
+
+// Surgery Stuff
+#define SURGERY_SUCCESS 2 // Proceed with surgery
+#define SURGERY_FAIL 1 // Autofail surgery
+#define SURGERY_IGNORE 0 // Ignore surgery completely and just attack
+
+#define AURA_CANCEL 1
+#define AURA_FALSE  2
+#define AURA_TYPE_BULLET "Bullet"
+#define AURA_TYPE_WEAPON "Weapon"
+#define AURA_TYPE_THROWN "Thrown"
+#define AURA_TYPE_LIFE   "Life"

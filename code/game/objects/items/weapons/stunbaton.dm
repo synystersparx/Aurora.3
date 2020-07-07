@@ -2,6 +2,9 @@
 /obj/item/melee/baton
 	name = "stunbaton"
 	desc = "A stun baton for incapacitating people with."
+	desc_info = "The baton needs to be turned on to apply the stunning effect.  Use it in your hand to toggle it on or off.  If your intent is \
+	set to 'harm', you will inflict damage when using it, regardless if it is on or not.  Each stun reduces the baton's charge, which can be replenished by \
+	putting it inside a weapon recharger."
 	icon_state = "stunbaton"
 	item_state = "baton"
 	slot_flags = SLOT_BELT
@@ -10,6 +13,8 @@
 	edge = 0
 	throwforce = 7
 	w_class = 3
+	drop_sound = 'sound/items/drop/metalweapon.ogg'
+	pickup_sound = 'sound/items/pickup/metalweapon.ogg'
 	origin_tech = list(TECH_COMBAT = 2)
 	attack_verb = list("beaten")
 	var/stunforce = 0
@@ -126,10 +131,12 @@
 		stun *= 0.5
 		if(status)		//Checks to see if the stunbaton is on.
 			agony *= 0.5	//whacking someone causes a much poorer contact than prodding them.
-			if(sheathed) //however breaking the skin results in a more potent electric shock or some bullshit. im a coder, not a doctor
-				L.electrocute_act(force * 2, src, def_zone = target_zone)
-			else
-				L.electrocute_act(force * 2, src, ground_zero = target_zone)
+			if(iscarbon(L))
+				var/mob/living/carbon/C = L
+				if(sheathed) //however breaking the skin results in a more potent electric shock or some bullshit. im a coder, not a doctor
+					C.electrocute_act(force * 2, src, def_zone = target_zone)
+				else
+					C.electrocute_act(force * 2, src, ground_zero = target_zone)
 		else
 			agony = 0
 		//we can't really extract the actual hit zone from ..(), unfortunately. Just act like they attacked the area they intended to.
@@ -164,19 +171,19 @@
 			var/mob/living/carbon/slime/S =  L
 			if(!status)
 				L.visible_message("<span class='warning'>[S] has been prodded with \the [src] by [user]. Too bad it was off.</span>")
-				return 1
+				return TRUE
 			else
 				L.visible_message("<span class='danger'>[S] has been prodded with \the [src] by [user]!</span>")
 
-			S.Discipline ++
-			if(prob(5))
-				S.Discipline = 0
-				S.rabid = 1 // heres that "or piss them off part"
+			S.discipline++
+			if(prob(1))
+				S.discipline = 0
+				S.rabid = TRUE // heres that "or piss them off part"
 
 		else
 			if(!status)
 				L.visible_message("<span class='warning'>[L] has been prodded with \the [src] by [user]. Luckily it was off.</span>")
-				return 1
+				return TRUE
 			else
 				L.visible_message("<span class='danger'>[L] has been prodded with \the [src] by [user]!</span>")
 

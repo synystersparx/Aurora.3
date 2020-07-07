@@ -28,7 +28,7 @@
 	heat_damage_per_tick = 20
 	cold_damage_per_tick = 20
 	var/poison_per_bite = 5
-	var/poison_type = "toxin"
+	var/poison_type = /datum/reagent/toxin
 	faction = "spiders"
 	var/busy = 0
 	pass_flags = PASSTABLE
@@ -51,7 +51,7 @@
 	melee_damage_upper = 10
 	poison_per_bite = 10
 	var/atom/cocoon_target
-	poison_type = "stoxin"
+	poison_type = /datum/reagent/soporific
 	var/fed = 0
 
 //hunters have the most poison and move the fastest, so they can find prey
@@ -69,7 +69,6 @@
 
 /mob/living/simple_animal/hostile/giant_spider/Initialize(mapload, atom/parent)
 	get_light_and_color(parent)
-	target_type_validator_map[/obj/effect/energy_field] = CALLBACK(src, .proc/validator_e_field)
 	. = ..()
 
 /mob/living/simple_animal/hostile/giant_spider/AttackingTarget()
@@ -77,7 +76,7 @@
 	if(isliving(.))
 		var/mob/living/L = .
 		if(L.reagents)
-			L.reagents.add_reagent("toxin", poison_per_bite)
+			L.reagents.add_reagent(/datum/reagent/toxin, poison_per_bite)
 			if(prob(poison_per_bite) && (!issilicon(L) && !isipc(L)))
 				to_chat(L, "<span class='warning'>You feel a tiny prick.</span>")
 				L.reagents.add_reagent(poison_type, 5)
@@ -88,7 +87,7 @@
 		var/mob/living/carbon/human/H = .
 		if(prob(poison_per_bite))
 			var/obj/item/organ/external/O = pick(H.organs)
-			if(!(O.status & (ORGAN_ROBOT|ORGAN_ADV_ROBOT)) && !O.cannot_amputate)
+			if(!(O.status & (ORGAN_ROBOT|ORGAN_ADV_ROBOT)) && (O.limb_flags & ORGAN_CAN_AMPUTATE))
 				var/eggs = new /obj/effect/spider/eggcluster(O, src)
 				O.implants += eggs
 				to_chat(H, "<span class='warning'>The [src] injects something into your [O.name]!</span>")
@@ -109,14 +108,6 @@
 /mob/living/simple_animal/hostile/giant_spider/proc/stop_walking()
 	stop_automated_movement = 0
 	walk(src, 0)
-
-/mob/living/simple_animal/hostile/giant_spider/proc/validator_e_field(var/obj/effect/energy_field/E, var/atom/current)
-	if(isliving(current)) // We prefer mobs over anything else
-		return FALSE
-	if(get_dist(src, E) < get_dist(src, current))
-		return TRUE
-	else
-		return FALSE
 
 /mob/living/simple_animal/hostile/giant_spider/nurse/think()
 	..()

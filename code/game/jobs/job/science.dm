@@ -7,11 +7,12 @@
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
+	intro_prefix = "the"
 	supervisors = "the captain"
 	selection_color = "#FF40FF"
 	economic_modifier = 15
 
-	minimum_character_age = 30
+	minimum_character_age = 35
 
 	access = list(access_rd, access_heads, access_tox, access_genetics, access_morgue, access_eva, access_external_airlocks,
 			            access_tox_storage, access_teleporter, access_sec_doors, access_medical, access_engine, access_construction,
@@ -24,6 +25,8 @@
 	minimal_player_age = 14
 	ideal_character_age = 50
 	outfit = /datum/outfit/job/rd
+
+	blacklisted_species = list("M'sai Tajara", "Zhan-Khazan Tajara", "Vaurca Worker", "Vaurca Warrior")
 
 /datum/outfit/job/rd
 	name = "Research Director"
@@ -55,7 +58,7 @@
 	selection_color = "#FFAAFF"
 	economic_modifier = 7
 
-	minimum_character_age = 25
+	minimum_character_age = 30
 
 	access = list(access_robotics, access_tox, access_tox_storage, access_research, access_xenobiology, access_xenoarch)
 	minimal_access = list(access_tox, access_tox_storage, access_research, access_xenoarch)
@@ -97,7 +100,7 @@
 	selection_color = "#FFAAFF"
 	economic_modifier = 7
 
-	minimum_character_age = 25
+	minimum_character_age = 30
 
 	access = list(access_robotics, access_tox, access_tox_storage, access_research, access_xenobiology, access_hydroponics)
 	minimal_access = list(access_research, access_xenobiology, access_hydroponics, access_tox_storage)

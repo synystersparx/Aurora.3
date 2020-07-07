@@ -15,7 +15,12 @@
 	s_tone = null
 	skin_color = null
 	hair_color = null
-	if(status & ORGAN_ROBOT && !(isipc(human)) && !(isautakh(human)))
+	var/limb_exception = FALSE
+	if(robotize_type)
+		var/datum/robolimb/R = all_robolimbs[robotize_type]
+		if(R.paintable)
+			limb_exception = TRUE
+	if(status & ORGAN_ROBOT && !(isipc(human)) && !limb_exception)
 		return
 	if(species && human.species && species.name != human.species.name)
 		return
@@ -85,6 +90,8 @@
 
 	apply_markings()
 
+	get_internal_organs_overlay()
+
 	add_overlay(owner.generate_hair_icon())
 
 	compile_overlays()
@@ -113,6 +120,20 @@
 			add_overlay(finished_icon) //So when it's not on your body, it has icons
 			mob_icon.Blend(finished_icon, ICON_OVERLAY) //So when it's on your body, it has icons
 
+/obj/item/organ/external/proc/get_internal_organs_overlay()
+	for(var/obj/item/organ/internal/O in internal_organs)
+		if(O.on_mob_icon)
+			var/cache_key = "[O.on_mob_icon]-[O.icon_state]"
+
+			var/icon/organ_icon = SSicon_cache.internal_organ_cache[cache_key]
+			if (!organ_icon)
+				organ_icon = new /icon(O.on_mob_icon, O.icon_state)
+				SSicon_cache.internal_organ_cache[cache_key] = organ_icon
+
+			add_overlay(organ_icon)
+			mob_icon.Blend(organ_icon, ICON_OVERLAY)
+
+/obj/item/organ/external/var/icon_cache_key
 /obj/item/organ/external/proc/get_icon(var/skeletal)
 
 	var/gender = "f"
@@ -124,6 +145,7 @@
 		if(painted && skin_color)
 			mob_icon.Blend(skin_color, ICON_ADD)
 		apply_markings(restrict_to_robotic = TRUE)
+		get_internal_organs_overlay()
 	else
 		if(!dna)
 			mob_icon = new /icon('icons/mob/human_races/human/r_human.dmi', "[icon_name][gendered_icon ? "_[gender]" : ""]")
@@ -158,18 +180,20 @@
 						mob_icon.Blend(rgb(s_tone, s_tone, s_tone), ICON_ADD)
 					else
 						mob_icon.Blend(rgb(-s_tone,  -s_tone,  -s_tone), ICON_SUBTRACT)
-				
+
 
 			apply_markings()
+			get_internal_organs_overlay()
 
-			if(body_hair && hair_color)
-				var/list/limb_icon_cache = SSicon_cache.body_hair_cache
+			if(body_hair)
+				var/list/limb_icon_cache = SSicon_cache.limb_icons_cache
 				var/cache_key = "[body_hair]-[icon_name]-[hair_color]"
 				if(!limb_icon_cache[cache_key])
 					var/icon/I = icon(species.icobase, "[icon_name]_[body_hair]")
 					I.Blend(hair_color, ICON_ADD)
 					limb_icon_cache[cache_key] = I
 				mob_icon.Blend(limb_icon_cache[cache_key], ICON_OVERLAY)
+				icon_cache_key = cache_key
 
 	icon = mob_icon
 
@@ -210,6 +234,10 @@
 	for (var/marking in cached_markings)
 		keyparts += "[marking][cached_markings[marking]["color"]]"
 
+	for(var/obj/item/organ/internal/O in internal_organs)
+		if(O.on_mob_icon)
+			keyparts += "[O.on_mob_icon]-[O.icon_state]"
+
 	. = keyparts.Join("_")
 
 /obj/item/organ/external/proc/update_marking_cache()
@@ -217,3 +245,37 @@
 		LAZYADD(cached_markings, genetic_markings)
 	if (LAZYLEN(temporary_markings))
 		LAZYADD(cached_markings, temporary_markings)
+
+// Global scope, used in code below.
+var/list/flesh_hud_colours = list("#00ff00","#aaff00","#ffff00","#ffaa00","#ff0000","#aa0000","#660000")
+var/list/robot_hud_colours = list("#ffffff","#cccccc","#aaaaaa","#888888","#666666","#444444","#222222","#000000")
+
+/obj/item/organ/external/proc/get_damage_hud_image()
+
+	// Generate the greyscale base icon and cache it for later.
+	// icon_cache_key is set by any get_icon() calls that are made.
+	// This looks convoluted, but it's this way to avoid icon proc calls.
+	var/list/limb_icon_cache = SSicon_cache.limb_icons_cache
+	if(!hud_damage_image)
+		var/cache_key = "dambase-[icon_cache_key]"
+		if(!icon_cache_key || !limb_icon_cache[cache_key])
+			limb_icon_cache[cache_key] = icon(get_icon(), null, SOUTH)
+		var/image/temp = image(limb_icon_cache[cache_key])
+		if(species)
+			// Calculate the required colour matrix.
+			var/r = 0.30 * species.health_hud_intensity
+			var/g = 0.59 * species.health_hud_intensity
+			var/b = 0.11 * species.health_hud_intensity
+			temp.color = list(r, r, r, g, g, g, b, b, b)
+		hud_damage_image = image(null)
+		hud_damage_image.overlays += temp
+
+	// Calculate the required color index.
+	var/dam_state = min(1,((brute_dam+burn_dam)/max(1,max_damage)))
+	var/min_dam_state = min(1,(get_pain()/max(1,max_damage)))
+	if(min_dam_state && dam_state < min_dam_state)
+		dam_state = min_dam_state
+	// Apply colour and return product.
+	var/list/hud_colours = !BP_IS_ROBOTIC(src) ? flesh_hud_colours : robot_hud_colours
+	hud_damage_image.color = hud_colours[max(1,min(Ceiling(dam_state*hud_colours.len),hud_colours.len))]
+	return hud_damage_image

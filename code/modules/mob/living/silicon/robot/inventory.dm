@@ -88,8 +88,11 @@
 		module_state_3 = null
 		inv3.icon_state = "inv3"
 	updateicon()
+	hud_used.update_robot_modules_display()
 
 /mob/living/silicon/robot/proc/activated(obj/item/O)
+	updateicon()
+
 	if(module_state_1 == O)
 		return 1
 	else if(module_state_2 == O)
@@ -98,7 +101,6 @@
 		return 1
 	else
 		return 0
-	updateicon()
 
 //Helper procs for cyborg modules on the UI.
 //These are hackish but they help clean up code elsewhere.
@@ -228,21 +230,21 @@
 		return
 	if(!module_state_1)
 		module_state_1 = O
-		O.layer = 20
+		O.layer = SCREEN_LAYER
 		O.screen_loc = inv1.screen_loc
 		contents += O
 		if(istype(module_state_1,/obj/item/borg/sight))
 			sight_mode |= module_state_1:sight_mode
 	else if(!module_state_2)
 		module_state_2 = O
-		O.layer = 20
+		O.layer = SCREEN_LAYER
 		O.screen_loc = inv2.screen_loc
 		contents += O
 		if(istype(module_state_2,/obj/item/borg/sight))
 			sight_mode |= module_state_2:sight_mode
 	else if(!module_state_3)
 		module_state_3 = O
-		O.layer = 20
+		O.layer = SCREEN_LAYER
 		O.screen_loc = inv3.screen_loc
 		contents += O
 		if(istype(module_state_3,/obj/item/borg/sight))

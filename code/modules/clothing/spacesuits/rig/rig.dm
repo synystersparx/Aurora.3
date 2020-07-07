@@ -32,6 +32,7 @@
 	var/interface_title = "Hardsuit Controller"
 	var/wearer_move_delay //Used for AI moving.
 	var/ai_controlled_move_delay = 10
+	var/last_remote_message // when did a mounted pAI or AI use a module? used to prevent admin msg spam
 
 	// Keeps track of what this rig should spawn with.
 	var/suit_type = "hardsuit"
@@ -60,6 +61,8 @@
 	// Rig status vars.
 	var/open = 0                                              // Access panel status.
 	var/locked = 1                                            // Lock status.
+	var/dnaLock                                               // To whom do we belong?
+	var/crushing = FALSE                                      // Are we crushing the occupant to death?
 	var/subverted = 0
 	var/interface_locked = 0
 	var/control_overridden = 0
@@ -85,7 +88,7 @@
 	var/datum/effect_system/sparks/spark_system
 
 	var/allowed_module_types = MODULE_GENERAL // All rigs by default should have access to general
-	var/list/species_restricted = list("Human","Tajara","Unathi", "Skrell", "Machine")
+	var/list/species_restricted = list("Human","Tajara","Unathi", "Skrell", "Machine", "Bishop Accessory Frame", "Zeng-Hu Mobility Frame")
 
 /obj/item/rig/examine()
 	to_chat(usr, "This is \icon[src][src.name].")
@@ -112,6 +115,8 @@
 	spark_system = bind_spark(src, 5)
 
 	START_PROCESSING(SSprocessing, src)
+
+	last_remote_message = world.time
 
 	if(initial_modules && initial_modules.len)
 		for(var/path in initial_modules)
@@ -189,6 +194,7 @@
 /obj/item/rig/proc/reset()
 	offline = 2
 	canremove = 1
+	crushing = FALSE
 	for(var/obj/item/piece in list(helmet,boots,gloves,chest))
 		if(!piece) continue
 		piece.icon_state = "[initial(icon_state)]"
@@ -301,6 +307,11 @@
 	if (has_sealed_state)
 		icon_state = canremove ? initial(icon_state) : "[initial(icon_state)]_sealed"
 
+	if(dnaLock && !offline)
+		if(dnaLock != wearer.dna)
+			visible_message("\icon[src.icon] <b>[src]</b> announces, <span class='notice'>\"DNA mismatch. Unauthorized access detected.\"</span>")
+			crushing = TRUE
+
 	if(wearer != initiator)
 		to_chat(initiator, "<font color='blue'>Suit adjustment complete. Suit is now [canremove ? "unsealed" : "sealed"].</font>")
 
@@ -357,12 +368,19 @@
 
 	set_vision(!offline)
 	if(offline)
+		crushing = FALSE
 		if(offline == 1)
 			for(var/obj/item/rig_module/module in installed_modules)
 				module.deactivate()
 			offline = 2
 			slowdown = offline_slowdown
 		return
+
+	if(crushing)
+		wearer.apply_damage(10) // Applies 10 brute damage to a random extremity each process
+		if(wearer.stat == DEAD)
+			crushing = FALSE
+			visible_message(span("danger", "A squelching sound comes from within the sealed hardsuit..")) // this denotes that the user inside has died.
 
 	if(cell && cell.charge > 0 && electrified > 0)
 		electrified--

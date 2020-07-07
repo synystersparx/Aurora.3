@@ -30,7 +30,6 @@
 	var/locked = 0
 	var/mob/living/carbon/brain/brainmob = null//The current occupant.
 	var/obj/item/organ/internal/brain/brainobj = null	//The current brain organ.
-	var/obj/mecha = null//This does not appear to be used outside of reference in mecha.dm.
 
 	attackby(var/obj/item/O as obj, var/mob/user as mob)
 		if(istype(O,/obj/item/organ/internal/brain) && !brainmob) //Time to stick a brain in it --NEO
@@ -135,8 +134,7 @@
 		var/mob/living/silicon/robot/borg = loc
 		borg.mmi = null
 	if(brainmob)
-		qdel(brainmob)
-		brainmob = null
+		QDEL_NULL(brainmob)
 	return ..()
 
 /obj/item/device/mmi/radio_enabled
@@ -149,7 +147,7 @@
 	New()
 		..()
 		radio = new(src)//Spawns a radio inside the MMI.
-		radio.broadcasting = 1//So it's broadcasting from the start.
+		radio.broadcasting = TRUE//So it's broadcasting from the start.
 
 	verb//Allows the brain to toggle the radio functions.
 		Toggle_Broadcasting()

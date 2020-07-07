@@ -28,9 +28,11 @@
 
 	//Effects
 	var/damage = 10
-	var/damage_type = BRUTE		//BRUTE, BURN, TOX, OXY, CLONE, HALLOSS are the only things that should be in here
+	var/damage_type = BRUTE		//BRUTE, BURN, TOX, OXY, CLONE, PAIN are the only things that should be in here
+	var/damage_flags = DAM_BULLET
 	var/nodamage = FALSE		//Determines if the projectile will skip any damage inflictions
 	var/check_armour = "bullet" //Defines what armor to use when it hits things.  Must be set to bullet, laser, energy,or bomb	//Cael - bio and rad are also valid
+	var/list/impact_sounds	//for different categories, IMPACT_MEAT etc
 
 	var/stun = 0
 	var/weaken = 0
@@ -60,7 +62,7 @@
 	*/
 
 	//Movement parameters
-	var/speed = 0.4			//Amount of deciseconds it takes for projectile to travel
+	var/speed = 0.2			//Amount of deciseconds it takes for projectile to travel
 	var/pixel_speed = 33	//pixels per move - DO NOT FUCK WITH THIS UNLESS YOU ABSOLUTELY KNOW WHAT YOU ARE DOING OR UNEXPECTED THINGS /WILL/ HAPPEN!
 	var/Angle = 0
 	var/original_angle = 0		//Angle at firing
@@ -107,14 +109,13 @@
 	if(isanimal(target))
 		return FALSE
 	var/mob/living/L = target
-	if (damage_type == BRUTE)
+	if(damage_type == BRUTE && damage > 5) //weak hits shouldn't make you gush blood
 		var/splatter_color = "#A10808"
 		var/mob/living/carbon/human/H = target
-		if (istype(H)&& H.species && H.species.blood_color)
+		if (istype(H) && H.species && H.species.blood_color)
 			splatter_color = H.species.blood_color
 		var/splatter_dir = starting ? get_dir(starting, target.loc) : dir
 		new /obj/effect/temp_visual/dir_setting/bloodsplatter(target.loc, splatter_dir, splatter_color)
-
 	if(hit_effect)
 		new hit_effect(target.loc)
 
@@ -173,6 +174,8 @@
 	var/result = PROJECTILE_FORCE_MISS
 	if(hit_zone)
 		def_zone = hit_zone //set def_zone, so if the projectile ends up hitting someone else later (to be implemented), it is more likely to hit the same part
+		if(!target_mob.aura_check(AURA_TYPE_BULLET, src, def_zone))
+			return TRUE
 		result = target_mob.bullet_act(src, def_zone)
 
 	if(result == PROJECTILE_FORCE_MISS && (can_miss == 0)) //if you're shooting at point blank you can't miss.
@@ -182,13 +185,13 @@
 
 	//hit messages
 	if(silenced)
-		to_chat(target_mob, "<span class='danger'>You've been hit in the [parse_zone(def_zone)] by \the [src]!</span>")
+		to_chat(target_mob, "<span class='danger'>You've been hit in the [parse_zone(def_zone)] by \a [src]!</span>")
 	else
-		target_mob.visible_message("<span class='danger'>\The [target_mob] is hit by \the [src] in the [parse_zone(def_zone)]!</span>", "<span class='danger'><font size='2'>You're hit by \the [src] in the [parse_zone(def_zone)]!</font></span>")//X has fired Y is now given by the guns so you cant tell who shot you if you could not see the shooter
+		target_mob.visible_message("<span class='danger'>\The [target_mob] is hit by \a [src] in the [parse_zone(def_zone)]!</span>", "<span class='danger'><font size=2>You are hit by \a [src] in the [parse_zone(def_zone)]!</font></span>")//X has fired Y is now given by the guns so you cant tell who shot you if you could not see the shooter
 
 	//admin logs
 	if(!no_attack_log)
-		if(istype(firer, /mob))
+		if(ismob(firer))
 
 			var/attacker_message = "shot with \a [src.type]"
 			var/victim_message = "shot with \a [src.type]"
@@ -214,7 +217,7 @@
 		return FALSE
 
 	if(firer && !ignore_source_check)
-		if(A == firer || (A == firer.loc && istype(A, /obj/mecha))) //cannot shoot yourself or your mech
+		if(A == firer || (A == firer.loc)) //cannot shoot yourself or your mech
 			trajectory_ignore_forcemove = TRUE
 			forceMove(get_turf(A))
 			trajectory_ignore_forcemove = FALSE
@@ -361,6 +364,10 @@
 				on_impact(loc)
 			qdel(src)
 		return
+
+	if (QDELETED(src))
+		return
+
 	last_projectile_move = world.time
 	if(!nondirectional_sprite && !hitscanning)
 		var/matrix/M = new
@@ -368,6 +375,11 @@
 		transform = M
 	trajectory.increment(trajectory_multiplier)
 	var/turf/T = trajectory.return_turf()
+
+	if (!T) // Nowhere to go. Just die.
+		qdel(src)
+		return
+
 	if(T.z != loc.z)
 		before_move()
 		before_z_change(loc, T)
@@ -419,6 +431,9 @@
 		var/y = text2num(screen_loc_Y[1]) * 32 + text2num(screen_loc_Y[2]) - 32
 
 		//Calculate the "resolution" of screen based on client's view and world's icon size. This will work if the user can view more tiles than average.
+		if(istype(user, /mob/living/heavy_vehicle))
+			var/mob/living/heavy_vehicle/H = user
+			user = pick(H.pilots) //since i assume this is a list, we want only 1 person
 		var/list/screenview = getviewsize(user.client.view)
 		var/screenviewX = screenview[1] * world.icon_size
 		var/screenviewY = screenview[2] * world.icon_size
@@ -509,7 +524,8 @@
 		required_moves = SSprojectiles.global_max_tick_moves
 	if(!required_moves)
 		return
-	for(var/i in 1 to required_moves)
+
+	for(var/i = 1; i <= required_moves && !QDELETED(src); i++)
 		pixel_move(required_moves)
 
 /obj/item/projectile/proc/setAngle(new_angle)	//wrapper for overrides.

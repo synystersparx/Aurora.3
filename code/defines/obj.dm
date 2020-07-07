@@ -33,18 +33,6 @@
 	flags = PROXMOVE
 	pass_flags = PASSTABLE
 
-
-/obj/effect/begin
-	name = "begin"
-	icon = 'icons/obj/stationobjs.dmi'
-	icon_state = "begin"
-	anchored = 1.0
-	unacidable = 1
-
-/*
- * This item is completely unused, but removing it will break something in R&D and Radio code causing PDA and Ninja code to fail on compile
- */
-
 /var/list/acting_rank_prefixes = list("acting", "temporary", "interim", "provisional")
 
 /proc/make_list_rank(rank)
@@ -90,6 +78,7 @@
 	throw_range = 20
 	flags = CONDUCT
 	drop_sound = 'sound/items/drop/rubber.ogg'
+	pickup_sound = 'sound/items/pickup/rubber.ogg'
 
 	afterattack(atom/target as mob|obj|turf|area, mob/user as mob)
 		user.drop_item()

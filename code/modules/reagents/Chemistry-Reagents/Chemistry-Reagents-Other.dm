@@ -2,7 +2,6 @@
 
 /datum/reagent/crayon_dust
 	name = "Crayon dust"
-	id = "crayon_dust"
 	description = "Intensely coloured powder obtained by grinding crayons."
 	reagent_state = LIQUID
 	color = "#888888"
@@ -12,55 +11,46 @@
 
 /datum/reagent/crayon_dust/red
 	name = "Red crayon dust"
-	id = "crayon_dust_red"
 	color = "#FE191A"
 	taste_description = "chalky strawberry wax"
 
 /datum/reagent/crayon_dust/orange
 	name = "Orange crayon dust"
-	id = "crayon_dust_orange"
 	color = "#FFBE4F"
 	taste_description = "chalky orange peels"
 
 /datum/reagent/crayon_dust/yellow
 	name = "Yellow crayon dust"
-	id = "crayon_dust_yellow"
 	color = "#FDFE7D"
 	taste_description = "chalky lemon rinds"
 
 /datum/reagent/crayon_dust/green
 	name = "Green crayon dust"
-	id = "crayon_dust_green"
 	color = "#18A31A"
 	taste_description = "chalky lime rinds"
 
 /datum/reagent/crayon_dust/blue
 	name = "Blue crayon dust"
-	id = "crayon_dust_blue"
 	color = "#247CFF"
 	taste_description = "chalky blueberry skins"
 
 /datum/reagent/crayon_dust/purple
 	name = "Purple crayon dust"
-	id = "crayon_dust_purple"
 	color = "#CC0099"
 	taste_description = "chalky grape skins"
 
 /datum/reagent/crayon_dust/grey //Mime
 	name = "Grey crayon dust"
-	id = "crayon_dust_grey"
 	color = "#808080"
 	taste_description = "chalky crushed dreams"
 
 /datum/reagent/crayon_dust/brown //Rainbow
 	name = "Brown crayon dust"
-	id = "crayon_dust_brown"
 	color = "#846F35"
 	taste_description = "raw, powerful creativity"
 
 /datum/reagent/paint
 	name = "Paint"
-	id = "paint"
 	description = "This paint will stick to almost any object."
 	reagent_state = LIQUID
 	color = "#808080"
@@ -133,7 +123,6 @@
 
 /datum/reagent/adminordrazine //An OP chemical for admins
 	name = "Adminordrazine"
-	id = "adminordrazine"
 	description = "It's magic, I ain't gotta explain shit."
 	reagent_state = LIQUID
 	color = "#C8A5DC"
@@ -173,15 +162,9 @@
 	M.sleeping = 0
 	M.jitteriness = 0
 	M.intoxication = 0
-	for(var/datum/disease/D in M.viruses)
-		D.spread = "Remissive"
-		D.stage--
-		if(D.stage < 1)
-			D.cure()
 
 /datum/reagent/gold
 	name = "Gold"
-	id = "gold"
 	description = "Gold is a dense, soft, shiny metal and the most malleable and ductile metal known."
 	reagent_state = SOLID
 	color = "#F7C430"
@@ -190,7 +173,6 @@
 
 /datum/reagent/silver
 	name = "Silver"
-	id = "silver"
 	description = "A soft, white, lustrous transition metal, it has the highest electrical conductivity of any element and the highest thermal conductivity of any metal."
 	reagent_state = SOLID
 	color = "#D0D0D0"
@@ -198,8 +180,7 @@
 	fallback_specific_heat = 0.241
 
 /datum/reagent/uranium
-	name ="Uranium"
-	id = "uranium"
+	name = "Uranium"
 	description = "A silvery-white metallic chemical element in the actinide series, weakly radioactive."
 	reagent_state = SOLID
 	color = "#B8B8C0"
@@ -222,30 +203,14 @@
 
 /datum/reagent/platinum
 	name ="Platinum"
-	id = "platinum"
 	description = "Platinum is a naturally occuring silvery metalic element."
 	reagent_state = SOLID
 	color = "#E0E0E0"
 	taste_description = "salty metalic miner tears"
 	fallback_specific_heat = 0.2971
 
-/datum/reagent/adrenaline
-	name = "Adrenaline"
-	id = "adrenaline"
-	description = "Adrenaline is a hormone used as a drug to treat cardiac arrest and other cardiac dysrhythmias resulting in diminished or absent cardiac output."
-	reagent_state = LIQUID
-	color = "#C8A5DC"
-	taste_description = "bitterness"
-	fallback_specific_heat = 0.75
-
-/datum/reagent/adrenaline/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
-	M.SetParalysis(0)
-	M.SetWeakened(0)
-	M.adjustToxLoss(rand(3)*removed)
-
 /datum/reagent/water/holywater
 	name = "Holy Water"
-	id = "holywater"
 	description = "An ashen-obsidian-water mix, this solution will alter certain sections of the brain's rationality."
 	color = "#E0E8EF"
 
@@ -277,7 +242,6 @@
 
 /datum/reagent/diethylamine
 	name = "Diethylamine"
-	id = "diethylamine"
 	description = "A secondary amine, mildly corrosive."
 	reagent_state = LIQUID
 	color = "#604030"
@@ -285,7 +249,6 @@
 
 /datum/reagent/surfactant // Foam precursor
 	name = "Azosurfactant"
-	id = "surfactant"
 	description = "A isocyanate liquid that forms a foam when mixed with water."
 	reagent_state = LIQUID
 	color = "#9E6B38"
@@ -293,7 +256,6 @@
 
 /datum/reagent/foaming_agent // Metal foaming agent. This is lithium hydride. Add other recipes (e.g. LiH + H2O -> LiOH + H2) eventually.
 	name = "Foaming agent"
-	id = "foaming_agent"
 	description = "A agent that yields metallic foam when mixed with light metal and a strong acid."
 	reagent_state = SOLID
 	color = "#664B63"
@@ -301,7 +263,6 @@
 
 /datum/reagent/thermite
 	name = "Thermite"
-	id = "thermite"
 	description = "Thermite produces an aluminothermic reaction known as a thermite reaction. Can be used to melt walls."
 	reagent_state = SOLID
 	color = "#673910"
@@ -325,9 +286,8 @@
 /datum/reagent/thermite/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
 	M.adjustFireLoss(3 * removed)
 
-/datum/reagent/space_cleaner
+/datum/reagent/spacecleaner
 	name = "Space cleaner"
-	id = "cleaner"
 	description = "A compound used to clean things. Now with 50% more sodium hypochlorite!"
 	reagent_state = LIQUID
 	color = "#A5F0EE"
@@ -335,17 +295,17 @@
 	taste_description = "sourness"
 	germ_adjust = 10
 
-/datum/reagent/space_cleaner/touch_obj(var/obj/O)
+/datum/reagent/spacecleaner/touch_obj(var/obj/O)
 	O.clean_blood()
 
-/datum/reagent/space_cleaner/touch_turf(var/turf/T)
+/datum/reagent/spacecleaner/touch_turf(var/turf/T)
 	if(volume >= 1)
 		if(istype(T, /turf/simulated))
 			var/turf/simulated/S = T
 			S.dirt = 0
 		T.clean_blood()
 
-/datum/reagent/space_cleaner/affect_touch(var/mob/living/carbon/M, var/alien, var/removed)
+/datum/reagent/spacecleaner/affect_touch(var/mob/living/carbon/M, var/alien, var/removed)
 	if(M.r_hand)
 		M.r_hand.clean_blood()
 	if(M.l_hand)
@@ -377,15 +337,14 @@
 		var/mob/living/carbon/slime/S = M
 		S.adjustToxLoss( volume * (removed/REM) * 0.5 )
 		if(!S.client)
-			if(S.Target) // Like cats
-				S.Target = null
-				++S.Discipline
+			if(S.target) // Like cats
+				S.target = null
+				++S.discipline
 		if(dose == removed)
-			S.visible_message("<span class='warning'>[S]'s flesh sizzles where the water touches it!</span>", "<span class='danger'>Your flesh burns in the water!</span>")
+			S.visible_message(span("warning", "[S]'s flesh sizzles where the space cleaner touches it!"), span("danger", "Your flesh burns in the space cleaner!"))
 
 /datum/reagent/lube
 	name = "Space Lube"
-	id = "lube"
 	description = "Lubricant is a substance introduced between two moving surfaces to reduce the friction and wear between them."
 	reagent_state = LIQUID
 	color = "#009CA8"
@@ -399,7 +358,6 @@
 
 /datum/reagent/silicate
 	name = "Silicate"
-	id = "silicate"
 	description = "A compound that can be used to reinforce glass."
 	reagent_state = LIQUID
 	color = "#C7FFFF"
@@ -414,7 +372,6 @@
 
 /datum/reagent/glycerol
 	name = "Glycerol"
-	id = "glycerol"
 	description = "Glycerol is a simple polyol compound. Glycerol is sweet-tasting and of low toxicity."
 	reagent_state = LIQUID
 	color = "#808080"
@@ -422,15 +379,55 @@
 
 /datum/reagent/nitroglycerin
 	name = "Nitroglycerin"
-	id = "nitroglycerin"
 	description = "Nitroglycerin is a heavy, colorless, oily, explosive liquid obtained by nitrating glycerol."
 	reagent_state = LIQUID
 	color = "#808080"
 	taste_description = "oil"
+	var/temp_set = FALSE
+
+/datum/reagent/nitroglycerin/proc/explode()
+	var/datum/effect/effect/system/reagents_explosion/e = new()
+	e.set_up(round (src.volume/2, 1), holder.my_atom, 0, 0)
+	if(isliving(holder.my_atom))
+		e.amount *= 0.5
+		var/mob/living/L = holder.my_atom
+		if(L.stat!=DEAD)
+			e.amount *= 0.5
+	e.start()
+	holder.clear_reagents()
+
+/datum/reagent/nitroglycerin/add_thermal_energy(var/added_energy)
+	. = ..()
+	if(!temp_set) // so initial temperature-setting doesn't make stuff explode
+		temp_set = TRUE
+		return
+	if(abs(added_energy) > (specific_heat * 5 / volume)) // can explode via cold or heat shock
+		explode()
+
+/datum/reagent/nitroglycerin/apply_force(var/force)
+	..()
+	if(prob(force * 6))
+		explode()
+
+/datum/reagent/nitroglycerin/touch_turf(var/turf/T)
+	. = ..()
+	explode()
+
+/datum/reagent/nitroglycerin/touch_obj(var/obj/O)
+	. = ..()
+	explode()
+
+/datum/reagent/nitroglycerin/touch_mob(var/mob/M)
+	. = ..()
+	explode()
+
+/datum/reagent/nitroglycerin/affect_blood(var/mob/living/carbon/human/H, var/alien, var/removed)
+	if(!istype(H) || alien == IS_DIONA)
+		return
+	H.add_chemical_effect(CE_PULSE, 2)
 
 /datum/reagent/coolant
 	name = "Coolant"
-	id = "coolant"
 	description = "Industrial cooling substance."
 	reagent_state = LIQUID
 	color = "#C8A5DC"
@@ -439,7 +436,6 @@
 
 /datum/reagent/ultraglue
 	name = "Ultra Glue"
-	id = "glue"
 	description = "An extremely powerful bonding agent."
 	color = "#FFFFCC"
 	taste_description = "a special education class"
@@ -447,7 +443,6 @@
 
 /datum/reagent/woodpulp
 	name = "Wood Pulp"
-	id = "woodpulp"
 	description = "A mass of wood fibers."
 	reagent_state = LIQUID
 	color = "#B97A57"
@@ -456,7 +451,6 @@
 
 /datum/reagent/luminol
 	name = "Luminol"
-	id = "luminol"
 	description = "A compound that interacts with blood on the molecular level."
 	reagent_state = LIQUID
 	color = "#F2F3F4"
@@ -471,7 +465,6 @@
 
 /datum/reagent/pyrosilicate
 	name = "Pyrosilicate"
-	id = "pyrosilicate"
 	description = "A bright orange powder consisting of strange self-heating properties that reacts when exposed to sodium chloride."
 	reagent_state = SOLID
 	color = "#FFFF00"
@@ -480,7 +473,6 @@
 
 /datum/reagent/cryosurfactant
 	name = "Cryosurfactant"
-	id = "cryosurfactant"
 	description = "A bright cyan liquid consisting of strange self-cooling properties that reacts when exposed to water."
 	reagent_state = LIQUID
 	color = "#00FFFF"
@@ -489,7 +481,6 @@
 
 /datum/reagent/mutone
 	name = "Mutone"
-	id = "mutone"
 	description = "A strange green powder with even stranger properties."
 	reagent_state = SOLID
 	color = "#11AA11"
@@ -513,7 +504,6 @@
 
 /datum/reagent/plexium
 	name = "Plexium"
-	id = "plexium"
 	description = "A yellow, fowl smelling liquid that seems to affect the brain in strange ways."
 	reagent_state = LIQUID
 	color = "#888822"
@@ -539,7 +529,6 @@
 
 /datum/reagent/venenum
 	name = "Venenum"
-	id = "venenum"
 	description = "A thick tar like liquid that seems to move around on it's own every now and then. Limited data shows it only works when injected into the bloodstream."
 	reagent_state = LIQUID
 	color = "#000000"
@@ -582,7 +571,6 @@
 
 /datum/reagent/fuel/zoragel
 	name = "Inert Gel"
-	id = "zoragel"
 	description = "A particularly adhesive but otherwise inert and harmless gel."
 	reagent_state = LIQUID
 	color = "#D35908"
@@ -591,7 +579,6 @@
 
 /datum/reagent/fuel/napalm
 	name = "Zo'rane Fire"
-	id = "greekfire"
 	description = "A highly flammable and cohesive gel once used commonly in the tunnels of Sedantis. Napalm sticks to kids."
 	reagent_state = LIQUID
 	color = "#D35908"
@@ -619,7 +606,6 @@
 //Shhh don't tell no one.
 /datum/reagent/estus
 	name = "Liquid Light"
-	id = "estus"
 	description = "This impossible substance slowly converts from a liquid into actual light."
 	reagent_state = LIQUID
 	color = "#ffff40"
@@ -650,7 +636,6 @@
 
 /datum/reagent/liquid_fire
 	name = "Liquid Fire"
-	id = "liquid_fire"
 	description = "A dangerous flammable chemical, capable of causing fires when in contact with organic matter."
 	reagent_state = LIQUID
 	color = "#E25822"
@@ -672,7 +657,6 @@
 
 /datum/reagent/black_matter
 	name = "Unstable Black Matter"
-	id = "black_matter"
 	description = "A pitch black blend of cosmic origins, handle with care."
 	color = "#000000"
 	taste_description = "emptyness"
@@ -697,7 +681,6 @@
 
 /datum/reagent/bluespace_dust
 	name = "Bluespace Dust"
-	id = "bluespace_dust"
 	description = "A dust composed of microscopic bluespace crystals."
 	color = "#1f8999"
 	taste_description = "fizzling blue"
@@ -718,7 +701,6 @@
 
 /datum/reagent/philosopher_stone
 	name = "Philosopher's Stone"
-	id = "philosopher_stone"
 	description = "A mythical compound, rumored to be the catalyst of fantastic reactions."
 	color = "#f4c430"
 	taste_description = "heavenly knowledge"
@@ -726,7 +708,6 @@
 
 /datum/reagent/sglue
 	name = "Sovereign Glue"
-	id = "sglue"
 	description = "A very potent adhesive which can be applied to inanimate surfaces."
 	reagent_state = LIQUID
 	color = "#EDE8E2"
@@ -743,7 +724,6 @@
 
 /datum/reagent/usolve
 	name = "Universal Solvent"
-	id = "usolve"
 	description = "A very potent solvent which can be applied to inanimate surfaces."
 	reagent_state = LIQUID
 	color = "#EDE8E2"
@@ -760,7 +740,6 @@
 
 /datum/reagent/shapesand
 	name = "Shapesand"
-	id = "shapesand"
 	description = "A strangely animate clump of sand which can shift its color and consistency."
 	reagent_state = SOLID
 	color = "#c2b280"
@@ -797,7 +776,6 @@
 
 /datum/reagent/love_potion
 	name = "Philter of Love"
-	id = "love"
 	description = "A sickly sweet compound that induces chemical dependency on the first person the subject sees."
 	reagent_state = LIQUID
 	color = "#ff69b4"
@@ -815,7 +793,6 @@
 
 /datum/reagent/bottle_lightning
 	name = "Bottled Lightning"
-	id = "lightning"
 	description = "A mysterious compound capable of producing electrical discharges."
 	reagent_state = LIQUID
 	color = "#70838A"
@@ -826,3 +803,19 @@
 /datum/reagent/bottle_lightning/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
 	if(prob(25))
 		tesla_zap(M, 6, 1500)
+
+/datum/reagent/stone_dust
+	name = "Stone Dust"
+	description = "Crystalline silica dust, harmful when inhaled."
+	reagent_state = SOLID
+	color = "#5a4d41"
+	taste_description = "dust"
+	specific_heat = 1
+
+/datum/reagent/stone_dust/affect_breathe(var/mob/living/carbon/human/H, var/alien, var/removed)
+	. = ..()
+	if(istype(H))
+		if(prob(15))
+			var/obj/item/organ/L = H.internal_organs_by_name[BP_LUNGS]
+			if(istype(L) && !L.robotic)
+				L.take_damage(0.5*removed)

@@ -7,10 +7,7 @@
 	possible_transfer_amounts = null
 	amount_per_transfer_from_this = 5
 	volume = 20
-
-/obj/item/reagent_containers/toothpaste/Initialize()
-	. = ..()
-	reagents.add_reagent("toothpaste", 20)
+	reagents_to_add = list(/datum/reagent/drink/toothpaste = 20)
 
 /obj/item/reagent_containers/toothpaste/on_reagent_change()
 	update_icon()
@@ -41,7 +38,7 @@
 /obj/item/reagent_containers/toothbrush/update_icon()
 	cut_overlays()
 
-	if(reagents.has_reagent("toothpaste"))
+	if(reagents.has_reagent(/datum/reagent/drink/toothpaste))
 		add_overlay("toothpaste_overlay")
 
 /obj/item/reagent_containers/toothbrush/attack_self(mob/user as mob)
@@ -71,7 +68,7 @@
 			if(!reagents.total_volume)
 				to_chat(user, "<span class='warning'>The [initial(name)] is dry!</span>")
 			else if(reagents.total_volume)
-				if(user.zone_sel.selecting == "mouth" && !(M.wear_mask && M.wear_mask.item_flags & AIRTIGHT))
+				if(user.zone_sel.selecting == BP_MOUTH && !(M.wear_mask && M.wear_mask.item_flags & AIRTIGHT))
 					user.do_attack_animation(src)
 					user.visible_message("<span class='warning'>[user] is trying to brush \the [target]'s teeth \the [src]!</span>")
 					playsound(loc, 'sound/effects/toothbrush.ogg', 15, 1)

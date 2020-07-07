@@ -33,7 +33,7 @@
 	var/obj/secbot_listener/listener = null
 	var/beacon_freq = 1445			// Navigation beacon frequency
 	var/control_freq = BOT_FREQ		// Bot control frequency
-	var/list/path = list()
+	var/list/turf/path = list()
 	var/frustration = 0
 	var/turf/patrol_target = null	// This is where we are headed
 	var/closest_dist				// Used to find the closest beakon
@@ -58,6 +58,7 @@
 
 	var/datum/callback/patrol_callback	// this is here so we don't constantly recreate this datum, it being identical each time.
 	var/move_to_delay = 4 //delay for the automated movement.
+	can_take_pai = FALSE
 
 /mob/living/bot/secbot/beepsky
 	name = "Officer Beepsky"

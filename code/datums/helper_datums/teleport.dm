@@ -192,20 +192,6 @@
 				if(O.opacity)
 					boominess += 10
 
-			if(istype(teleatom, /obj/mecha))
-				valid = 1
-				var/obj/mecha/M = teleatom
-				if(newdest)
-					M.ex_act(3)
-					M.occupant.adjustHalLoss(25)
-					to_chat(M.occupant, "<span class='danger'>You feel a sharp abdominal pain inside yourself as the [teleatom] phases into \the [impediment]</span>")
-
-				boominess += max(0, M.w_class - 1)
-				if(M.density)
-					boominess += 5
-				if(M.opacity)
-					boominess += 10
-
 			if(istype(teleatom, /mob/living))
 				valid = 1
 				var/mob/living/L = teleatom
@@ -222,7 +208,7 @@
 							if(organs_to_gib.len)
 								var/obj/item/organ/external/E = pick(organs_to_gib)
 								to_chat(H, "<span class='danger'>You partially phase into \the [impediment], causing your [E.name] to violently dematerialize!</span>")
-								H.apply_damage(35, BRUTE, E, 0, sharp=0, edge=0)
+								H.apply_damage(35, BRUTE, E, 0)
 
 					else
 						if(newdest)

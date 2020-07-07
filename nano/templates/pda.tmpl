@@ -154,9 +154,6 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                     {{if data.cartridge.access.access_reagent_scanner==1}}
                         {{:helper.link(data.scanmode == 3 ? 'Disable Reagent Scanner' : 'Enable Reagent Scanner', 'gear', {'choice' : "Reagent Scan"}, null, 'fixedLeftWider')}}
                     {{/if}}
-                    {{if data.cartridge.access.access_engine==1}}
-                        {{:helper.link(data.scanmode == 4 ? 'Disable Halogen Counter' : 'Enable Halogen Counter', 'gear', {'choice' : "Halogen Counter"}, null, 'fixedLeftWider')}}
-                    {{/if}}
                     {{if data.cartridge.access.access_atmos==1}}
                         {{:helper.link(data.scanmode == 5 ? 'Disable Gas Scanner' : 'Enable Gas Scanner', 'gear', {'choice' : "Gas Scan"}, null, 'fixedLeftWide')}}
                     {{/if}}
@@ -632,7 +629,6 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                     {{if data.records.general_exists == 1}}
                         <span class="good">Name:		</span> <span class="average">{{:data.records.general.name}}	</span><br>
                         <span class="good">Sex:			</span> <span class="average">{{:data.records.general.sex}}		</span><br>
-                        <span class="good">Species:		</span> <span class="average">{{:data.records.general.species}}	</span><br>
                         <span class="good">Age:			</span> <span class="average">{{:data.records.general.age}}		</span><br>
                         <span class="good">Rank:		</span> <span class="average">{{:data.records.general.rank}}	</span><br>
                         <span class="good">Fingerprint:		</span> <span class="average">{{:data.records.general.fingerprint}}	</span><br>
@@ -683,7 +679,6 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                     {{if data.records.general_exists == 1}}
                         <span class="good">Name: </span> <span class="average"> {{:data.records.general.name}}</span><br>
                         <span class="good">Sex: </span>  <span class="average">{{:data.records.general.sex}} </span><br>
-                        <span class="good">Species: </span> <span class="average">{{:data.records.general.species}} </span><br>
                         <span class="good">Age: </span>  <span class="average">{{:data.records.general.age}} </span><br>
                         <span class="good">Rank: </span>  <span class="average">{{:data.records.general.rank}} </span><br>
                         <span class="good">Fingerprint:  </span> <span class="average">{{:data.records.general.fingerprint}} </span><br>

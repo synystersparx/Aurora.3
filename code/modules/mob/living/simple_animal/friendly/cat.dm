@@ -2,11 +2,13 @@
 /mob/living/simple_animal/cat
 	name = "cat"
 	desc = "A domesticated, feline pet. Has a tendency to adopt crewmembers."
+	icon = 'icons/mob/npc/pets.dmi'
 	icon_state = "cat2"
 	item_state = "cat2"
 	icon_living = "cat2"
 	icon_dead = "cat2_dead"
 	icon_rest = "cat2_rest"
+	color = list(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1, 0,0,0,0)
 	can_nap = 1
 	speak = list("Meow!","Esp!","Purr!","HSSSSS")
 	speak_emote = list("purrs", "meows")
@@ -32,9 +34,18 @@
 	var/mob/living/simple_animal/rat/rattarget = null
 	seek_speed = 5
 	pass_flags = PASSTABLE
+	//Counter for how intense the radlight is
+	var/radlight = 0
+	//How many metabolism procs to wait before rapidly dropping the levels down so the cats stop glowing fairly quickly
+	var/radlight_fade_delay = 10
+	canbrush = TRUE
 	possession_candidate = 1
 	emote_sounds = list('sound/effects/creatures/cat_meow.ogg', 'sound/effects/creatures/cat_meow2.ogg')
 	butchering_products = list(/obj/item/stack/material/animalhide/cat = 2)
+
+/mob/living/simple_animal/cat/Initialize()
+	. = ..()
+	src.filters += filter(type="drop_shadow", size = 2, offset = 2, color = rgb(0,208,0,0))
 
 /mob/living/simple_animal/cat/think()
 	//MICE!
@@ -44,7 +55,6 @@
 			if(snack.stat != DEAD && prob(65))//The probability allows her to not get stuck target the first rat, reducing exploits
 				rattarget = snack
 				movement_target = snack
-				foodtarget = 0	//chasing mice takes precedence over eating food
 				if(prob(15))
 					audible_emote(pick("hisses and spits!","mrowls fiercely!","eyes [snack] hungrily."))
 
@@ -77,20 +87,6 @@
 					var/atom/A = pick(visible)
 					visible_emote("suddenly stops and stares at something unseen[istype(A) ? " near [A]":""].",0)
 
-/mob/living/simple_animal/cat/proc/handle_movement_target()
-	//if our target is neither inside a turf or inside a human(???), stop
-	if((movement_target) && !(isturf(movement_target.loc) || ishuman(movement_target.loc) ))
-		movement_target = null
-		stop_automated_movement = 0
-	//if we have no target or our current one is out of sight/too far away
-	if( !movement_target || !(movement_target.loc in oview(src, 4)) )
-		movement_target = null
-		stop_automated_movement = 0
-
-	if(movement_target)
-		stop_automated_movement = 1
-		walk_to(src, movement_target, 0, DS2TICKS(seek_move_delay))
-
 /mob/living/simple_animal/cat/proc/attack_mice()
 	if((src.loc) && isturf(src.loc))
 		if(!stat && !resting && !buckled)
@@ -103,19 +99,66 @@
 					if (prob(75))
 						break//usually only kill one rat per proc
 
-/mob/living/simple_animal/cat/beg(var/atom/thing, var/atom/holder)
-	visible_emote("licks [get_pronoun(POSESSIVE_ADJECTIVE)] lips and hungrily glares at [holder]'s [thing.name]",0)
-
 /mob/living/simple_animal/cat/Released()
 	//A thrown cat will immediately attack mice near where it lands
 	handle_movement_target()
 	addtimer(CALLBACK(src, .proc/attack_mice), 3)
 	..()
 
+/mob/living/simple_animal/cat/proc/handle_radiation_light()
+	radlight = clamp(radlight, 0, 98)
+	if (radlight > 0)
+		radlight_fade_delay = clamp(radlight_fade_delay-1, 0, 10)
+		var/cc = radlight/120.0
+		if(radlight_fade_delay == 0)
+			radlight = clamp(radlight - 11, 0, 100)
+		var/cshift = list()
+		var/radintensity = round(radlight/33.0)
+		switch(radintensity)
+			if(0)
+				cc = cc+(cc/2.0)
+				cshift = list(1,cc,0,0, 0,1,0,0, 0,cc,1,0, 0,0,0,1, 0,0,0,0)
+			if(1)
+				cc = cc+(cc/2.0)
+				cshift = list(1,0,0,0, 0,1,0,0, cc,cc,1,0, 0,0,0,1, 0,0,0,0)
+			if(2)
+				cshift = list(1,0,0,0, cc,1,0,0, cc,0,1,0, 0,0,0,1, 0,0,0,0)
+
+		if(color != cshift || radlight == 0)
+			animate(src, color=cshift,time=8,flags=ANIMATION_PARALLEL)
+			switch(radintensity)
+				if(0)
+					animate(src.filters[1], color=rgb(0,208,0,140), time=10, easing = SINE_EASING,flags=ANIMATION_PARALLEL)
+					set_light(1.4, radlight/15, "#2cfa1f",)
+				if(1)
+					animate(src.filters[1], color=rgb(208,208,0,140), time=10, easing = SINE_EASING,flags=ANIMATION_PARALLEL)
+					set_light(1.4, radlight/25, "#ffff00",)
+				if(2)
+					animate(src.filters[1], color=rgb(208,0,0,140), time=10, easing = SINE_EASING,flags=ANIMATION_PARALLEL)
+					set_light(1.4, radlight/30, "#ca0b00",)
+			if (radlight == 0)
+				animate(src.filters[1], color=rgb(0,255,0,0), time=5,flags=ANIMATION_PARALLEL)
+				color = color = list(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1, 0,0,0,0)
+
+/mob/living/simple_animal/cat/apply_radiation(var/rads)
+	radlight += rads*2
+	radlight_fade_delay = 10
+	total_radiation += rads
+	if (total_radiation < 0)
+		total_radiation = 0
+
 /mob/living/simple_animal/cat/death()
 	.=..()
 	stat = DEAD
 
+/mob/living/simple_animal/cat/Life()
+	. = ..()
+	handle_radiation_light()
+
+/mob/living/simple_animal/cat/apply_radiation_effects()
+	. = ..()
+	if(.)
+		apply_effect((rand(30,60)),IRRADIATE,blocked=0)
 
 /mob/living/simple_animal/cat/proc/handle_flee_target()
 	//see if we should stop fleeing
@@ -249,13 +292,14 @@
 	befriend_job = "Chief Medical Officer"
 	holder_type = /obj/item/holder/cat/black
 
-/mob/living/simple_animal/cat/fluff/Runtime/death()
-	.=..()
-	desc = "Oh no, Runtime is dead! What kind of monster would do this?"
+/mob/living/simple_animal/cat/fluff/examine(mob/user)
+	..()
+	if(stat == DEAD)
+		to_chat(user, "Oh no, [name] is dead! What kind of monster would do this?")
 
 /mob/living/simple_animal/cat/kitten
 	name = "kitten"
-	desc = "D'aaawwww"
+	desc = "D'aaawwww."
 	icon_state = "kitten"
 	item_state = "kitten"
 	icon_living = "kitten"
@@ -264,13 +308,14 @@
 	gender = NEUTER
 	holder_type = /obj/item/holder/cat/kitten
 
-/mob/living/simple_animal/cat/kitten/death()
-	.=..()
-	desc = "It's a dead kitten! What kind of monster would do this?"
+/mob/living/simple_animal/cat/kitten/examine(mob/user)
+	..()
+	if(stat == DEAD)
+		to_chat(user, "It's a dead kitten! What kind of monster would do this?")
 
 /mob/living/simple_animal/cat/fluff/bones
 	name = "Bones"
-	desc = "That's Bones the cat. He's a laid back, black cat. Meow."
+	desc = "He's a laid back, black cat. Meow."
 	gender = MALE
 	icon_state = "cat3"
 	item_state = "cat3"
@@ -280,10 +325,6 @@
 	can_nap = 1
 	var/friend_name = "Erstatz Vryroxes"
 	holder_type = /obj/item/holder/cat/black
-
-/mob/living/simple_animal/cat/fluff/bones/death()
-	.=..()
-	desc = "Bones is dead"
 
 /mob/living/simple_animal/cat/kitten/Initialize()
 	. = ..()

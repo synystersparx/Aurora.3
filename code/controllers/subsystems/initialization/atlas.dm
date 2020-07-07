@@ -17,7 +17,7 @@ var/datum/controller/subsystem/atlas/SSatlas
 	var/map_override	// If set, SSatlas will forcibly load this map. If the map does not exist, mapload will fail and SSatlas will panic.
 	var/list/spawn_locations = list()
 
-	var/list/connected_z_cache = list()
+	var/list/list/connected_z_cache = list()
 	var/z_levels = 0	// Each bit represents a connection between adjacent levels.  So the first bit means levels 1 and 2 are connected.
 
 /datum/controller/subsystem/atlas/stat_entry()
@@ -134,7 +134,6 @@ var/datum/controller/subsystem/atlas/SSatlas
 
 /datum/controller/subsystem/atlas/proc/load_map_meta()
 	// This needs to be done after current_map is set, but before mapload.
-	lobby_image = new /obj/effect/lobby_image
 
 	admin_departments = list(
 		"[current_map.boss_name]",

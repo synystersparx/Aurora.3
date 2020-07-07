@@ -43,17 +43,17 @@
 	/obj/item/device/radio/beacon,\
 	/obj/item/autopsy_scanner,\
 	/obj/item/bikehorn,\
-	/obj/item/bonesetter,\
+	/obj/item/surgery/bonesetter,\
 	/obj/item/material/hatchet/butch,\
-	/obj/item/caution,\
-	/obj/item/caution/cone,\
+	/obj/item/clothing/suit/caution,\
+	/obj/item/clothing/head/cone,\
 	/obj/item/crowbar,\
 	/obj/item/clipboard,\
 	/obj/item/cell,\
-	/obj/item/circular_saw,\
+	/obj/item/surgery/circular_saw,\
 	/obj/item/material/hatchet,\
 	/obj/item/handcuffs,\
-	/obj/item/hemostat,\
+	/obj/item/surgery/hemostat,\
 	/obj/item/material/knife,\
 	/obj/item/flame/lighter,\
 	/obj/item/light/bulb,\
@@ -95,9 +95,9 @@
 			var/spawn_type = pop(spawning_types)
 			var/obj/spawned_obj = new spawn_type(src.loc)
 			if(source_material)
-				if(lentext(source_material.name) < MAX_MESSAGE_LEN)
+				if(length(source_material.name) < MAX_MESSAGE_LEN)
 					spawned_obj.name = "[source_material] " +  spawned_obj.name
-				if(lentext(source_material.desc) < MAX_MESSAGE_LEN * 2)
+				if(length(source_material.desc) < MAX_MESSAGE_LEN * 2)
 					if(spawned_obj.desc)
 						spawned_obj.desc += " It is made of [source_material]."
 					else

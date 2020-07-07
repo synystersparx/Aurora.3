@@ -6,12 +6,15 @@ var/global/list/obj/item/device/pda/PDAs = list()
 /obj/item/device/pda
 	name = "\improper PDA"
 	desc = "A portable microcomputer by Thinktronic Systems, LTD. Functionality determined by a preprogrammed ROM cartridge."
+	desc_info = "Alt-click to remove IDs. Ctrl-click to remove things in the pen slot."
 	icon = 'icons/obj/pda.dmi'
 	icon_state = "pda"
 	item_state = "electronic"
 	w_class = 2.0
 	slot_flags = SLOT_ID | SLOT_BELT
 	uv_intensity = 15
+	drop_sound = 'sound/items/drop/disk.ogg'
+	pickup_sound = 'sound/items/pickup/disk.ogg'
 
 	//Main variables
 	var/owner = null
@@ -127,7 +130,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
  * Engineering
  */
 
- /obj/item/device/pda/atmos
+/obj/item/device/pda/atmos
 	icon_state = "pda-atmo"
 	default_cartridge = /obj/item/cartridge/atmos
 	inserted_item = /obj/item/pen/silver
@@ -145,7 +148,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
  * Cargo
  */
 
- /obj/item/device/pda/cargo
+/obj/item/device/pda/cargo
 	icon_state = "pda-cargo"
 	default_cartridge = /obj/item/cartridge/quartermaster
 	inserted_item = /obj/item/pen/silver
@@ -258,7 +261,6 @@ var/global/list/obj/item/device/pda/PDAs = list()
 
 /obj/item/device/pda/lawyer
 	icon_state = "pda-lawyer"
-	default_cartridge = /obj/item/cartridge/lawyer
 	inserted_item = /obj/item/pen/fountain
 	ttone = "..."
 
@@ -302,7 +304,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 
 // Special AI/pAI PDAs that cannot explode.
 /obj/item/device/pda/ai
-	icon_state = "NONE"
+	icon_state = null
 	ttone = "data"
 	newstone = "news"
 	detonate = 0
@@ -424,7 +426,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 
 /obj/item/device/pda/MouseDrop(obj/over_object as obj, src_location, over_location)
 	var/mob/M = usr
-	if((!istype(over_object, /obj/screen)) && !use_check(M))
+	if(!istype(over_object, /obj/screen) && !use_check(M) && !(over_object == src))
 		return attack_self(M)
 
 /obj/item/device/pda/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
@@ -433,7 +435,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 	var/auto_update = 1
 	if(mode in no_auto_update)
 		auto_update = 0
-	if(old_ui && (mode == lastmode && ui_tick % 5 && mode in update_every_five))
+	if(old_ui && (mode == lastmode && ui_tick % 5 && (mode in update_every_five)))
 		return
 
 	lastmode = mode
@@ -535,7 +537,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 						if(P.icon_state == "pda-hop"||P.icon_state == "pda-bar"||P.icon_state == "pda-holy"||P.icon_state == "pda-lawyer"||P.icon_state == "pda-libb"||P.icon_state == "pda-hydro"||P.icon_state == "pda-chef"||P.icon_state == "pda-j")
 							pdas.Add(list(list("Name" = "[P]", "Reference" = "\ref[P]", "Detonate" = "[P.detonate]", "inconvo" = "0")))
 					if(8)	//medical
-						if(P.icon_state == "pda-cmo"||P.icon_state == "pda-v"||P.icon_state == "pda-m"||P.icon_state == "pda-chem")
+						if(P.icon_state == "pda-cmo"||P.icon_state == "pda-v"||P.icon_state == "pda-m"||P.icon_state == "pda-chem"||P.icon_state == "pda-psych")
 							pdas.Add(list(list("Name" = "[P]", "Reference" = "\ref[P]", "Detonate" = "[P.detonate]", "inconvo" = "0")))
 			count++
 
@@ -744,11 +746,6 @@ var/global/list/obj/item/device/pda/PDAs = list()
 				scanmode = 0
 			else if((!isnull(cartridge)) && (cartridge.access_reagent_scanner))
 				scanmode = 3
-		if("Halogen Counter")
-			if(scanmode == 4)
-				scanmode = 0
-			else if((!isnull(cartridge)) && (cartridge.access_engine))
-				scanmode = 4
 		if("Honk")
 			if ( !(last_honk && world.time < last_honk + 20) )
 				playsound(loc, 'sound/items/bikehorn.ogg', 50, 1)
@@ -1100,7 +1097,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 
 		if (USE_SUCCESS)
 			if (!inserted_item)
-				to_chat(user, "<span class='notice'>[src] does not have pen in it.</span>")
+				to_chat(user, "<span class='notice'>[src] does not have a pen in it.</span>")
 				return
 
 			if (loc == user && !user.get_active_hand())
@@ -1116,11 +1113,17 @@ var/global/list/obj/item/device/pda/PDAs = list()
 
 /obj/item/device/pda/proc/create_message(var/mob/living/U = usr, var/obj/item/device/pda/P, var/tap = 1)
 	if(tap)
-		U.visible_message("<span class='notice'>\The [U] taps on \his PDA's screen.</span>")
+		U.visible_message("<b>\The [U]</b> taps on \his PDA's screen.")
 	var/t = input(U, "Please enter message", P.name, null) as text|null
 	t = sanitize(t)
 	//t = readd_quotes(t)
 	t = replace_characters(t, list("&#34;" = "\""))
+	if(iscarbon(U) && t)
+		var/mob/living/carbon/C = U
+		if(C.hallucination >= 50 && prob(C.hallucination / 10))			//If you're really hallucinating, you might not be typing what you think you are
+			var/t_orig = t
+			t = pick(SShallucinations.hallucinated_phrases)								//see carbon/hallucination.dm
+			log_pda("[usr] (PDA: [C.name]) typed \"[t_orig]\" then hallucination changed it to \"[t]\". Recipient was [P.owner]",ckey=key_name(C),ckey_target=key_name(P.owner))
 	if (!t || !istype(P))
 		return
 	if (!in_range(src, U) && loc != U)
@@ -1160,19 +1163,6 @@ var/global/list/obj/item/device/pda/PDAs = list()
 			conversations.Add("\ref[P]")
 		if(!P.conversations.Find("\ref[src]"))
 			P.conversations.Add("\ref[src]")
-
-
-		if (prob(15)) //Give the AI a chance of intercepting the message
-			var/who = src.owner // revealing sender
-			if(prob(50))
-				who = P.owner // revealing recipient
-
-			for(var/mob/living/silicon/ai/ai in mob_list)
-				if(ai.aiPDA != P && ai.aiPDA != src)
-					if(who != P.owner) // if not revealing the recipient
-						ai.show_message("<i>Intercepted message from <b>[who]</b>: [t]</i>")
-					else // if not revealing the sender
-						ai.show_message("<i>Intercepted message to <b>[who]</b>: [t]</i>")
 
 		P.new_message_from_pda(src, t)
 		SSnanoui.update_user_uis(U, src) // Update the sending user's PDA UI so that they can see the new message
@@ -1333,7 +1323,6 @@ var/global/list/obj/item/device/pda/PDAs = list()
 				if (cartridge.radio)
 					cartridge.radio.hostpda = null
 				to_chat(usr, "<span class='notice'>You remove \the [cartridge] from the [name].</span>")
-				playsound(loc, 'sound/machines/click.ogg', 50, 1)
 				cartridge = null
 
 /obj/item/device/pda/proc/id_check(mob/user as mob, choice as num)//To check for IDs; 1 for in-pda use, 2 for out of pda use.
@@ -1364,7 +1353,6 @@ var/global/list/obj/item/device/pda/PDAs = list()
 		cartridge = C
 		user.drop_from_inventory(cartridge,src)
 		to_chat(user, "<span class='notice'>You insert [cartridge] into [src].</span>")
-		playsound(loc, 'sound/machines/click.ogg', 50, 1)
 		SSnanoui.update_uis(src) // update all UIs attached to src
 		if(cartridge.radio)
 			cartridge.radio.hostpda = src
@@ -1410,65 +1398,8 @@ var/global/list/obj/item/device/pda/PDAs = list()
 		to_chat(user, "<span class='notice'>Card scanned.</span>")
 	try_sort_pda_list()
 
-/obj/item/device/pda/attack(mob/living/C as mob, mob/living/user as mob)
-	if (istype(C, /mob/living/carbon))
-		switch(scanmode)
-			if(1)
-
-				for (var/mob/O in viewers(C, null))
-					O.show_message("<span class='warning'>\The [user] has analyzed [C]'s vitals!</span>", 1)
-
-				user.show_message("<span class='notice'>Analyzing Results for [C]:</span>")
-				user.show_message("<span class='notice'>    Overall Status: [C.stat > 1 ? "dead" : "[C.health - C.halloss]% healthy"]</span>", 1)
-				user.show_message(text("<span class='notice'>    Damage Specifics:</span> <span class='[]'>[]</span>-<span class='[]'>[]</span>-<span class='[]'>[]</span>-<span class='[]'>[]</span>",
-						(C.getOxyLoss() > 50) ? "warning" : "", calcDamage(C.getOxyLoss()),
-						(C.getToxLoss() > 50) ? "warning" : "", calcDamage(C.getToxLoss()),
-						(C.getFireLoss() > 50) ? "warning" : "", calcDamage(C.getFireLoss()),
-						(C.getBruteLoss() > 50) ? "warning" : "", calcDamage(C.getBruteLoss())
-						), 1)
-				user.show_message("<span class='notice'>    Key: Suffocation/Toxin/Burns/Brute</span>", 1)
-				user.show_message("<span class='notice'>    Body Temperature: [C.bodytemperature-T0C]&deg;C ([C.bodytemperature*1.8-459.67]&deg;F)</span>", 1)
-				if(C.tod && (C.stat == DEAD || (C.status_flags & FAKEDEATH)))
-					user.show_message("<span class='notice'>    Time of Death: [C.tod]</span>")
-				if(istype(C, /mob/living/carbon/human))
-					var/mob/living/carbon/human/H = C
-					var/list/damaged = H.get_damaged_organs(1,1)
-					user.show_message("<span class='notice'>Localized Damage, Brute/Burn:</span>",1)
-					if(length(damaged)>0)
-						for(var/obj/item/organ/external/org in damaged)
-							user.show_message(text("<span class='notice'>     []: <span class='[]'>[]</span>-<span class='[]'>[]</span></span>",
-									capitalize(org.name), (org.brute_dam > 0) ? "warning" : "notice", calcDamage(org.brute_dam), (org.burn_dam > 0) ? "warning" : "notice", calcDamage(org.burn_dam)),1)
-					else
-						user.show_message("<span class='notice'>    Limbs are OK.</span>",1)
-
-				for(var/datum/disease/D in C.viruses)
-					if(!D.hidden[SCANNER])
-						user.show_message("<span class='warning'><b>Warning: [D.form] Detected</b>\nName: [D.name].\nType: [D.spread].\nStage: [D.stage]/[D.max_stages].\nPossible Cure: [D.cure]</span>")
-
-			if(2)
-				if (!istype(C:dna, /datum/dna))
-					to_chat(user, "<span class='notice'>No fingerprints found on [C]</span>")
-				else
-					to_chat(user, text("<span class='notice'>\The [C]'s Fingerprints: [md5(C:dna.uni_identity)]</span>"))
-				if ( !(C:blood_DNA) )
-					to_chat(user, "<span class='notice'>No blood found on [C]</span>")
-					if(C:blood_DNA)
-						qdel(C:blood_DNA)
-				else
-					to_chat(user, "<span class='notice'>Blood found on [C]. Analysing...</span>")
-					spawn(15)
-						for(var/blood in C:blood_DNA)
-							to_chat(user, "<span class='notice'>Blood type: [C:blood_DNA[blood]]\nDNA: [blood]</span>")
-
-			if(4)
-				for (var/mob/O in viewers(C, null))
-					O.show_message("<span class='warning'>\The [user] has analyzed [C]'s radiation levels!</span>", 1)
-
-				user.show_message("<span class='notice'>Analyzing Results for [C]:</span>")
-				if(C.total_radiation)
-					user.show_message("<span class='notice'>Radiation Level: [C.total_radiation]</span>")
-				else
-					user.show_message("<span class='notice'>No radiation detected.</span>")
+/obj/item/device/pda/attack(mob/living/C, mob/living/user)
+	health_scan_mob(C, user, TRUE)
 
 /obj/item/device/pda/afterattack(atom/A as mob|obj|turf|area, mob/user as mob, proximity)
 	if(!proximity) return
@@ -1599,6 +1530,10 @@ var/global/list/obj/item/device/pda/PDAs = list()
 		plist[text("[name]")] = P
 	return plist
 
+/obj/item/device/pda/CouldUseTopic(var/mob/user)
+	..()
+	if(iscarbon(user))
+		playsound(src, 'sound/machines/pda_click.ogg', 20)
 
 //Some spare PDAs in a box
 /obj/item/storage/box/PDAs

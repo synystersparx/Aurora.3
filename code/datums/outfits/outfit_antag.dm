@@ -14,7 +14,7 @@
 	belt = /obj/item/storage/belt/utility/full
 	gloves = /obj/item/clothing/gloves/combat
 	shoes = /obj/item/clothing/shoes/combat
-	l_ear = /obj/item/device/radio/headset/syndicate
+	l_ear = /obj/item/device/radio/headset/syndicate/alt
 	id = /obj/item/card/id/syndicate
 	r_pocket = /obj/item/device/radio/uplink
 	backpack_contents = list(
@@ -35,8 +35,9 @@
 
 	var/obj/item/device/radio/uplink/U = H.r_store
 	if(istype(U))
-		U.hidden_uplink.uplink_owner = "[H.key]"
+		U.hidden_uplink.uplink_owner = H.mind
 		U.hidden_uplink.uses = uplink_uses
+		U.hidden_uplink.nanoui_menu = 1
 
 /datum/outfit/admin/syndicate/get_id_access()
 	return get_syndicate_access(id_access)
@@ -109,7 +110,7 @@
 	allow_backbag_choice = FALSE
 
 	uniform = /obj/item/clothing/under/syndicate/ninja
-	back = /obj/item/rig/light/ninja
+	back = null
 	belt = /obj/item/storage/belt/ninja
 	shoes = /obj/item/clothing/shoes/swat/ert
 	gloves = /obj/item/clothing/ring/ninja
@@ -137,7 +138,11 @@
 	if(visualsOnly)
 		return
 
-	H.equip_to_slot_or_del(new /obj/item/device/ninja_uplink(H, H.mind), slot_l_store)
+	var/obj/item/rig/light/ninja/rig = new /obj/item/rig/light/ninja(src)
+	rig.dnaLock = H.dna
+	H.equip_to_slot_or_del(rig, slot_l_hand)
+
+	H.equip_to_slot_or_del(new /obj/item/device/special_uplink/ninja(H, H.mind), slot_l_store)
 
 /datum/outfit/admin/syndicate/mercenary
 	name = "Mercenary"
@@ -158,18 +163,14 @@
 		return
 
 	if(!H.shoes)
-		H.equip_to_slot_or_del(new /obj/item/clothing/shoes/jackboots/unathi(H), slot_shoes)
+		H.equip_to_slot_or_del(new /obj/item/clothing/shoes/jackboots/toeless(H), slot_shoes)
 
 /datum/outfit/admin/syndicate/raider
 	name = "Raider"
 	allow_backbag_choice = FALSE
 
 	uniform = list(
-		/obj/item/clothing/under/soviet,
-		/obj/item/clothing/under/pirate,
-		/obj/item/clothing/under/redcoat,
 		/obj/item/clothing/under/serviceoveralls,
-		/obj/item/clothing/under/captain_fly,
 		/obj/item/clothing/under/det,
 		/obj/item/clothing/under/brown,
 		/obj/item/clothing/under/syndicate/tracksuit
@@ -221,7 +222,7 @@
 		return
 
 	if(!H.shoes)
-		var/fallback_type = pick(/obj/item/clothing/shoes/sandal, /obj/item/clothing/shoes/jackboots/unathi)
+		var/fallback_type = pick(/obj/item/clothing/shoes/sandal, /obj/item/clothing/shoes/jackboots/toeless)
 		H.equip_to_slot_or_del(new fallback_type(H), slot_shoes)
 
 	var/obj/item/storage/wallet/W = H.wear_id
@@ -230,6 +231,96 @@
 	if(W)
 		W.handle_item_insertion(id)
 		spawn_money(rand(50,150)*10,W)
+
+/datum/outfit/admin/syndicate/raider/burglar
+	name = "Burglar"
+
+	uniform = list(
+		/obj/item/clothing/under/suit_jacket/really_black,
+		/obj/item/clothing/under/suit_jacket/charcoal,
+		/obj/item/clothing/under/suit_jacket/navy,
+		/obj/item/clothing/under/suit_jacket/burgundy
+		)
+
+	suit = /obj/item/clothing/suit/armor/bulletproof
+
+	shoes = list(
+		/obj/item/clothing/shoes/laceup/all_species,
+		/obj/item/clothing/shoes/laceup/brown/all_species
+	)
+
+	glasses = list(
+		/obj/item/clothing/glasses/sunglasses,
+		/obj/item/clothing/glasses/sunglasses/aviator
+	)
+
+	head = null
+
+	gloves = list(
+		/obj/item/clothing/gloves/watch,
+		/obj/item/clothing/gloves/watch/silver,
+		/obj/item/clothing/gloves/watch/gold,
+		/obj/item/clothing/gloves/watch/spy
+	)
+
+	l_ear = /obj/item/device/radio/headset/burglar
+	l_pocket = /obj/item/syndie/teleporter
+	r_pocket = /obj/item/device/special_uplink/burglar
+	id = /obj/item/storage/wallet
+
+	r_hand = /obj/item/storage/briefcase/black
+
+	backpack_contents = list()
+
+/datum/outfit/admin/syndicate/raider/burglar/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
+	. = ..()
+	if(visualsOnly)
+		return
+
+	var/static/list/burglar_guns = list(
+		/obj/item/gun/energy/rifle/icelance,
+		/obj/item/gun/energy/retro,
+		/obj/item/gun/projectile/silenced,
+		/obj/item/gun/projectile/colt,
+		/obj/item/gun/projectile/revolver/deckard,
+		/obj/item/gun/projectile/revolver/lemat
+		)
+
+	var/new_gun = pick(burglar_guns)
+	var/turf/T = get_turf(H)
+
+	var/obj/item/primary = new new_gun(T)
+	var/obj/item/clothing/accessory/holster/armpit/holster
+
+	if(primary.slot_flags & SLOT_HOLSTER)
+		holster = new /obj/item/clothing/accessory/holster/armpit(T)
+		holster.holstered = primary
+		primary.forceMove(holster)
+	else if(!H.belt && (primary.slot_flags & SLOT_BELT))
+		H.equip_to_slot_or_del(primary, slot_belt)
+	else if(!H.back && (primary.slot_flags & SLOT_BACK))
+		H.equip_to_slot_or_del(primary, slot_back)
+	else
+		H.put_in_any_hand_if_possible(primary)
+
+	if(istype(primary, /obj/item/gun/projectile))
+		var/obj/item/gun/projectile/bullet_thrower = primary
+		var/obj/item/storage/briefcase/B = locate() in H
+		if(bullet_thrower.magazine_type)
+			new bullet_thrower.magazine_type(B)
+			if(prob(20)) //don't want to give them too much
+				new bullet_thrower.magazine_type(B)
+		else if(bullet_thrower.ammo_type)
+			for(var/i in 1 to rand(3, 5) + rand(0, 2))
+				new bullet_thrower.ammo_type(B)
+		H.put_in_hands(B)
+
+	if(holster)
+		var/obj/item/clothing/under/uniform = H.w_uniform
+		if(istype(uniform) && uniform.can_attach_accessory(holster))
+			uniform.attackby(holster, H)
+		else
+			H.put_in_any_hand_if_possible(holster)
 
 // Non-syndicate antag outfits
 
@@ -276,3 +367,22 @@
 	backpack_contents = list(
 		/obj/item/storage/box = 1
 	)
+
+/datum/outfit/admin/wizard/apprentice
+	name = "Space Wizard Apprentice"
+	l_hand = null
+	r_pocket = null
+
+/datum/outfit/admin/wizard/skeleton
+	name = "Skeleton Warrior"
+	allow_backbag_choice = FALSE
+
+	uniform = /obj/item/clothing/under/gladiator
+	back = /obj/item/material/twohanded/spear/bone
+	suit = /obj/item/clothing/suit/armor/bone
+	head = /obj/item/clothing/head/helmet/bone
+	l_ear = null
+	r_pocket = null
+	l_hand = null
+
+	backpack_contents = null

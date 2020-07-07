@@ -9,6 +9,7 @@
 	var/colour = "red"
 	var/open = 0
 	drop_sound = 'sound/items/drop/glass.ogg'
+	pickup_sound = 'sound/items/pickup/glass.ogg'
 
 /obj/item/lipstick/purple
 	name = "purple lipstick"
@@ -148,7 +149,7 @@
 
 				return TRUE
 
-	else if(target_zone == "mouth")
+	else if(target_zone == BP_MOUTH)
 
 		if(H.head && (H.head.body_parts_covered & FACE))
 			to_chat(user, "<span class='warning'>\The [H.head] is in the way!</span>")

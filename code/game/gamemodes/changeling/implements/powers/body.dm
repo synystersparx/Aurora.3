@@ -253,8 +253,8 @@
 	C.SetStunned(0)
 	C.SetWeakened(0)
 	C.lying = FALSE
-	C.reagents.add_reagent("hyperzine", 0.10) //Certainly this can't be abused. - Geeves
-	C.reagents.add_reagent("oxycodone", 0.10)
+	C.reagents.add_reagent(/datum/reagent/hyperzine, 0.10) //Certainly this can't be abused. - Geeves
+	C.reagents.add_reagent(/datum/reagent/oxycodone, 0.10)
 	C.update_canmove()
 
 	src.verbs -= /mob/proc/changeling_unstun
@@ -471,6 +471,7 @@
 	flick("summoning", effect)
 	QDEL_IN(effect, 10)
 	M.forceMove(ling) //move inside the new dude to hide him.
+	ling.occupant = M
 	M.status_flags |= GODMODE //dont want him to die or breathe or do ANYTHING
 	addtimer(CALLBACK(src, .proc/revert_horror_form,ling), 10 MINUTES)
 

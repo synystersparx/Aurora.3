@@ -14,18 +14,39 @@
  */
 /obj/item/pen
 	desc = "An instrument for writing or drawing with ink. This one is in black, in a classic, grey casing. Stylish, classic and professional."
+	desc_info = {"This is an item for writing down your thoughts, on paper or elsewhere. The following special commands are available:
+Pen and crayon commands
+\[br\] : Creates a linebreak.
+\[center\] - \[/center\] : Centers the text.
+\[h1\] - \[/h1\] : Makes the text a first level heading.
+\[h2\] - \[/h2\] : Makes the text a second level headin.
+\[h3\] - \[/h3\] : Makes the text a third level heading.
+\[b\] - \[/b\] : Makes the text bold.
+\[i\] - \[/i\] : Makes the text italic.
+\[u\] - \[/u\] : Makes the text underlined.
+\[large\] - \[/large\] : Increases the size of the text.
+\[sign\] : Inserts a signature of your name in a foolproof way.
+\[field\] : Inserts an invisible field which lets you start type from there. Useful for forms.
+\[date\] : Inserts today's station date.
+\[time\] : Inserts the current station time.
+Pen exclusive commands
+\[small\] - \[/small\] : Decreases the size of the text.
+\[list\] - \[/list\] : A list.
+\[*\] : A dot used for lists.
+\[hr\] : Adds a horizontal rule."}
 	name = "pen"
 	icon = 'icons/obj/bureaucracy.dmi'
 	icon_state = "pen"
 	item_state = "pen"
 	slot_flags = SLOT_BELT | SLOT_EARS
 	throwforce = 0
-	w_class = 1.0
+	w_class = ITEMSIZE_TINY
 	throw_speed = 7
 	throw_range = 15
 	matter = list(DEFAULT_WALL_MATERIAL = 10)
 	var/colour = "black"	//what colour the ink is!
 	drop_sound = 'sound/items/drop/accessory.ogg'
+	pickup_sound = 'sound/items/pickup/accessory.ogg'
 
 /obj/item/pen/ispen()
 	return TRUE
@@ -60,6 +81,16 @@
 	icon_state = "pen_red"
 	colour = "red"
 
+/obj/item/pen/yellow
+	desc = "An instrument for writing or drawing with ink. Favored by artists who like to draw using bright colors."
+	icon_state = "pen_yellow"
+	colour = "yellow"
+
+/obj/item/pen/green
+	desc = "An instrument for writing or drawing with ink. This one is in green. Favored by students who like to have their notes extra organized with colors."
+	icon_state = "pen_green"
+	colour = "green"
+
 /obj/item/pen/invisible
 	desc = "An instrument for writing or drawing with ink. This one has invisible ink."
 	icon_state = "pen"
@@ -69,7 +100,7 @@
 	desc = "An instrument for writing or drawing with ink. This one comes with with multiple colors! Push down all three simultaneously to rule the universe."
 	icon_state = "pen_multi"
 	var/selectedColor = 1
-	var/colors = list("black","blue","red")
+	var/colors = list("black", "blue", "red", "green", "yellow")
 
 /obj/item/pen/multi/attack_self(mob/user)
 	if(++selectedColor > 3)
@@ -107,9 +138,13 @@
 	icon_state = "pen_fountain"
 	throwforce = 1 //pointy
 	colour = "#1c1713" //dark ashy brownish
+	var/cursive = TRUE
 
 /obj/item/pen/fountain/attack_self(var/mob/user)
-	return
+	playsound(loc, 'sound/items/penclick.ogg', 50, 1)
+	to_chat(user, span("notice", "You snap the nib into position to write [cursive ? "normally" : "in cursive"]."))
+	cursive = !cursive
+
 /*
  * PDA Fountain Pens
  */
@@ -143,9 +178,8 @@
 	flags = OPENCONTAINER
 	slot_flags = SLOT_BELT
 	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
-
-/obj/item/pen/reagent/New()
-	..()
+/obj/item/pen/reagent/Initialize()
+	. = ..()
 	create_reagents(30)
 
 /obj/item/pen/reagent/attack(mob/living/M as mob, mob/user as mob)
@@ -168,10 +202,7 @@
 /obj/item/pen/reagent/sleepy
 	desc = "It's a black ink pen with a sharp point and a carefully engraved \"Waffle Co.\""
 	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
-
-/obj/item/pen/reagent/sleepy/New()
-	..()
-	reagents.add_reagent("chloralhydrate", 22)	//Used to be 100 sleep toxin//30 Chloral seems to be fatal, reducing it to 22./N
+	reagents_to_add = list(/datum/reagent/chloralhydrate = 22)
 
 
 /*
@@ -179,11 +210,31 @@
  */
 /obj/item/pen/reagent/paralysis
 	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
+	reagents_to_add = list(/datum/reagent/toxin/dextrotoxin = 10)
 
-/obj/item/pen/reagent/paralysis/New()
-	..()
-	reagents.add_reagent("zombiepowder", 10)
-	reagents.add_reagent("cryptobiolin", 15)
+/obj/item/pen/reagent/healing
+	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
+	reagents_to_add = list(/datum/reagent/tricordrazine = 10, /datum/reagent/dermaline = 5, /datum/reagent/bicaridine = 5)
+	icon_state = "pen_green"
+	colour = "green"
+
+/obj/item/pen/reagent/pacifier
+	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
+	reagents_to_add = list(/datum/reagent/wulumunusha = 2, /datum/reagent/pacifier = 15, /datum/reagent/cryptobiolin = 10)
+	icon_state = "pen_blue"
+	colour = "blue"
+
+/obj/item/pen/reagent/hyperzine
+	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
+	reagents_to_add = list(/datum/reagent/hyperzine = 10)
+	icon_state = "pen_yellow"
+	colour = "yellow"
+
+/obj/item/pen/reagent/poison
+	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
+	reagents_to_add = list(/datum/reagent/toxin/cyanide = 1, /datum/reagent/lexorin = 20)
+	icon_state = "pen_red"
+	colour = "red"
 
 /*
  * Chameleon pen
@@ -246,20 +297,15 @@
 	icon = 'icons/obj/crayons.dmi'
 	icon_state = "crayonred"
 	drop_sound = 'sound/items/drop/gloves.ogg'
+	pickup_sound = 'sound/items/pickup/gloves.ogg'
 	w_class = 1.0
 	attack_verb = list("attacked", "coloured")
 	colour = "#FF0000" //RGB
 	var/shadeColour = "#220000" //RGB
 	var/instant = 0
 	var/colourName = "red" //for updateIcon purposes
-	var/chem_volume = 10 //crayon dust
-	var/dust = "crayon_dust"
-
-/obj/item/pen/crayon/New()
-	name = "[colourName] crayon"
-	..()
+	reagents_to_add = list(/datum/reagent/crayon_dust = 10)
 
 /obj/item/pen/crayon/Initialize()
 	. = ..()
-	create_reagents(chem_volume)
-	reagents.add_reagent(dust,chem_volume)
+	name = "[colourName] crayon"

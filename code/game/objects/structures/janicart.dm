@@ -1,7 +1,7 @@
 /obj/structure/janitorialcart
 	name = "janitorial cart"
 	desc = "The ultimate in janitorial carts! Has space for water, mops, signs, trash bags, and more!"
-	description_info  = "Click and drag a mop bucket onto the cart to mount it\
+	desc_info  = "Click and drag a mop bucket onto the cart to mount it\
 	</br>Alt+Click with a mop to put it away, a normal click will wet it in the bucket.\
 	</br>Alt+Click with a container, such as a bucket, to pour its contents into the mounted bucket. A normal click will toss it into the trash\
 	</br>You can also use a lightreplacer, spraybottle (of spacecleaner) and four wet-floor signs on the cart to store them"
@@ -127,7 +127,7 @@
 		to_chat(user, "<span class='notice'>You put [I] into [src].</span>")
 		return 1
 
-	else if(istype(I, /obj/item/caution))
+	else if(istype(I, /obj/item/clothing/suit/caution))
 		if(signs < 4)
 			user.drop_from_inventory(I,src)
 			signs++
@@ -191,7 +191,7 @@
 		mybucket = null
 
 	if (signs)
-		for (var/obj/item/caution/Sign in src)
+		for (var/obj/item/clothing/suit/caution/Sign in src)
 			if (prob(min((chance*2),100)))
 				signs--
 				Sign.forceMove(dropspot)
@@ -261,7 +261,7 @@
 					myreplacer = null
 			if("sign")
 				if(signs)
-					var/obj/item/caution/Sign = locate() in src
+					var/obj/item/clothing/suit/caution/Sign = locate() in src
 					if(Sign)
 						user.put_in_hands(Sign)
 						to_chat(user, "<span class='notice'>You take \a [Sign] from [src].</span>")

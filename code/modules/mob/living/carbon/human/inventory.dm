@@ -91,7 +91,8 @@ This saves us from having to call add_fingerprint() any time something is put in
 		if (wear_suit.flags_inv & HIDEJUMPSUIT)
 			update_uniform = 1
 		if(s_store)
-			drop_from_inventory(s_store)
+			if(!(isvaurca(src) && s_store.w_class <= ITEMSIZE_SMALL))
+				drop_from_inventory(s_store)
 		wear_suit = null
 		update_inv_wear_suit()
 		if (update_uniform)
@@ -234,7 +235,7 @@ This saves us from having to call add_fingerprint() any time something is put in
 				var/obj/item/clothing/ears/offear/O = new(W)
 				O.forceMove(src)
 				src.r_ear = O
-				O.layer = 20
+				O.layer = SCREEN_LAYER+0.01
 			W.equipped(src, slot)
 			update_inv_ears(redraw_mob)
 		if(slot_r_ear)
@@ -243,7 +244,7 @@ This saves us from having to call add_fingerprint() any time something is put in
 				var/obj/item/clothing/ears/offear/O = new(W)
 				O.forceMove(src)
 				src.l_ear = O
-				O.layer = 20
+				O.layer = SCREEN_LAYER+0.01
 			W.equipped(src, slot)
 			update_inv_ears(redraw_mob)
 		if(slot_glasses)
@@ -311,7 +312,7 @@ This saves us from having to call add_fingerprint() any time something is put in
 		src.r_hand = null
 		update_inv_r_hand()
 
-	W.layer = 20
+	W.layer = SCREEN_LAYER+0.01
 
 	if(W.action_button_name)
 		update_action_buttons()
@@ -381,13 +382,13 @@ This saves us from having to call add_fingerprint() any time something is put in
 	if(w_uniform) items += w_uniform
 
 	if(include_carried)
-		if(slot_l_hand)     items += l_hand
-		if(slot_r_hand)     items += r_hand
-		if(slot_l_store)    items += l_store
-		if(slot_r_store)    items += r_store
-		if(slot_legcuffed)  items += legcuffed
-		if(slot_handcuffed) items += handcuffed
-		if(slot_s_store)    items += s_store
+		if(l_hand)     items += l_hand
+		if(r_hand)     items += r_hand
+		if(l_store)    items += l_store
+		if(r_store)    items += r_store
+		if(legcuffed)  items += legcuffed
+		if(handcuffed) items += handcuffed
+		if(s_store)    items += s_store
 
 	return items
 

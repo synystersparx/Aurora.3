@@ -58,6 +58,12 @@
 	if(!gibbed && deathmessage != "no message") // This is gross, but reliable. Only brains use it.
 		src.visible_message("<b>\The [src.name]</b> [deathmessage]", range = messagerange)
 
+	// If we have a remotely controlled mob, we come back to our body to die properly
+	if(vr_mob)
+		vr_mob.body_return()
+	// Alternatively, if we are the remotely controlled mob, just kick our controller out
+	if(old_mob)
+		body_return()
 	stat = DEAD
 
 	update_canmove()
@@ -78,7 +84,9 @@
 	drop_l_hand()
 
 	if(healths)
-		healths.icon_state = "health7"
+		healths.overlays.Cut() // This is specific to humans but the relevant code is here; shouldn't mess with other mobs.
+		if("health7" in icon_states(healths.icon))
+			healths.icon_state = "health7"
 
 	timeofdeath = world.time
 	if (isanimal(src))

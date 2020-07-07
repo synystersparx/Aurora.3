@@ -4,8 +4,10 @@
 	pass_flags = PASSTABLE | PASSGLASS | PASSGRILLE
 	damage = 30
 	damage_type = BURN
+	impact_sounds = list(BULLET_IMPACT_MEAT = SOUNDS_LASER_MEAT, BULLET_IMPACT_METAL = SOUNDS_LASER_METAL)
 	check_armour = "laser"
 	eyeblur = 4
+	damage_flags = DAM_LASER
 	var/frequency = 1
 	hitscan = 1
 	invisibility = 101	//beam projectiles are invisible as they are rendered by the effect engine
@@ -25,7 +27,17 @@
 	eyeblur = 2
 
 /obj/item/projectile/beam/pistol
+	damage = 35
+
+/obj/item/projectile/beam/pistol/hegemony
+	icon = 'icons/obj/guns/hegemony_pistol.dmi'
+	icon_state = "hegemony_pistol"
 	damage = 30
+	armor_penetration = 5
+
+	muzzle_type = /obj/effect/projectile/muzzle/hegemony
+	tracer_type = /obj/effect/projectile/tracer/hegemony
+	impact_type = /obj/effect/projectile/impact/hegemony
 
 /obj/item/projectile/beam/midlaser
 	damage = 35
@@ -159,8 +171,10 @@
 	icon_state = "stun"
 	nodamage = 1
 	taser_effect = 1
+	sharp = 0
+	eyeblur = 1
 	agony = 40
-	damage_type = HALLOSS
+	damage_type = PAIN
 
 	muzzle_type = /obj/effect/projectile/muzzle/stun
 	tracer_type = /obj/effect/projectile/tracer/stun
@@ -180,7 +194,7 @@
 	name = "electrical arc"
 	icon_state = "stun"
 	nodamage = 1
-	damage_type = HALLOSS
+	damage_type = PAIN
 
 	muzzle_type = /obj/effect/projectile/muzzle/stun
 	tracer_type = /obj/effect/projectile/tracer/stun
@@ -268,16 +282,12 @@
 	name = "diffuse laser"
 	icon_state = "laser"
 	pass_flags = PASSTABLE | PASSGLASS | PASSGRILLE
-	damage = 15
+	damage = 20
 	eyeblur = 4
-
-	muzzle_type = /obj/effect/projectile/muzzle/laser
-	tracer_type = /obj/effect/projectile/tracer/laser
-	impact_type = /obj/effect/projectile/impact/laser
 
 /obj/item/projectile/beam/megaglaive
 	name = "thermal lance"
-	icon_state = "megaglaive"
+	icon_state = "gauss"
 	damage = 10
 	incinerate = 5
 	armor_penetration = 10
@@ -306,7 +316,7 @@
 
 /obj/item/projectile/beam/thermaldrill
 	name = "thermal drill"
-	icon_state = "megaglaive"
+	icon_state = "gauss"
 	damage = 1
 	no_attack_log = 1
 
@@ -367,7 +377,7 @@
 	name = "energy net projection"
 	icon_state = "xray"
 	nodamage = 1
-	damage_type = HALLOSS
+	damage_type = PAIN
 
 	muzzle_type = /obj/effect/projectile/muzzle/xray
 	tracer_type = /obj/effect/projectile/tracer/xray

@@ -26,7 +26,7 @@
 /obj/machinery/chemical_dispenser/ert
 	name = "medicine dispenser"
 	spawn_cartridges = list(
-			/obj/item/reagent_containers/chem_disp_cartridge/inaprov,
+			/obj/item/reagent_containers/chem_disp_cartridge/norepi,
 			/obj/item/reagent_containers/chem_disp_cartridge/ryetalyn,
 			/obj/item/reagent_containers/chem_disp_cartridge/paracetamol,
 			/obj/item/reagent_containers/chem_disp_cartridge/tramadol,
@@ -45,7 +45,6 @@
 			/obj/item/reagent_containers/chem_disp_cartridge/imidazoline,
 			/obj/item/reagent_containers/chem_disp_cartridge/peridaxon,
 			/obj/item/reagent_containers/chem_disp_cartridge/bicaridine,
-			/obj/item/reagent_containers/chem_disp_cartridge/deltamivir,
 			/obj/item/reagent_containers/chem_disp_cartridge/thetamycin,
 			/obj/item/reagent_containers/chem_disp_cartridge/coughsyrup,
 			/obj/item/reagent_containers/chem_disp_cartridge/benadryl,
@@ -55,6 +54,13 @@
 			/obj/item/reagent_containers/chem_disp_cartridge/cryoxadone,
 			/obj/item/reagent_containers/chem_disp_cartridge/clonexadone
 		)
+
+/obj/machinery/chemical_dispenser/ert/attackby(obj/item/W, mob/user)
+	if(W.iswrench())
+		to_chat(user, span("notice","This dispenser is riveted to the floor and cannot be unanchored."))
+		return
+	else
+		return ..()
 
 /obj/machinery/chemical_dispenser/bar_soft
 	name = "soft drink dispenser"
@@ -69,6 +75,7 @@
 			/obj/item/reagent_containers/chem_disp_cartridge/water,
 			/obj/item/reagent_containers/chem_disp_cartridge/ice,
 			/obj/item/reagent_containers/chem_disp_cartridge/coffee{temperature_override = 369},
+			/obj/item/reagent_containers/chem_disp_cartridge/hot_coco{temperature_override = 349},			
 			/obj/item/reagent_containers/chem_disp_cartridge/cream,
 			/obj/item/reagent_containers/chem_disp_cartridge/tea{temperature_override = 349},
 			/obj/item/reagent_containers/chem_disp_cartridge/icetea,
@@ -86,7 +93,8 @@
 			/obj/item/reagent_containers/chem_disp_cartridge/apple,
 			/obj/item/reagent_containers/chem_disp_cartridge/watermelon,
 			/obj/item/reagent_containers/chem_disp_cartridge/clean_kois,
-			/obj/item/reagent_containers/chem_disp_cartridge/banana
+			/obj/item/reagent_containers/chem_disp_cartridge/banana,
+			/obj/item/reagent_containers/chem_disp_cartridge/root_beer
 		)
 
 /obj/machinery/chemical_dispenser/bar_alc
@@ -140,6 +148,7 @@
 			/obj/item/reagent_containers/chem_disp_cartridge/sugar,
 			/obj/item/reagent_containers/chem_disp_cartridge/milk,
 			/obj/item/reagent_containers/chem_disp_cartridge/soymilk,
+			/obj/item/reagent_containers/chem_disp_cartridge/hot_coco{temperature_override = 349},
 			/obj/item/reagent_containers/chem_disp_cartridge/water{temperature_override = 373}
 		)
 

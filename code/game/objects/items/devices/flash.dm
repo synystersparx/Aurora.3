@@ -2,7 +2,7 @@
 	name = "flash"
 	desc = "Used for blinding and being an asshole."
 	icon_state = "flash"
-	item_state = "flashtool"
+	item_state = "flash"
 	throwforce = 5
 	w_class = 2
 	throw_speed = 4
@@ -79,6 +79,7 @@
 		var/safety = M:eyecheck(TRUE)
 		if(safety <= 0)
 			flick("e_flash", M.flash)
+			M.confused = 10
 			var/mob/living/carbon/human/H = M
 			var/obj/item/organ/internal/eyes/E = H.get_eyes()
 			if(!E)
@@ -87,18 +88,16 @@
 			E.flash_act()
 
 		else
-			flashfail = 1
-
+			flashfail = TRUE
 	else if(issilicon(M))
 		if(isrobot(M))
 			var/mob/living/silicon/robot/R = M
-			if(R.overclocked)
-				return
-
-		M.Weaken(rand(3,7)) //should be that borg is disabled for around 3-7 seconds
-
+			if(R.overclocked || R.flash_resistant)
+				flashfail = TRUE
+		if(!flashfail)
+			M.Weaken(rand(3, 7)) //should be that borg is disabled for around 3-7 seconds
 	else
-		flashfail = 1
+		flashfail = TRUE
 
 	if(isrobot(user))
 		spawn(0)
@@ -143,7 +142,7 @@
 	//It will never break on the first use.
 	switch(times_used)
 		if(0 to 5)
-			if(prob(10*times_used))	//More consequential rolls are made the more you overuse the device.
+			if(prob(5*times_used))	//More consequential rolls are made the more you overuse the device.
 				broken = 1
 				to_chat(user, "<span class='warning'>The bulb has burnt out!</span>")
 				icon_state = "flashburnt"
@@ -183,7 +182,7 @@
 	flash_recharge()
 	switch(times_used)
 		if(0 to 5)
-			if(prob(20*times_used))
+			if(prob(5*times_used))
 				broken = 1
 				icon_state = "flashburnt"
 				return

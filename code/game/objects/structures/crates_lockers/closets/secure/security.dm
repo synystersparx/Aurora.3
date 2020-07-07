@@ -27,10 +27,13 @@
 	new /obj/item/clothing/under/captainformal(src)
 	//Tools
 	new /obj/item/device/radio/headset/heads/captain(src)
+	new /obj/item/device/radio/headset/heads/captain/alt(src)
 	new /obj/item/cartridge/captain(src)
 	new /obj/item/gun/energy/pistol(src)
 	new /obj/item/device/flash(src)
 	new /obj/item/melee/telebaton(src)
+	// acting captain briefcase
+	new /obj/item/storage/briefcase/nt/acap(src)
 
 /obj/structure/closet/secure_closet/captains2
 	name = "captain's attire"
@@ -78,6 +81,7 @@
 	//Tools
 	new /obj/item/cartridge/hop(src)
 	new /obj/item/device/radio/headset/heads/hop(src)
+	new /obj/item/device/radio/headset/heads/hop/alt(src)
 	new /obj/item/gun/energy/pistol(src)
 	new /obj/item/gun/projectile/sec/flash(src)
 	new /obj/item/device/flash(src)
@@ -96,15 +100,12 @@
 	..()
 	new /obj/item/clothing/under/rank/head_of_personnel(src)
 	new /obj/item/clothing/under/dress/dress_hop(src)
-	new /obj/item/clothing/under/dress/dress_hr(src)
-	new /obj/item/clothing/under/lawyer/female(src)
 	new /obj/item/clothing/under/lawyer/black(src)
 	new /obj/item/clothing/under/lawyer/red(src)
-	new /obj/item/clothing/under/lawyer/oldman(src)
 	new /obj/item/clothing/under/rank/head_of_personnel_whimsy(src)
 	new /obj/item/clothing/shoes/brown(src)
 	new /obj/item/clothing/shoes/black(src)
-	new /obj/item/clothing/shoes/leather(src)
+	new /obj/item/clothing/shoes/laceup/brown(src)
 	new /obj/item/clothing/shoes/white(src)
 	new /obj/item/clothing/head/caphat/hop(src)
 
@@ -127,7 +128,6 @@
 	new /obj/item/storage/backpack/satchel_sec(src)
 	new /obj/item/clothing/under/rank/head_of_security(src)
 	new /obj/item/clothing/under/rank/head_of_security/corp(src)
-	new /obj/item/clothing/suit/storage/toggle/armor/hos/jensen(src)
 	new /obj/item/clothing/suit/armor/hos(src)
 	new /obj/item/clothing/suit/storage/vest/hos(src)
 	new /obj/item/clothing/head/helmet/hos/cap(src)
@@ -139,6 +139,7 @@
 	//Tools
 	new /obj/item/cartridge/hos(src)
 	new /obj/item/device/radio/headset/heads/hos(src)
+	new /obj/item/device/radio/headset/heads/hos/alt(src)
 	new /obj/item/storage/box/tranquilizer(src)
 	new /obj/item/clothing/glasses/sunglasses/sechud(src)
 	new /obj/item/clothing/glasses/sunglasses/sechud/head(src)
@@ -177,6 +178,7 @@
 	//Tools
 	new /obj/item/clothing/glasses/sunglasses/sechud/aviator(src)
 	new /obj/item/device/radio/headset/heads/hos(src)
+	new /obj/item/device/radio/headset/heads/hos/alt(src)
 	//Belts
 	new /obj/item/storage/belt/security(src)
 	new /obj/item/clothing/accessory/holster/waist(src)
@@ -218,6 +220,7 @@
 	//Tools
 	new /obj/item/cartridge/security(src)
 	new /obj/item/device/radio/headset/headset_sec(src)
+	new /obj/item/device/radio/headset/headset_sec/alt(src)
 	new /obj/item/clothing/glasses/sunglasses/sechud/aviator(src)
 	new /obj/item/clothing/glasses/sunglasses/sechud(src)
 	new /obj/item/taperoll/police(src)
@@ -253,12 +256,13 @@
 	new /obj/item/clothing/under/rank/cadet(src)
 	//Tools
 	new /obj/item/device/radio/headset/headset_sec(src)
+	new /obj/item/device/radio/headset/headset_sec/alt(src)
 	new /obj/item/device/flash(src)
 	new /obj/item/reagent_containers/spray/pepper(src)
 	new /obj/item/taperoll/police(src)
 	new /obj/item/device/hailer(src)
 	new /obj/item/device/holowarrant(src)
-	new /obj/item/device/flashlight/flare(src)
+	new /obj/item/device/flashlight/flare/glowstick/red(src)
 	//Belts
 	if (prob(50))
 		new /obj/item/clothing/accessory/storage/black_vest(src)
@@ -286,8 +290,10 @@
 	new /obj/item/clothing/under/rank/security/corp(src)
 	new /obj/item/clothing/suit/storage/vest/officer(src)
 	new /obj/item/clothing/head/helmet(src)
+	new /obj/item/clothing/mask/gas/alt(src)
 	//Tools
 	new /obj/item/device/radio/headset/headset_sec(src)
+	new /obj/item/device/radio/headset/headset_sec/alt(src)
 	new /obj/item/clothing/glasses/sunglasses/sechud/aviator(src)
 	new /obj/item/clothing/glasses/sunglasses/sechud(src)
 	new /obj/item/ammo_magazine/c45m/rubber(src)
@@ -299,7 +305,7 @@
 	new /obj/item/taperoll/police(src)
 	new /obj/item/device/hailer(src)
 	new /obj/item/device/holowarrant(src)
-	new /obj/item/device/flashlight/flare(src)
+	new /obj/item/device/flashlight/flare/glowstick/red(src)
 	new /obj/item/handcuffs(src)
 	//Belts
 	if (prob(50))
@@ -350,10 +356,10 @@
 	new /obj/item/clothing/shoes/brown(src)
 	//Tools
 	new /obj/item/device/radio/headset/headset_sec(src)
+	new /obj/item/device/radio/headset/headset_sec/alt(src)
 	new /obj/item/clothing/suit/storage/vest/detective(src)
-	new /obj/item/ammo_magazine/c38(src)
-	new /obj/item/ammo_magazine/c38(src)
-	new /obj/item/gun/projectile/revolver/detective(src)
+	new /obj/item/ammo_magazine/mc9mm/flash(src)
+	new /obj/item/gun/projectile/pistol/detective(src)
 	new /obj/item/taperoll/police(src)
 	//Belts
 	new /obj/item/clothing/accessory/holster/waist(src)
@@ -380,6 +386,7 @@
 	new /obj/item/clothing/shoes/laceup(src)
 	//Tools
 	new /obj/item/device/radio/headset/headset_sec(src)
+	new /obj/item/device/radio/headset/headset_sec/alt(src)
 	new /obj/item/storage/box/evidence(src)
 	new /obj/item/device/flash(src)
 	new /obj/item/taperoll/police(src)
@@ -432,6 +439,7 @@
 /obj/structure/closet/secure_closet/wall
 	name = "wall locker"
 	req_access = list(access_security)
+	icon = 'icons/obj/walllocker.dmi'
 	icon_state = "wall-locker1"
 	density = 1
 	icon_closed = "wall-locker"

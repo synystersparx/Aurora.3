@@ -44,13 +44,13 @@ They sell generic supplies and ask for generic supplies.
 		/obj/item/device/slime_scanner              = TRADER_BLACKLIST, //If it was doing slime stuff, it already had this
 		/obj/item/device/spy_bug                    = TRADER_BLACKLIST, // Traitor stuff
 		/obj/item/device/spy_monitor                = TRADER_BLACKLIST, // Traitor stuff
-		/obj/item/device/suit_cooling_unit/improved = TRADER_BLACKLIST, // Not on Aurora
+		/obj/item/device/suit_cooling_unit          = TRADER_BLACKLIST, // Not on Aurora
 		/obj/item/device/taperecorder/cciaa         = TRADER_BLACKLIST, // Admin item
 		/obj/item/device/batterer                   = TRADER_BLACKLIST, // Item too rare
 		/obj/item/device/contract_uplink            = TRADER_BLACKLIST, // Traitor stuff
 		/obj/item/device/uplink                     = TRADER_BLACKLIST_ALL, // Traitor stuff
 		/obj/item/device/announcer                  = TRADER_BLACKLIST, // Rev item
-		/obj/item/device/ninja_uplink               = TRADER_BLACKLIST, // Ninja item
+		/obj/item/device/special_uplink             = TRADER_BLACKLIST,
 		/obj/item/device/onetankbomb                = TRADER_BLACKLIST, // Not weapons trader
 		/obj/item/device/kinetic_analyzer           = TRADER_BLACKLIST, // Not KA trader
 		/obj/item/device/camera                     = TRADER_BLACKLIST_SUB, // a lot of ai/drone/cyborg/fluff items
@@ -60,7 +60,7 @@ They sell generic supplies and ask for generic supplies.
 		/obj/item/device/electronic_assembly        = TRADER_BLACKLIST_ALL, // Not a circuit trader
 		/obj/item/device/integrated_circuit_printer = TRADER_BLACKLIST_ALL, //Not a circuit trader
 		/obj/item/device/integrated_electronics     = TRADER_BLACKLIST_ALL, // Not a circuit trader
-		/obj/item/device/mine_bot_ugprade           = TRADER_BLACKLIST_ALL, // Not a mining vendor + drone stuff
+		/obj/item/device/mine_bot_upgrade           = TRADER_BLACKLIST_ALL, // Not a mining vendor + drone stuff
 		/obj/item/device/mmi                        = TRADER_BLACKLIST_SUB, // removes MMI Subtypes to prevent trading confusion
 		/obj/item/device/soulstone                  = TRADER_BLACKLIST, // Wiz item
 		/obj/item/device/firing_pin                 = TRADER_BLACKLIST_ALL, // Not a weapons trader
@@ -70,8 +70,7 @@ They sell generic supplies and ask for generic supplies.
 		/obj/item/device/depth_scanner              = TRADER_BLACKLIST, // Xenoarch
 		/obj/item/device/beacon_locator             = TRADER_BLACKLIST, // Telescience
 		/obj/item/device/telepad_beacon             = TRADER_BLACKLIST, // Telescience
-		/obj/item/device/udp_debugger               = TRADER_BLACKLIST, // Circuits
-		/obj/item/device/antibody_scanner           = TRADER_BLACKLIST // Virology
+		/obj/item/device/udp_debugger               = TRADER_BLACKLIST // Circuits
 	)
 
 	possible_trading_items = list(
@@ -79,7 +78,7 @@ They sell generic supplies and ask for generic supplies.
 		/obj/item/storage/bag/ore/drone               = TRADER_BLACKLIST, // don't want drone bags
 		/obj/item/storage/bag/sheetsnatcher/borg      = TRADER_BLACKLIST, // don't want borg bags
 		/obj/item/storage/bag/circuits                = TRADER_BLACKLIST_ALL, //can spawn glitchy circuit boxes, circuitry should belong to science
-		/obj/item/storage/bag/cash                    = TRADER_BLACKLIST, // spawns with money
+		/obj/item/storage/bag/money                   = TRADER_BLACKLIST, // spawns with money
 		/obj/item/storage/backpack                    = TRADER_ALL,
 		/obj/item/storage/backpack/cultpack           = TRADER_BLACKLIST, // cult stuff
 		/obj/item/storage/backpack/holding            = TRADER_BLACKLIST_ALL, // research stuff
@@ -105,9 +104,7 @@ They sell generic supplies and ask for generic supplies.
 		/obj/item/clothing/glasses/sunglasses/blindfold/tape = TRADER_BLACKLIST, // Literally just tape over someone's eyes
 		/obj/item/clothing/glasses/chameleon                 = TRADER_BLACKLIST, // traitor stuff
 		/obj/item/clothing/glasses/sunglasses/bst            = TRADER_BLACKLIST, // BlueSpaceTech glasses
-		/obj/item/clothing/glasses/fluff                     = TRADER_BLACKLIST_ALL, // Custom items
-		/obj/item/clothing/glasses/welding/fluff             = TRADER_BLACKLIST_ALL, // Custom items
-		/obj/item/clothing/glasses/regular/fluff             = TRADER_BLACKLIST_ALL // Custom items
+		/obj/item/clothing/glasses/welding/fluff             = TRADER_BLACKLIST_ALL // Custom items
 	)
 
 	insult_drop = 0
@@ -144,7 +141,6 @@ They sell generic supplies and ask for generic supplies.
 		/obj/structure/AIcore                           = TRADER_THIS_TYPE,
 		/obj/structure/ore_box                          = TRADER_THIS_TYPE,
 		/obj/structure/dispenser                        = TRADER_THIS_TYPE,
-		/obj/mecha/working/hoverpod                     = TRADER_THIS_TYPE,
 		/obj/item/ladder_mobile                  = TRADER_THIS_TYPE,
 		/obj/item/inflatable_dispenser           = TRADER_THIS_TYPE,
 		/obj/machinery/pipedispenser/orderable          = TRADER_THIS_TYPE,
@@ -162,33 +158,32 @@ They sell generic supplies and ask for generic supplies.
 		/obj/item/storage/firstaid                               = TRADER_SUBTYPES_ONLY,
 		/obj/item/storage/pill_bottle                            = TRADER_SUBTYPES_ONLY,
 		/obj/item/reagent_containers/hypospray                   = TRADER_ALL,
-		/obj/item/device/healthanalyzer                                 = TRADER_THIS_TYPE,
-		/obj/item/device/breath_analyzer                                = TRADER_THIS_TYPE,
-		/obj/item/stack/medical/bruise_pack                             = TRADER_THIS_TYPE,
-		/obj/item/stack/medical/ointment                                = TRADER_THIS_TYPE,
-		/obj/item/stack/medical/advanced                                = TRADER_SUBTYPES_ONLY,
-		/obj/item/stack/medical/splint                                  = TRADER_THIS_TYPE,
-		/obj/item/bonesetter                                     = TRADER_THIS_TYPE,
-		/obj/item/retractor                                      = TRADER_THIS_TYPE,
-		/obj/item/hemostat                                       = TRADER_THIS_TYPE,
-		/obj/item/cautery                                        = TRADER_THIS_TYPE,
-		/obj/item/surgicaldrill                                  = TRADER_THIS_TYPE,
-		/obj/item/scalpel                                        = TRADER_ALL,
-		/obj/item/circular_saw                                   = TRADER_THIS_TYPE,
-		/obj/item/bonegel                                        = TRADER_THIS_TYPE,
-		/obj/item/FixOVein                                       = TRADER_THIS_TYPE,
-		/obj/item/bonesetter                                     = TRADER_THIS_TYPE,
+		/obj/item/device/healthanalyzer                          = TRADER_THIS_TYPE,
+		/obj/item/device/breath_analyzer                         = TRADER_THIS_TYPE,
+		/obj/item/stack/medical/bruise_pack                      = TRADER_THIS_TYPE,
+		/obj/item/stack/medical/ointment                         = TRADER_THIS_TYPE,
+		/obj/item/stack/medical/advanced                         = TRADER_SUBTYPES_ONLY,
+		/obj/item/stack/medical/splint                           = TRADER_THIS_TYPE,
+		/obj/item/surgery/bonesetter                                     = TRADER_THIS_TYPE,
+		/obj/item/surgery/retractor                                      = TRADER_THIS_TYPE,
+		/obj/item/surgery/hemostat                                       = TRADER_THIS_TYPE,
+		/obj/item/surgery/cautery                                        = TRADER_THIS_TYPE,
+		/obj/item/surgery/surgicaldrill                                  = TRADER_THIS_TYPE,
+		/obj/item/surgery/scalpel                                        = TRADER_ALL,
+		/obj/item/surgery/circular_saw                                   = TRADER_THIS_TYPE,
+		/obj/item/surgery/bonegel                                        = TRADER_THIS_TYPE,
+		/obj/item/surgery/FixOVein                                       = TRADER_THIS_TYPE,
+		/obj/item/surgery/bonesetter                                     = TRADER_THIS_TYPE,
 		/obj/item/storage/box/syringes                           = TRADER_THIS_TYPE,
 		/obj/item/storage/box/syringegun                         = TRADER_THIS_TYPE,
 		/obj/item/storage/box/masks                              = TRADER_THIS_TYPE,
 		/obj/item/storage/box/gloves                             = TRADER_THIS_TYPE,
 		/obj/item/storage/box/cdeathalarm_kit                    = TRADER_THIS_TYPE,
 		/obj/item/storage/box/beakers                            = TRADER_THIS_TYPE,
-		/obj/item/reagent_containers/glass/bottle/inaprovaline   = TRADER_THIS_TYPE,
+		/obj/item/reagent_containers/glass/bottle/norepinephrine = TRADER_THIS_TYPE,
 		/obj/item/reagent_containers/glass/bottle/stoxin         = TRADER_THIS_TYPE,
 		/obj/item/reagent_containers/glass/bottle/chloralhydrate = TRADER_THIS_TYPE,
 		/obj/item/reagent_containers/glass/bottle/antitoxin      = TRADER_THIS_TYPE,
-		/obj/item/device/handheld_medical                               = TRADER_THIS_TYPE,
-		/obj/item/stack/medical/advanced/bruise_pack/spaceklot          = TRADER_THIS_TYPE,
-		/obj/mecha/medical/odysseus                                     = TRADER_THIS_TYPE
+		/obj/item/device/handheld_medical                        = TRADER_THIS_TYPE,
+		/obj/item/stack/medical/advanced/bruise_pack/spaceklot   = TRADER_THIS_TYPE
 	)

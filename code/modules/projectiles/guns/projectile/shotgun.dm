@@ -6,14 +6,12 @@
 	var/sawnoff_workmsg
 	var/sawing_in_progress = FALSE
 
-/obj/item/gun/projectile/shotgun
-
 /obj/item/gun/projectile/shotgun/attackby(obj/item/A, mob/user)
 	if (!can_sawoff || sawing_in_progress)
 		return ..()
 
 	var/static/list/barrel_cutting_tools = typecacheof(list(
-		/obj/item/circular_saw,
+		/obj/item/surgery/circular_saw,
 		/obj/item/melee/energy,
 		/obj/item/gun/energy/plasmacutter	// does this even work?
 	))
@@ -40,6 +38,10 @@
 /obj/item/gun/projectile/shotgun/pump
 	name = "pump shotgun"
 	desc = "An ubiquitous unbranded shotgun. Useful for sweeping alleys."
+	desc_info = "This is a ballistic weapon.  To fire the weapon, ensure your intent is *not* set to 'help', have your gun mode set to 'fire', \
+	then click where you want to fire.  After firing, you will need to pump the gun, by clicking on the gun in your hand.  To reload, load more shotgun \
+	shells into the gun."
+	icon = 'icons/obj/guns/shotgun.dmi'
 	icon_state = "shotgun"
 	item_state = "shotgun"
 	max_shells = 4
@@ -55,7 +57,6 @@
 	fire_sound = 'sound/weapons/gunshot/gunshot_shotgun2.ogg'
 	is_wieldable = TRUE
 	var/recentpump = 0 // to prevent spammage
-	var/pump_fail_msg = "<span class='warning'>You cannot rack the shotgun without gripping it with both hands!</span>"
 	var/pump_snd = 'sound/weapons/shotgunpump.ogg'
 	var/has_wield_state = TRUE
 
@@ -71,10 +72,11 @@
 
 /obj/item/gun/projectile/shotgun/pump/proc/pump(mob/M)
 	if(!wielded)
-		to_chat(M, pump_fail_msg)
-		return
+		if(!do_after(M, 20, TRUE)) // have to stand still for 2 seconds instead of doing it instantly. bad idea during a shootout
+			return
 
 	playsound(M, pump_snd, 60, 1)
+	to_chat(M, SPAN_NOTICE("You rack \the [src]!"))
 
 	if(chambered)//We have a shell in the chamber
 		chambered.forceMove(get_turf(src)) //Eject casing
@@ -98,6 +100,7 @@
 /obj/item/gun/projectile/shotgun/pump/combat
 	name = "combat shotgun"
 	desc = "Built for close quarters combat, the Hephaestus Industries KS-40 is widely regarded as a weapon of choice for repelling boarders."
+	icon = 'icons/obj/guns/cshotgun.dmi'
 	icon_state = "cshotgun"
 	item_state = "cshotgun"
 	origin_tech = list(TECH_COMBAT = 5, TECH_MATERIAL = 2)
@@ -107,7 +110,8 @@
 
 /obj/item/gun/projectile/shotgun/pump/combat/sol
 	name = "naval shotgun"
-	desc = "A Malella-type 12-gauge breaching shotgun commonly found in the hands of the Sol Alliance. Made by Necropolis Industries."
+	desc = "A Malella-type 12-gauge breaching shotgun commonly found in the hands of the Sol Alliance. Made by Zavodskoi Interstellar."
+	icon = 'icons/obj/guns/malella.dmi'
 	icon_state = "malella"
 	item_state = "malella"
 	origin_tech = list(TECH_COMBAT = 6, TECH_MATERIAL = 3, TECH_ILLEGAL = 2)
@@ -116,6 +120,8 @@
 /obj/item/gun/projectile/shotgun/doublebarrel
 	name = "double-barreled shotgun"
 	desc = "A true classic."
+	desc_info = "Use in hand to unload, alt click to change firemodes."
+	icon = 'icons/obj/guns/dshotgun.dmi'
 	icon_state = "dshotgun"
 	item_state = "dshotgun"
 	//SPEEDLOADER because rapid unloading.
@@ -125,7 +131,9 @@
 	max_shells = 2
 	w_class = 4
 	force = 10
-	flags =  CONDUCT
+	flags = CONDUCT
+	is_wieldable = TRUE
+	var/has_wield_state = TRUE
 	slot_flags = SLOT_BACK
 	caliber = "shotgun"
 	origin_tech = list(TECH_COMBAT = 3, TECH_MATERIAL = 1)
@@ -141,6 +149,23 @@
 	can_sawoff = TRUE
 	sawnoff_workmsg = "shorten the barrel"
 
+/obj/item/gun/projectile/shotgun/doublebarrel/attack_self(mob/user)
+	unload_ammo(user, TRUE)
+
+/obj/item/gun/projectile/shotgun/doublebarrel/AltClick(mob/user)
+	if(Adjacent(user))
+		var/datum/firemode/new_mode = switch_firemodes(user)
+		if(new_mode)
+			to_chat(user, SPAN_NOTICE("\The [src] is now set to [new_mode.name]."))
+
+/obj/item/gun/projectile/shotgun/doublebarrel/update_icon()
+	..()
+	if(wielded && has_wield_state)
+		item_state = "[icon_state]-wielded"
+	else
+		item_state = "[icon_state]"
+	update_held_icon()
+
 /obj/item/gun/projectile/shotgun/doublebarrel/pellet
 	ammo_type = /obj/item/ammo_casing/shotgun/pellet
 
@@ -153,8 +178,10 @@
 	..(user, allow_dump=1)
 
 /obj/item/gun/projectile/shotgun/doublebarrel/saw_off(mob/user, obj/item/tool)
+	icon = 'icons/obj/guns/sawnshotgun.dmi'
 	icon_state = "sawnshotgun"
 	item_state = "sawnshotgun"
+	is_wieldable = FALSE
 	w_class = 3
 	force = 5
 	slot_flags &= ~SLOT_BACK	//you can't sling it on your back
@@ -166,9 +193,58 @@
 /obj/item/gun/projectile/shotgun/doublebarrel/sawn
 	name = "sawn-off shotgun"
 	desc = "Omar's coming!"
+	icon = 'icons/obj/guns/sawnshotgun.dmi'
 	icon_state = "sawnshotgun"
 	item_state = "sawnshotgun"
+	is_wieldable = FALSE
 	slot_flags = SLOT_BELT|SLOT_HOLSTER
 	ammo_type = /obj/item/ammo_casing/shotgun/pellet
 	w_class = 3
 	force = 5
+
+/obj/item/gun/projectile/shotgun/foldable
+	name = "foldable shotgun"
+	desc = "A single-shot shotgun that can be folded for easy concealment."
+	icon = 'icons/obj/guns/overunder.dmi'
+	icon_state = "overunder"
+	item_state = "overunder"
+	slot_flags = SLOT_BELT
+	w_class = 3
+	ammo_type = /obj/item/ammo_casing/shotgun/pellet
+	load_method = SINGLE_CASING|SPEEDLOADER
+	max_shells = 1
+	caliber = "shotgun"
+	fire_sound = 'sound/weapons/gunshot/gunshot_shotgun2.ogg'
+	origin_tech = list(TECH_COMBAT = 3, TECH_MATERIAL = 2, TECH_ILLEGAL = 2)
+	var/folded = TRUE
+
+/obj/item/gun/projectile/shotgun/foldable/update_icon()
+	if(folded)
+		icon_state = initial(icon_state)
+		item_state = icon_state
+	else
+		icon_state = "[initial(icon_state)]-d"
+		item_state = "[initial(item_state)]-d"
+	update_held_icon()
+
+/obj/item/gun/projectile/shotgun/foldable/proc/toggle_folded(mob/living/user)
+	folded = !folded
+	if(folded)
+		w_class = initial(w_class)
+		slot_flags = initial(slot_flags)
+		playsound(user, 'sound/weapons/sawclose.ogg', 60, 1)
+	else
+		w_class = 4
+		slot_flags &= ~SLOT_BELT
+		playsound(user, 'sound/weapons/sawopen.ogg', 60, 1)
+	to_chat(user, "You [folded ? "fold" : "unfold"] \the [src].")
+	update_icon()
+
+/obj/item/gun/projectile/shotgun/foldable/attack_self(mob/living/user)
+	toggle_folded(user)
+
+/obj/item/gun/projectile/shotgun/foldable/special_check(mob/user)
+	if(folded)
+		toggle_folded(user)
+		return FALSE
+	return ..()

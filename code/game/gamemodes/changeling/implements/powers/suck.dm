@@ -5,88 +5,13 @@
 	var/datum/changeling/changeling = changeling_power(0, 0, 100)
 	if(!changeling)
 		return
-	if (changeling.justate + 60 SECONDS > world.time)
-		to_chat(src, "<span class='warning'>We are still processing our last DNA sample!</span>")
-		return
-	if(changeling.isabsorbing)
-		to_chat(src, "<span class='warning'>We are already engaged in an absorption!</span>")
-		return
-
-	var/mob/living/carbon/human/T = input(usr, "Who are we extracting from?", "Target selection") in typecache_filter_list(oview(1), typecacheof(/mob/living/carbon/human))|null
-	if (!T)
-		return
-	if(changeling.isabsorbing)
-		to_chat(src, "<span class='warning'>We are already engaged in an absorption!</span>")
-		return
-	if(!istype(T))
-		to_chat(src, "<span class='warning'>[T] is not compatible with our biology.</span>")
-		return
-	if(T.species.flags & NO_SCAN)
-		to_chat(src, "<span class='warning'>We do not know how to parse this creature's DNA!</span>")
-		return
-	if (T.mind?.changeling)
-		to_chat(src, "<span class='warning'>This creature's DNA is already as complex as yours!</span>")
-		return
-	if(islesserform(T))
-		to_chat(src, "<span class='warning'>This creature DNA is not compatible with our form!</span>")
-		return
-	if(HUSK in T.mutations)
-		to_chat(src, "<span class='warning'>This creature's DNA is ruined beyond useability!</span>")
-		return
-	for(var/datum/absorbed_dna/D in changeling.absorbed_dna)
-		if(D.dna == T.dna)
-			to_chat(src, "<span class='warning'>We have already collected this creature's DNA!</span>")
-			return
-
-	changeling.isabsorbing = TRUE
-	for(var/stage = 1, stage <= 2, stage++)
-		switch(stage)
-			if(1)
-				to_chat(src, "<span class='notice'>We will attempt to infest and steal [T]'s DNA. We must remain next to them.</span>")
-			if(2)
-				to_chat(src, "<span class='notice'>We subtly touch [T], and begin to infest their genetic structure.</span>")
-		feedback_add_details("changeling_powers","A[stage]")
-		if(!do_mob(src, T, 75))
-			to_chat(src, "<span class='warning'>Our extraction of [T] has been interrupted!</span>")
-			changeling.isabsorbing = FALSE
-			return
-
-	to_chat(src, "<span class='notice'>We have finished infesting [T], and withdraw from their flesh, taking some of their genetic data.</span>")
-	to_chat(src, "<span class='notice'>We will need a minute to process this sample, before we can begin absorbing another.</span>")
-
-	T.reagents.add_reagent("toxin", rand(10, 15))
-
-	changeling.justate = world.time
-
-	changeling.chem_charges += 5
-	changeling.geneticpoints += 1
-	for(var/language in T.languages)
-		if(!(language in changeling.absorbed_languages))
-			changeling.absorbed_languages += language
-
-	changeling_update_languages(changeling.absorbed_languages)
-
-	var/datum/absorbed_dna/newDNA = new(T.real_name, T.dna, T.species.get_cloning_variant(), T.languages)
-	absorbDNA(newDNA)
-
-	changeling.absorbedcount++
-	changeling.isabsorbing = FALSE
-
-	admin_attack_log(usr, T, "extracted the DNA of", "had their DNA extracted by", "extracted DNA from")
-
-	return TRUE
-
-/mob/proc/changeling_extract_dna()
-	set category = "Changeling"
-	set name = "Full DNA Extraction"
-
-	var/datum/changeling/changeling = changeling_power(0, 0, 100)
-	if(!changeling)
-		return
 
 	var/obj/item/grab/G = src.get_active_hand()
 	if(!istype(G))
 		to_chat(src, "<span class='warning'>We must be grabbing a creature in our active hand to absorb them.</span>")
+		return
+	if(!src.get_pressure_weakness())
+		to_chat(src, "<span class='warning'>We cannot absorb this creature from inside a sealed environment.</span>")
 		return
 	var/mob/living/carbon/human/T = G.affecting
 	if(!istype(T))
@@ -96,7 +21,7 @@
 		to_chat(src, "<span class='warning'>We do not know how to parse this creature's DNA!</span>")
 		return
 	if(islesserform(T))
-		to_chat(src, "<span class='warning'>This creature DNA is not compatible with our form!</span>")
+		to_chat(src, "<span class='warning'>This creature's DNA is not compatible with our form!</span>")
 		return
 	if(HUSK in T.mutations)
 		to_chat(src, "<span class='warning'>This creature's DNA is ruined beyond useability!</span>")
@@ -128,7 +53,7 @@
 				to_chat(T, "<span class='danger'>You feel a sharp stabbing pain!</span>")
 				playsound(get_turf(src), 'sound/effects/lingstabs.ogg', 50, 1)
 				var/obj/item/organ/external/affecting = T.get_organ(src.zone_sel.selecting)
-				if(affecting.take_damage(39, 0, 1, 0, "massive puncture wound"))
+				if(affecting.take_damage(40, 0, damage_flags = DAM_SHARP|DAM_EDGE, used_weapon = "massive puncture wound"))
 					T.UpdateDamageIcon()
 
 		feedback_add_details("changeling_powers","A[stage]")
@@ -143,7 +68,7 @@
 	playsound(get_turf(src), 'sound/effects/lingabsorbs.ogg', 50, 1)
 
 	changeling.chem_charges += 50
-	changeling.geneticpoints += 5
+	changeling.geneticpoints += 3
 
 	//Steal all of their languages!
 	for(var/language in T.languages)

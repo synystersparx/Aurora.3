@@ -7,16 +7,19 @@
 	var/base_name = " "
 	desc = " "
 	icon = 'icons/obj/chemical.dmi'
-	icon_state = "null"
-	item_state = "null"
+	icon_state = null
+	item_state = null
 	amount_per_transfer_from_this = 10
 	possible_transfer_amounts = list(5,10,15,25,30,60)
 	volume = 60
 	accuracy = 0.1
 	w_class = 2
 	flags = OPENCONTAINER
+	var/fragile = TRUE // most glassware is super fragile
+	var/no_shatter = FALSE //does this container shatter?
 	unacidable = 1 //glass doesn't dissolve in acid
-
+	drop_sound = 'sound/items/drop/bottle.ogg'
+	pickup_sound = 'sound/items/pickup/bottle.ogg'
 	var/label_text = ""
 
 /obj/item/reagent_containers/glass/Initialize()
@@ -50,6 +53,19 @@
 /obj/item/reagent_containers/glass/AltClick(var/mob/user)
 	set_APTFT()
 
+/obj/item/reagent_containers/glass/throw_impact(atom/hit_atom, var/speed)
+	. = ..()
+	if(speed > fragile && !no_shatter)
+		shatter()
+
+/obj/item/reagent_containers/glass/proc/shatter(var/mob/user)
+	if(reagents.total_volume)
+		reagents.splash(src.loc, reagents.total_volume) // splashes the mob holding it or the turf it's on
+	audible_message(span("warning", "\The [src] shatters with a resounding crash!"), span("warning", "\The [src] breaks."))
+	playsound(src, "shatter", 70, 1)
+	new /obj/item/material/shard(loc, "glass")
+	qdel(src)
+
 /obj/item/reagent_containers/glass/attackby(obj/item/W as obj, mob/user as mob)
 	if(istype(W,/obj/item/storage/part_replacer))
 		if(!reagents || !reagents.total_volume)
@@ -62,6 +78,11 @@
 			to_chat(user, "<span class='notice'>You set the label to \"[tmp_label]\".</span>")
 			label_text = tmp_label
 			update_name_label()
+		return
+	. = ..() // in the case of nitroglycerin, explode BEFORE it shatters
+	if(!(W.flags & NOBLUDGEON) && fragile && (W.force > fragile) && !no_shatter)
+		shatter()
+		return
 
 /obj/item/reagent_containers/glass/proc/update_name_label()
 	if(label_text == "")
@@ -73,11 +94,17 @@
 	name = "beaker"
 	desc = "A beaker."
 	icon = 'icons/obj/chemical.dmi'
+	item_icons = list(
+		slot_l_hand_str = 'icons/mob/items/stacks/lefthand_medical.dmi',
+		slot_r_hand_str = 'icons/mob/items/stacks/righthand_medical.dmi',
+		)
 	icon_state = "beaker"
 	item_state = "beaker"
 	center_of_mass = list("x" = 15,"y" = 11)
-	matter = list("glass" = 500)
+	matter = list(MATERIAL_GLASS = 500)
 	drop_sound = 'sound/items/drop/glass.ogg'
+	pickup_sound = 'sound/items/pickup/glass.ogg'
+	fragile = 4
 
 /obj/item/reagent_containers/glass/beaker/Initialize()
 	. = ..()
@@ -128,11 +155,12 @@
 	desc = "A large beaker."
 	icon_state = "beakerlarge"
 	center_of_mass = list("x" = 16,"y" = 11)
-	matter = list("glass" = 5000)
+	matter = list(MATERIAL_GLASS = 5000)
 	volume = 120
 	amount_per_transfer_from_this = 10
 	possible_transfer_amounts = list(5,10,15,25,30,60,120)
 	flags = OPENCONTAINER
+	fragile = 6 // a bit sturdier
 
 /obj/item/reagent_containers/glass/beaker/bowl
 	name = "mixing bowl"
@@ -146,55 +174,55 @@
 	possible_transfer_amounts = list(5,10,15,25,30,60,180)
 	flags = OPENCONTAINER
 	unacidable = 0
+	no_shatter = TRUE
 
 /obj/item/reagent_containers/glass/beaker/noreact
 	name = "cryostasis beaker"
 	desc = "A cryostasis beaker that allows for chemical storage without reactions."
 	icon_state = "beakernoreact"
 	center_of_mass = list("x" = 16,"y" = 13)
-	matter = list("glass" = 500)
+	matter = list(MATERIAL_GLASS = 500)
 	volume = 60
 	amount_per_transfer_from_this = 10
 	flags = OPENCONTAINER | NOREACT
+	fragile = 0
 
 /obj/item/reagent_containers/glass/beaker/bluespace
 	name = "bluespace beaker"
 	desc = "A bluespace beaker, powered by experimental bluespace technology."
 	icon_state = "beakerbluespace"
 	center_of_mass = list("x" = 16,"y" = 11)
-	matter = list("glass" = 5000)
+	matter = list(MATERIAL_GLASS = 5000)
 	volume = 300
 	amount_per_transfer_from_this = 10
 	possible_transfer_amounts = list(5,10,15,25,30,60,120,300)
 	flags = OPENCONTAINER
+	fragile = 0
 
 /obj/item/reagent_containers/glass/beaker/vial
 	name = "vial"
 	desc = "A small glass vial."
 	icon_state = "vial"
 	center_of_mass = list("x" = 15,"y" = 9)
-	matter = list("glass" = 250)
+	matter = list(MATERIAL_GLASS = 250)
 	volume = 30
 	amount_per_transfer_from_this = 10
 	possible_transfer_amounts = list(5,10,15,25)
 	flags = OPENCONTAINER
+	fragile = 1
 
-/obj/item/reagent_containers/glass/beaker/cryoxadone
-/obj/item/reagent_containers/glass/beaker/cryoxadone/Initialize()
-	. = ..()
-	reagents.add_reagent("cryoxadone", 30)
-	update_icon()
+/obj/item/reagent_containers/glass/beaker/cryoxadone/reagents_to_add = list(/datum/reagent/cryoxadone = 30)
 
-/obj/item/reagent_containers/glass/beaker/sulphuric
-/obj/item/reagent_containers/glass/beaker/sulphuric/Initialize()
-	. = ..()
-	reagents.add_reagent("sacid", 60)
-	update_icon()
+/obj/item/reagent_containers/glass/beaker/sulphuric/reagents_to_add = list(/datum/reagent/acid = 60)
 
 /obj/item/reagent_containers/glass/bucket
 	desc = "A blue plastic bucket."
 	name = "bucket"
 	icon = 'icons/obj/janitor.dmi'
+	item_icons = list(
+		slot_l_hand_str = 'icons/mob/items/lefthand_janitor.dmi',
+		slot_r_hand_str = 'icons/mob/items/righthand_janitor.dmi',
+		)
 	icon_state = "bucket"
 	item_state = "bucket"
 	center_of_mass = list("x" = 16,"y" = 10)
@@ -207,8 +235,11 @@
 	flags = OPENCONTAINER
 	unacidable = 0
 	drop_sound = 'sound/items/drop/helm.ogg'
+	pickup_sound = 'sound/items/pickup/helm.ogg'
 	var/carving_weapon = /obj/item/wirecutters
 	var/helmet_type = /obj/item/clothing/head/helmet/bucket
+	no_shatter = TRUE
+	fragile = 0
 
 /obj/item/reagent_containers/glass/bucket/attackby(var/obj/D, mob/user as mob)
 	if(isprox(D))
@@ -247,7 +278,7 @@
 	to_chat(user, "<span class='notice'>You drink heavily from \the [src].</span>")
 
 
-obj/item/reagent_containers/glass/bucket/wood
+/obj/item/reagent_containers/glass/bucket/wood
 	desc = "An old wooden bucket."
 	name = "wooden bucket"
 	icon = 'icons/obj/janitor.dmi'
@@ -256,6 +287,7 @@ obj/item/reagent_containers/glass/bucket/wood
 	center_of_mass = list("x" = 16,"y" = 8)
 	matter = list("wood" = 50)
 	drop_sound = 'sound/items/drop/wooden.ogg'
+	pickup_sound = 'sound/items/pickup/wooden.ogg'
 	carving_weapon = /obj/item/material/hatchet
 	helmet_type = /obj/item/clothing/head/helmet/bucket/wood
 
@@ -263,4 +295,5 @@ obj/item/reagent_containers/glass/bucket/wood
 	if(isprox(D))
 		to_chat(user, "This wooden bucket doesn't play well with electronics.")
 		return
-	 ..()
+
+	..()

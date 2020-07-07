@@ -1,7 +1,9 @@
 /obj/item/gun/energy/lawgiver
 	name = "\improper Lawgiver Mk II"
+	icon = 'icons/obj/guns/lawgiver.dmi'
 	icon_state = "lawgiver"
-	item_state = "gun"
+	item_state = "lawgiver"
+	has_item_ratio = FALSE
 	origin_tech = list(TECH_COMBAT = 6, TECH_MAGNET = 5)
 	sel_mode = 1
 	var/mode_check = 1
@@ -21,10 +23,7 @@
 			charge_cost = 50,
 			fire_delay = 3,
 			recoil = 1,
-			burst = null,
-			move_delay = null,
 			accuracy = 1,
-			dispersion = null,
 			projectile_type = /obj/item/projectile/bullet/pistol,
 			fire_sound = 'sound/weapons/gunshot/gunshot_smg.ogg'
 		),
@@ -45,10 +44,7 @@
 			charge_cost = 400,
 			fire_delay = 6,
 			recoil = 3,
-			burst = null,
-			move_delay = null,
 			accuracy = 0,
-			dispersion = null,
 			projectile_type = /obj/item/projectile/bullet/gyro/law,
 			fire_sound = 'sound/effects/Explosion1.ogg'
 		),
@@ -57,10 +53,7 @@
 			charge_cost = 50,
 			fire_delay = 4,
 			recoil = 0,
-			burst = null,
-			move_delay = null,
 			accuracy = 1,
-			dispersion = null,
 			projectile_type = /obj/item/projectile/energy/electrode,
 			fire_sound = 'sound/weapons/Taser.ogg'
 		),
@@ -69,10 +62,7 @@
 			charge_cost = 250,
 			fire_delay = 4,
 			recoil = 3,
-			burst = null,
-			move_delay = null,
 			accuracy = 1,
-			dispersion = null,
 			projectile_type = /obj/item/projectile/bullet/shotgun/incendiary,
 			fire_sound = 'sound/weapons/gunshot/gunshot1.ogg'
 		),
@@ -81,10 +71,7 @@
 			charge_cost = 130,
 			fire_delay = 6,
 			recoil = 3,
-			burst = null,
-			move_delay = null,
 			accuracy = 1,
-			dispersion = null,
 			projectile_type = /obj/item/projectile/bullet/rifle/a556,
 			fire_sound = 'sound/weapons/gunshot/gunshot1.ogg'
 		),
@@ -93,10 +80,7 @@
 			charge_cost = 250,
 			fire_delay = 6,
 			recoil = 3,
-			burst = null,
-			move_delay = null,
 			accuracy = 0,
-			dispersion = null,
 			projectile_type = /obj/item/projectile/bullet/pellet/shotgun,
 			fire_sound = 'sound/weapons/gunshot/gunshot1.ogg'
 		)
@@ -173,6 +157,8 @@
 	return
 
 /obj/item/gun/energy/lawgiver/proc/hear(var/msg)
+	var/datum/firemode/old_mode = firemodes[sel_mode]
+
 	var/list/replacechars = list("'" = "","\"" = "",">" = "","<" = "","(" = "",")" = ""," " = "")
 	msg = sanitize_old(msg, replacechars)
 	/* Firing Modes*/
@@ -216,6 +202,7 @@
 		play_message()
 
 	if(mode_check != sel_mode)
+		old_mode.unapply_to(src)
 		var/datum/firemode/new_mode = firemodes[sel_mode]
 		new_mode.apply_to(src)
 		mode_check = sel_mode
